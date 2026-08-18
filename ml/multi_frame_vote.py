@@ -1,0 +1,147 @@
+# ---------------------------------------------------------------
+# ml/multi_frame_vote.py
+#
+# WHAT IT DOES
+# ─────────────
+# Taking a single frame from a webcam can be unreliable — motion
+# blur, reflections, or partial occlusion can confuse the matcher.
+#
+# This module captures a short burst of frames (~5) and runs the
+# matcher on each one.  Only if at least 3 of 5 frames agree on
+# the same product AND the majority result is itself "confident"
+# do we return a final confident answer.
+#
+# This is called "majority voting" — a very simple but effective
+# way to smooth out frame-to-frame noise.
+# ---------------------------------------------------------------
+
+import time
+from collections import Counter
+from typing import Optional
+
+import cv2
+import numpy as np
+
+from ml.config import (
+    AGREE_THRESHOLD,
+    CAMERA_INDEX,
+    FRAME_INTERVAL_SEC,
+    NUM_FRAMES,
+)
+from ml.embedding_extractor import extract_embedding
+from ml.matcher import EmbeddingDB, match
+
+
+def capture_and_vote(
+    cap: Optional[cv2.VideoCapture] = None,
+    db: Optional[EmbeddingDB] = None,
+) -> dict:
+    """
+    Capture a short burst of frames, run the matcher on each, and
+    return a majority-voted result.
+
+    Parameters
+    ----------
+    cap : cv2.VideoCapture, optional
+        An already-open camera.  Pass this in from demo.py so we
+        don't open/close the camera repeatedly.
+        If None, this function opens and closes its own camera.
+
+    db : EmbeddingDB, optional
+        Pre-loaded embedding database (speeds things up).
+
+    Returns
+    -------
+    dict with keys:
+        "final_name"    (str)  – agreed product name, or "uncertain"
+        "confident"     (bool) – True only if voting threshold met
+        "vote_count"    (int)  – how many frames agreed on final_name
+        "total_frames"  (int)  – how many frames were captured
+        "message"       (str)  – human-readable verdict
+        "last_result"   (dict) – the raw match() dict from the last frame
+    """
+    own_cap = False
+    if cap is None:
+        cap = cv2.VideoCapture(CAMERA_INDEX)
+        own_cap = True
+
+    if not cap.isOpened():
+        raise RuntimeError(
+            f"Cannot open camera index {CAMERA_INDEX}. "
+            "Check CAMERA_INDEX in ml/config.py."
+        )
+
+    frame_results: list[dict] = []
+
+    try:
+        for i in range(NUM_FRAMES):
+            # Give the camera a moment between frames.
+            # Without this pause we'd be grabbing near-duplicate frames.
+            time.sleep(FRAME_INTERVAL_SEC)
+
+            ok, frame = cap.read()
+            if not ok or frame is None:
+                print(f"[multi_frame_vote] Warning: failed to read frame {i+1}/{NUM_FRAMES}")
+                continue
+
+            embedding = extract_embedding(frame)
+            result = match(embedding, db=db)
+            frame_results.append(result)
+
+    finally:
+        if own_cap:
+            cap.release()
+
+    if not frame_results:
+        return {
+            "final_name": "uncertain",
+            "confident": False,
+            "vote_count": 0,
+            "total_frames": 0,
+            "message": "Uncertain — no frames captured.",
+            "last_result": {},
+        }
+
+    # ── Count how many frames voted for each product ─────────────
+    # We only count "confident" frames in the vote.
+    # An uncertain frame from the matcher doesn't get a vote.
+    confident_names = [
+        r["top_name"] for r in frame_results if r["confident"]
+    ]
+
+    vote_counts: Counter = Counter(confident_names)
+
+    total_captured = len(frame_results)
+
+    if not vote_counts:
+        # No frame was individually confident.
+        return {
+            "final_name": "uncertain",
+            "confident": False,
+            "vote_count": 0,
+            "total_frames": total_captured,
+            "message": "Uncertain — needs a clearer view.",
+            "last_result": frame_results[-1],
+        }
+
+    # The product that got the most confident votes.
+    winner_name, winner_votes = vote_counts.most_common(1)[0]
+
+    if winner_votes >= AGREE_THRESHOLD:
+        return {
+            "final_name": winner_name,
+            "confident": True,
+            "vote_count": winner_votes,
+            "total_frames": total_captured,
+            "message": f"Confident: {winner_name}  ({winner_votes}/{total_captured} frames agreed)",
+            "last_result": frame_results[-1],
+        }
+    else:
+        return {
+            "final_name": winner_name,  # best guess, but flagged uncertain
+            "confident": False,
+            "vote_count": winner_votes,
+            "total_frames": total_captured,
+            "message": "Uncertain — needs a clearer view.",
+            "last_result": frame_results[-1],
+        }
