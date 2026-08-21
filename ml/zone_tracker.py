@@ -1,43 +1,38 @@
 # ---------------------------------------------------------------
 # ml/zone_tracker.py
 #
-# WHAT IT DOES
-# ─────────────
-# Watches a fixed rectangular "gateway" region of the camera frame.
-# When something moves through it, the tracker:
+# FULL-FRAME CART TRACKER
+# ────────────────────────
+# The whole camera frame is treated as the cart surface.
+# No gateway rectangle needed — just point the camera at the surface
+# where products will be placed and removed.
 #
-#   1. Detects motion using background subtraction (MOG2/KNN).
-#      The background model naturally absorbs anything that stops
-#      moving after ~1-2 seconds, so a settled item stops producing
-#      foreground pixels on its own — no extra "is it still?" logic.
+# HOW ADD DETECTION WORKS
+# ────────────────────────
+# 1. Motion appears (object enters frame or is placed down).
+# 2. We track the centroid of the moving blob.
+# 3. Motion stops and the blob settled INSIDE the frame (not at an edge).
+# 4. We wait SETTLE_WAIT_SEC to let autofocus settle and movement fully stop.
+# 5. We grab ADD_SETTLE_FRAMES clean, still frames of the resting item.
+# 6. Scan those still frames against the FULL product database.
+#    Still frames = much clearer photos = better match accuracy.
 #
-#   2. Finds the centroid (centre point) of the foreground blob
-#      inside the zone on each active frame.
+# HOW REMOVE DETECTION WORKS
+# ───────────────────────────
+# 1. Motion appears (hand grabs a resting item).
+# 2. We track the centroid moving toward the frame edge.
+# 3. The blob disappears at or near the frame edge (item left the frame).
+# 4. Scan the motion frames (captured while item was still visible) against
+#    ONLY the items currently in the cart — NOT the full database.
+#    This is faster (fewer comparisons) and more accurate (we know what
+#    should be in the cart; we just need to identify which one left).
 #
-#   3. Builds a short history of centroid positions (last N frames).
-#      From the first vs. last position in that history it decides
-#      whether the item moved top-to-bottom (ADD) or
-#      bottom-to-top (REMOVE).
-#
-#   4. When motion in the zone drops back to near-zero (object has
-#      finished crossing OR fully left), resolves the event:
-#        • Picks the best snapshot frame captured during the crossing.
-#        • Runs the matcher to identify which product it was.
-#        • Fires an on_event callback: ("ADD"/"REMOVE", product_name)
-#        • Starts a cooldown so the same slow movement isn't double-counted.
-#
-# DESIGN DECISION — why centroid direction, not pixel-region toggle?
-# ────────────────────────────────────────────────────────────────────
-# A toggle approach simply checks whether foreground pixels exist inside
-# the zone, then flips state.  It can't tell the difference between an
-# item being placed IN vs. being lifted OUT.  Tracking the centroid's
-# movement direction through the zone gives us that information directly.
-#
-# HOW TO USE
-# ──────────
-#   tracker = ZoneTracker(on_event=my_callback, db=embedding_db)
-#   for each frame:
-#       display_frame = tracker.process(frame)
+# DIRECTION LOGIC
+# ────────────────
+# - EDGE ZONE: outer EDGE_MARGIN_FRACTION of the frame (each side).
+# - If motion STOPS and last centroid is NOT in the edge zone → ADD candidate.
+# - If motion STOPS and last centroid IS in the edge zone → REMOVE.
+#   (The blob reached the edge and disappeared there.)
 # ---------------------------------------------------------------
 
 import time
@@ -49,373 +44,449 @@ import cv2
 import numpy as np
 
 from ml.config import (
+    ADD_SETTLE_FRAMES,
     BGS_LEARNING_RATE,
     BGS_METHOD,
     CENTROID_HISTORY_LEN,
-    ENTRY_Y_FRACTION,
+    EDGE_MARGIN_FRACTION,
     EVENT_COOLDOWN_SEC,
     FG_PIXEL_THRESHOLD,
     MAX_SNAPSHOTS,
-    ZONE_RECT,
+    REMOVE_MOTION_FRAMES,
+    SCORE_THRESHOLD,
+    SETTLE_WAIT_SEC,
 )
 from ml.embedding_extractor import extract_embedding
 from ml.matcher import EmbeddingDB, match
 
 
-# Maximum number of snapshots to actually run inference on.
-# We pick them evenly spaced from the full snapshot buffer.
-# 3 snapshots × ~80ms each = ~240ms total — keeps the UI responsive.
+# How many frames (at most) to run inference on.
+# Runs in a background thread, so 3 frames × ~80ms = ~240ms off the UI thread.
 _MAX_INFERENCE_SNAPS = 3
 
 
-# ── Internal state machine states ────────────────────────────────
 class _State:
-    IDLE     = "idle"      # No motion in zone
-    TRACKING = "tracking"  # Motion detected, collecting centroid history
-    COOLDOWN = "cooldown"  # Just resolved an event, ignoring briefly
+    IDLE     = "idle"      # Waiting for motion
+    TRACKING = "tracking"  # Motion detected, accumulating centroid + frames
+    SETTLING = "settling"  # Motion stopped inside frame, waiting before ADD scan
+    COOLDOWN = "cooldown"  # Just fired event, ignoring briefly
 
 
 class ZoneTracker:
     """
-    Detects items crossing a zone rectangle and fires ADD/REMOVE events.
+    Full-frame cart tracker using background subtraction + centroid direction.
 
     Parameters
     ----------
     on_event : callable(direction: str, product_name: str, score: float)
-        Called once per resolved crossing event.
+        Called once per resolved event.
         direction is "ADD" or "REMOVE".
-        product_name is the matched product, or "unknown" if unconfident.
-        score is the cosine similarity (0-1) of the best match.
 
     db : EmbeddingDB, optional
-        Pre-loaded embedding database.  If None, loaded from disk.
+        Full product database — used for ADD matching.
 
-    zone_rect : tuple (x, y, w, h), optional
-        Override the zone rectangle from config.py.  Useful for tests.
+    get_cart_db : callable() -> EmbeddingDB, optional
+        Called at REMOVE time to get a database containing ONLY the items
+        currently in the cart.  This makes REMOVE matching faster and more
+        targeted.  If None, the full db is used for REMOVE too.
+
+    frame_size : (width, height)
+        Camera frame dimensions.  Used to compute pixel coordinates of
+        the edge margin boundary.
     """
 
     def __init__(
         self,
         on_event: Callable[[str, str, float], None],
         db: Optional[EmbeddingDB] = None,
-        zone_rect: Optional[tuple] = None,
+        get_cart_db: Optional[Callable[[], Optional[EmbeddingDB]]] = None,
+        frame_size: tuple = (640, 480),
     ) -> None:
-        self.on_event = on_event
-        self.db = db
-        self.zone_rect = zone_rect or ZONE_RECT   # (x, y, w, h)
+        self.on_event    = on_event
+        self.db          = db
+        self.get_cart_db = get_cart_db
+        self.frame_w, self.frame_h = frame_size
 
         # ── Background subtractor ─────────────────────────────────
+        # Runs on the FULL frame — no zone cropping needed.
         if BGS_METHOD == "KNN":
-            self._bgs = cv2.createBackgroundSubtractorKNN(
-                detectShadows=True
-            )
+            self._bgs = cv2.createBackgroundSubtractorKNN(detectShadows=True)
         else:
-            self._bgs = cv2.createBackgroundSubtractorMOG2(
-                detectShadows=True
-            )
+            self._bgs = cv2.createBackgroundSubtractorMOG2(detectShadows=True)
 
-        # ── Centroid history ──────────────────────────────────────
+        # ── Tracking buffers ──────────────────────────────────────
         self._centroids: deque = deque(maxlen=CENTROID_HISTORY_LEN)
-
-        # ── Snapshot buffer ───────────────────────────────────────
-        self._snapshots: list[np.ndarray] = []
+        self._motion_snaps: list[np.ndarray] = []  # frames captured during motion
+        self._settle_snaps: list[np.ndarray] = []  # frames captured while settled
 
         # ── State machine ─────────────────────────────────────────
-        self._state = _State.IDLE
+        self._state          = _State.IDLE
         self._cooldown_until = 0.0
+        self._settle_start   = 0.0   # when SETTLING began
 
-        # ── Background identification thread ──────────────────────
-        # Identification (embedding + matching) runs in a separate
-        # thread so the camera loop is never blocked.
+        # ── Background thread ────────────────────────────────────
         self._id_thread: Optional[threading.Thread] = None
-        self._identifying = False     # True while the thread is running
+        self._identifying = False
 
-        # ── For the UI overlay ────────────────────────────────────
-        self.ui_state  = "idle"
+        # ── UI fields (read by live_cart_demo.py each frame) ──────
+        self.ui_state     = "idle"
         self.ui_direction = "--"
         self.ui_fg_pixels = 0
         self.last_event: Optional[dict] = None
 
-    # ── Public API ────────────────────────────────────────────────
+    # ─────────────────────────────────────────────────────────────
+    # PUBLIC API
+    # ─────────────────────────────────────────────────────────────
 
     def process(self, frame: np.ndarray) -> np.ndarray:
         """
         Process one camera frame.
 
-        Returns the frame with debug visualisations drawn on it.
-        Never blocks: identification runs in a background thread.
+        Parameters
+        ----------
+        frame : np.ndarray
+            Full BGR frame from the camera.
+
+        Returns
+        -------
+        np.ndarray
+            The frame with overlay visualisations drawn on it.
+            Never blocks — identification runs in a background thread.
         """
-        x, y, w, h = self.zone_rect
         now = time.time()
+        H, W = frame.shape[:2]
 
-        # ── Step 1: crop to zone ──────────────────────────────────
-        zone_crop = frame[y : y + h, x : x + w]
-
-        # ── Step 2: apply background subtractor to the crop ───────
-        fg_mask = self._bgs.apply(
-            zone_crop, learningRate=BGS_LEARNING_RATE
-        )
-
-        # Keep only definite foreground (value == 255), drop shadows.
+        # ── Step 1: background subtraction on FULL frame ──────────
+        fg_mask   = self._bgs.apply(frame, learningRate=BGS_LEARNING_RATE)
+        # Keep only definite foreground (255); drop shadows (127).
         fg_binary = (fg_mask == 255).astype(np.uint8) * 255
 
-        # ── Step 3: morphological cleanup ────────────────────────
-        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
-        fg_binary = cv2.morphologyEx(fg_binary, cv2.MORPH_OPEN, kernel)
-        fg_binary = cv2.morphologyEx(fg_binary, cv2.MORPH_CLOSE, kernel)
+        # ── Step 2: morphological cleanup ────────────────────────
+        # Opening removes noise speckles; Closing fills blob holes.
+        k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
+        fg_binary = cv2.morphologyEx(fg_binary, cv2.MORPH_OPEN,  k)
+        fg_binary = cv2.morphologyEx(fg_binary, cv2.MORPH_CLOSE, k)
 
-        # ── Step 4: count active foreground pixels ────────────────
-        fg_count = int(np.sum(fg_binary > 0))
+        # ── Step 3: foreground pixel count ───────────────────────
+        fg_count        = int(np.sum(fg_binary > 0))
         self.ui_fg_pixels = fg_count
-        active = fg_count >= FG_PIXEL_THRESHOLD
+        active          = fg_count >= FG_PIXEL_THRESHOLD
 
-        # ── Step 5: find centroid if active ───────────────────────
-        centroid_rel: Optional[tuple[float, float]] = None
+        # ── Step 4: centroid of the moving blob ──────────────────
+        centroid_rel: Optional[tuple] = None
         if active:
             M = cv2.moments(fg_binary)
             if M["m00"] > 0:
-                cx_abs = M["m10"] / M["m00"]
-                cy_abs = M["m01"] / M["m00"]
-                centroid_rel = (cx_abs / w, cy_abs / h)
+                # Store as fractions [0,1] of frame size so the logic
+                # doesn't depend on the actual resolution.
+                cx = M["m10"] / M["m00"] / W
+                cy = M["m01"] / M["m00"] / H
+                centroid_rel = (cx, cy)
 
-        # ── Step 6: state machine ─────────────────────────────────
+        # ── Step 5: state machine ─────────────────────────────────
         if self._state == _State.COOLDOWN:
             if now >= self._cooldown_until:
-                self._state = _State.IDLE
+                self._state   = _State.IDLE
                 self.ui_state = "idle"
 
         elif self._state == _State.IDLE:
-            if active and centroid_rel is not None:
+            if active and centroid_rel:
+                # Motion started — begin tracking.
                 self._state = _State.TRACKING
                 self._centroids.clear()
-                self._snapshots.clear()
+                self._motion_snaps.clear()
+                self._settle_snaps.clear()
                 self._centroids.append(centroid_rel)
-                self._snapshots.append(frame.copy())
+                self._motion_snaps.append(frame.copy())
                 self.ui_state = "tracking"
                 self._update_direction_ui()
 
         elif self._state == _State.TRACKING:
-            if active and centroid_rel is not None:
+            if active and centroid_rel:
+                # Still moving — accumulate.
                 self._centroids.append(centroid_rel)
-                if len(self._snapshots) < MAX_SNAPSHOTS:
-                    self._snapshots.append(frame.copy())
+                if len(self._motion_snaps) < MAX_SNAPSHOTS:
+                    self._motion_snaps.append(frame.copy())
                 self._update_direction_ui()
 
             else:
-                # Motion stopped — resolve event in background thread.
-                if len(self._centroids) >= 3:
-                    self._start_identification()
-                # Transition immediately so the UI stays responsive.
-                self._state = _State.COOLDOWN
-                self._cooldown_until = now + EVENT_COOLDOWN_SEC
+                # Motion stopped.  Was the item moving toward the edge (REMOVE)
+                # or did it settle inside the frame (ADD)?
+                if len(self._centroids) >= 2:
+                    last_c = self._centroids[-1]
+                    if self._near_edge(last_c):
+                        # Blob disappeared at the frame edge → REMOVE
+                        snaps = self._motion_snaps[-REMOVE_MOTION_FRAMES:] or [frame.copy()]
+                        self._fire_identification("REMOVE", snaps)
+                        self._enter_cooldown(now)
+                    else:
+                        # Blob stopped inside frame → ADD (wait for settling)
+                        self._state       = _State.SETTLING
+                        self._settle_start = now
+                        self._settle_snaps.clear()
+                        self.ui_state     = "settling"
+                        # Don't clear motion snaps yet; settle snaps will replace them.
+                else:
+                    # Too brief — ignore.
+                    self._enter_cooldown(now)
+
                 self._centroids.clear()
-                self._snapshots.clear()
-                self.ui_state = "cooldown"
+                self._motion_snaps.clear()
                 self.ui_direction = "--"
 
-        # ── Step 7: draw visuals on the frame ────────────────────
-        vis = self._draw(frame, fg_binary, centroid_rel, x, y, w, h)
-        return vis
+        elif self._state == _State.SETTLING:
+            if active:
+                # Motion restarted before settling finished.
+                # This could be the user adjusting the item or picking it back up.
+                # Reset to TRACKING so we can re-evaluate.
+                self._state = _State.TRACKING
+                self._centroids.clear()
+                self._settle_snaps.clear()
+                self._motion_snaps.clear()
+                if centroid_rel:
+                    self._centroids.append(centroid_rel)
+                    self._motion_snaps.append(frame.copy())
+                self.ui_state = "tracking"
+                self._update_direction_ui()
+            else:
+                # Still settled — collect clean still frames for scanning.
+                if len(self._settle_snaps) < ADD_SETTLE_FRAMES:
+                    self._settle_snaps.append(frame.copy())
 
-    # ── Private helpers ───────────────────────────────────────────
+                # After settle period expires, scan the still frames.
+                if now - self._settle_start >= SETTLE_WAIT_SEC:
+                    snaps = self._settle_snaps if self._settle_snaps else [frame.copy()]
+                    self._fire_identification("ADD", snaps)
+                    self._settle_snaps.clear()
+                    self._enter_cooldown(now)
+
+        # ── Step 6: draw overlay ──────────────────────────────────
+        return self._draw(frame, fg_binary, centroid_rel)
+
+    # ─────────────────────────────────────────────────────────────
+    # PRIVATE HELPERS
+    # ─────────────────────────────────────────────────────────────
+
+    def _near_edge(self, centroid_rel: tuple) -> bool:
+        """
+        Return True if the centroid is within EDGE_MARGIN_FRACTION of
+        any frame edge (top, bottom, left, right).
+        """
+        cx, cy = centroid_rel
+        m = EDGE_MARGIN_FRACTION
+        return cx < m or cx > (1 - m) or cy < m or cy > (1 - m)
+
+    def _enter_cooldown(self, now: float) -> None:
+        self._state          = _State.COOLDOWN
+        self._cooldown_until = now + EVENT_COOLDOWN_SEC
+        self.ui_state        = "cooldown"
 
     def _update_direction_ui(self) -> None:
-        """Infer current travel direction from centroid history."""
+        """Update the ui_direction label from centroid history."""
         if len(self._centroids) < 2:
             self.ui_direction = "--"
             return
-        first_y = self._centroids[0][1]
-        last_y  = self._centroids[-1][1]
-        dy = last_y - first_y
-        if abs(dy) < 0.05:
-            self.ui_direction = "lateral"
-        elif dy > 0:
-            self.ui_direction = "inward"
+        first = self._centroids[0]
+        last  = self._centroids[-1]
+        dx = last[0] - first[0]
+        dy = last[1] - first[1]
+        dist = (dx**2 + dy**2) ** 0.5
+        if dist < 0.03:
+            self.ui_direction = "stationary"
+        elif abs(dx) >= abs(dy):
+            self.ui_direction = "right" if dx > 0 else "left"
         else:
-            self.ui_direction = "outward"
+            self.ui_direction = "down" if dy > 0 else "up"
 
-    def _decide_direction(self, centroids: list) -> Optional[str]:
+    def _fire_identification(
+        self,
+        direction: str,
+        snapshots: list[np.ndarray],
+    ) -> None:
         """
-        Decide ADD or REMOVE from centroid history.
+        Launch product identification in a background thread.
 
-        Returns "ADD", "REMOVE", or None (ambiguous).
+        direction : "ADD" or "REMOVE"
+        snapshots : frames to run inference on
         """
-        if len(centroids) < 2:
-            return None
-
-        first_cy = centroids[0][1]
-        last_cy  = centroids[-1][1]
-
-        above = lambda cy: cy < ENTRY_Y_FRACTION
-        below = lambda cy: cy >= ENTRY_Y_FRACTION
-
-        if above(first_cy) and below(last_cy):
-            return "ADD"
-        if below(first_cy) and above(last_cy):
-            return "REMOVE"
-        return None
-
-    def _start_identification(self) -> None:
-        """
-        Kick off product identification in a background thread.
-
-        Takes a snapshot of the current centroids and snapshots,
-        clears the buffers, and starts the thread.  The main loop
-        continues rendering frames without any pause.
-        """
-        # Don't start a new thread if one is still running.
         if self._identifying:
-            return
-
-        # Copy what we need — the buffers will be cleared by the caller.
-        centroids_copy = list(self._centroids)
-        snapshots_copy = list(self._snapshots)
+            return  # previous thread still running — skip
 
         self._identifying = True
-        self.ui_state = "identifying"
+        self.ui_state     = "identifying"
 
         self._id_thread = threading.Thread(
-            target=self._resolve_event_threaded,
-            args=(centroids_copy, snapshots_copy),
+            target=self._identify_threaded,
+            args=(direction, snapshots),
             daemon=True,
         )
         self._id_thread.start()
 
-    def _resolve_event_threaded(
+    def _identify_threaded(
         self,
-        centroids: list,
+        direction: str,
         snapshots: list[np.ndarray],
     ) -> None:
         """
-        Runs in a background thread.  Identifies the product from
-        snapshots and fires the on_event callback.
+        Runs in a background thread.
+
+        ADD:    match against the full product database.
+        REMOVE: match only against items already in the cart.
+                This is faster (fewer products to compare) and
+                makes more sense — we can only remove something that's there.
         """
         try:
-            direction = self._decide_direction(centroids)
-            if direction is None:
+            # ── Choose which database to search ──────────────────
+            if direction == "REMOVE" and self.get_cart_db is not None:
+                db = self.get_cart_db()
+                if not db:
+                    # Cart is empty — can't remove anything.
+                    print("[zone_tracker] REMOVE ignored: cart is empty.")
+                    return
+            else:
+                db = self.db
+
+            if not db or not snapshots:
                 return
 
-            product_name = "unknown"
-            score        = 0.0
+            # ── Pick evenly-spaced frames to infer on ────────────
+            n = len(snapshots)
+            k = min(_MAX_INFERENCE_SNAPS, n)
+            if k == n:
+                chosen = snapshots
+            else:
+                indices = [int(i * (n - 1) / (k - 1)) for i in range(k)]
+                chosen  = [snapshots[i] for i in indices]
 
-            if snapshots and self.db is not None:
-                # Pick at most _MAX_INFERENCE_SNAPS evenly-spaced frames.
-                # E.g. if we have 6 snapshots and want 3, pick indices [0, 3, 5].
-                n = len(snapshots)
-                if n <= _MAX_INFERENCE_SNAPS:
-                    chosen = snapshots
-                else:
-                    indices = [
-                        int(i * (n - 1) / (_MAX_INFERENCE_SNAPS - 1))
-                        for i in range(_MAX_INFERENCE_SNAPS)
-                    ]
-                    chosen = [snapshots[i] for i in indices]
+            best_score = -1.0
+            best_name  = "unknown"
 
-                best_score = -1.0
-                best_name  = "unknown"
+            for snap in chosen:
+                try:
+                    emb    = extract_embedding(snap)
+                    result = match(emb, db=db)
+                    if result["top_score"] > best_score:
+                        best_score = result["top_score"]
+                        best_name  = result["top_name"]
+                except Exception as e:
+                    print(f"[zone_tracker] Inference error: {e}")
 
-                for snap in chosen:
-                    try:
-                        emb    = extract_embedding(snap)
-                        result = match(emb, db=self.db)
+            # Only fire event if we got a meaningful score.
+            if best_score < SCORE_THRESHOLD:
+                print(
+                    f"[zone_tracker] {direction} below threshold "
+                    f"(score={best_score:.3f} < {SCORE_THRESHOLD}) — ignored."
+                )
+                return
 
-                        if result["top_score"] > best_score:
-                            best_score = result["top_score"]
-                            best_name  = result["top_name"]
-
-                    except Exception as e:
-                        print(f"[zone_tracker] Snapshot match error: {e}")
-
-                if best_score > 0:
-                    product_name = best_name
-                    score = best_score
-
-            elif snapshots and self.db is None:
-                product_name = "no_db"
-
-            # ── Fire callback ─────────────────────────────────────
             event = {
                 "direction":    direction,
-                "product_name": product_name,
-                "score":        round(score, 4),
+                "product_name": best_name,
+                "score":        round(best_score, 4),
                 "timestamp":    time.time(),
             }
             self.last_event = event
             print(
-                f"[zone_tracker] EVENT: {direction}  product={product_name}"
-                f"  score={score:.3f}"
+                f"[zone_tracker] EVENT: {direction}  "
+                f"product={best_name}  score={best_score:.3f}"
             )
-            self.on_event(direction, product_name, score)
+            self.on_event(direction, best_name, best_score)
 
         finally:
             self._identifying = False
-            # Don't reset ui_state here — the main loop manages that.
+
+    # ─────────────────────────────────────────────────────────────
+    # DRAWING
+    # ─────────────────────────────────────────────────────────────
 
     def _draw(
         self,
         frame: np.ndarray,
         fg_binary: np.ndarray,
         centroid_rel: Optional[tuple],
-        x: int, y: int, w: int, h: int,
     ) -> np.ndarray:
         """
-        Draw the zone rectangle, centroid dot, direction arrow, and
-        state label onto the frame for live visualisation.
+        Draw overlays on the frame:
+          - Dashed inner rectangle showing the ADD interior zone
+          - Centroid dot (red) when motion is detected
+          - State label + fg count
+          - Settling progress bar
+          - Small FG mask inset (top-right) for debugging
         """
         out = frame.copy()
+        W, H = self.frame_w, self.frame_h
+        m = EDGE_MARGIN_FRACTION
 
-        # ── Zone rectangle colour based on state ─────────────────
-        state_colors = {
-            _State.IDLE:     (0,   200,  0),   # green
-            _State.TRACKING: (0,   200, 255),  # yellow
-            _State.COOLDOWN: (180, 180, 180),  # grey
-        }
-        rect_color = state_colors.get(self._state, (255, 255, 255))
-        cv2.rectangle(out, (x, y), (x + w, y + h), rect_color, 2)
+        # ── Edge margin rectangle ─────────────────────────────────
+        # Items inside this rectangle when they stop → ADD.
+        # Items that exit this region (last centroid outside) → REMOVE.
+        ex1 = int(W * m)
+        ey1 = int(H * m)
+        ex2 = int(W * (1 - m))
+        ey2 = int(H * (1 - m))
 
-        # ── Zone state label (top-left of zone) ───────────────────
-        label = f"{self._state}  dir:{self.ui_direction}"
-        cv2.putText(
-            out, label,
-            (x + 4, y - 8),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.55, rect_color, 1, cv2.LINE_AA
-        )
+        state_color = {
+            _State.IDLE:     (0,   200,   0),   # green
+            _State.TRACKING: (0,   200, 255),   # yellow
+            _State.SETTLING: (0,   180, 100),   # teal
+            _State.COOLDOWN: (150, 150, 150),   # grey
+        }.get(self._state, (255, 255, 255))
 
-        # ── Foreground pixel count (bottom-left of zone) ──────────
-        cv2.putText(
-            out, f"fg:{self.ui_fg_pixels}",
-            (x + 4, y + h - 6),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.45, rect_color, 1, cv2.LINE_AA
-        )
+        # Outer frame border
+        cv2.rectangle(out, (2, 2), (W - 3, H - 3), (60, 60, 70), 1)
+        # Inner "ADD zone" rectangle
+        cv2.rectangle(out, (ex1, ey1), (ex2, ey2), state_color, 2)
+
+        # Corner labels
+        cv2.putText(out, "REMOVE zone",
+                    (4, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (80, 80, 90), 1, cv2.LINE_AA)
+        cv2.putText(out, "ADD zone",
+                    (ex1 + 4, ey1 + 18),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.42, state_color, 1, cv2.LINE_AA)
+
+        # ── State + direction label ───────────────────────────────
+        label = "%s  dir:%s" % (self._state, self.ui_direction)
+        cv2.putText(out, label,
+                    (ex1 + 4, ey1 - 6),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.48, state_color, 1, cv2.LINE_AA)
+
+        # ── FG pixel count (bottom-left) ──────────────────────────
+        cv2.putText(out, "fg:%d" % self.ui_fg_pixels,
+                    (4, H - 6),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.40, (100, 100, 110), 1, cv2.LINE_AA)
 
         # ── Centroid dot ──────────────────────────────────────────
         if centroid_rel is not None:
-            cx_abs = int(centroid_rel[0] * w) + x
-            cy_abs = int(centroid_rel[1] * h) + y
-            cv2.circle(out, (cx_abs, cy_abs), 6, (0, 0, 255), -1)   # filled red dot
-            cv2.circle(out, (cx_abs, cy_abs), 8, (255, 255, 255), 1) # white ring
+            cx_abs = int(centroid_rel[0] * W)
+            cy_abs = int(centroid_rel[1] * H)
+            cv2.circle(out, (cx_abs, cy_abs), 7, (0,   0,   255), -1)   # red filled
+            cv2.circle(out, (cx_abs, cy_abs), 9, (255, 255, 255),  1)   # white ring
 
-        # ── Direction dividing line ───────────────────────────────
-        # Show the ADD/REMOVE boundary visually.
-        div_y = int(y + h * ENTRY_Y_FRACTION)
-        cv2.line(out, (x, div_y), (x + w, div_y), (0, 255, 200), 1)
-        cv2.putText(
-            out, "ADD \u2193 | REMOVE \u2191",
-            (x + 4, div_y - 4),
-            cv2.FONT_HERSHEY_SIMPLEX, 0.40, (0, 255, 200), 1, cv2.LINE_AA
-        )
+        # ── Settling progress bar ─────────────────────────────────
+        # Shows how close we are to firing the ADD scan.
+        if self._state == _State.SETTLING:
+            elapsed = time.time() - self._settle_start
+            ratio   = min(1.0, elapsed / SETTLE_WAIT_SEC)
+            bar_x1  = ex1
+            bar_x2  = ex1 + int((ex2 - ex1) * ratio)
+            bar_y   = ey2 + 6
+            cv2.rectangle(out, (ex1, bar_y),
+                          (ex2, bar_y + 8), (40, 60, 40), -1)   # track
+            cv2.rectangle(out, (bar_x1, bar_y),
+                          (bar_x2, bar_y + 8), (0, 210, 100), -1) # fill
+            cv2.putText(out, "Settling... hold still",
+                        (ex1 + 4, bar_y + 24),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.44, (0, 210, 100), 1, cv2.LINE_AA)
 
-        # ── Small foreground mask inset (top-right corner) ────────
-        # Shows what the background subtractor actually sees inside
-        # the zone — extremely useful for tuning FG_PIXEL_THRESHOLD.
+        # ── Tiny FG mask inset (top-right) ────────────────────────
+        # Helps you see exactly what the background subtractor sees.
         try:
-            inset_size = (w // 3, h // 3)
-            fg_inset = cv2.resize(fg_binary, inset_size)
-            fg_inset_bgr = cv2.cvtColor(fg_inset, cv2.COLOR_GRAY2BGR)
-            ix = x + w - inset_size[0] - 2
-            iy = y + 2
-            out[iy : iy + inset_size[1], ix : ix + inset_size[0]] = fg_inset_bgr
+            inset_w = W // 5
+            inset_h = H // 5
+            inset   = cv2.resize(fg_binary, (inset_w, inset_h))
+            inset   = cv2.cvtColor(inset, cv2.COLOR_GRAY2BGR)
+            out[4 : 4 + inset_h, W - inset_w - 4 : W - 4] = inset
         except Exception:
-            pass  # silently skip if size mismatch on small frames
+            pass
 
         return out
