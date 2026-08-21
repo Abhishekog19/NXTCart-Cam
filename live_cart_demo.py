@@ -1,34 +1,29 @@
 # ---------------------------------------------------------------
-# live_cart_demo.py  —  Smart Cart Gate Demo
+# live_cart_demo.py  --  NXTCart Smart Cart Demo
 #
-# WHAT IT DOES
+# HOW IT WORKS
 # ─────────────
-# • Streams the webcam feed with the gateway zone drawn over it.
-# • Automatically detects items passing through the zone,
-#   identifies them, and updates a virtual shopping cart.
-# • Nothing needs to be pressed during normal use —
-#   just hold the product above the zone and drop/lift it.
+# Point the webcam at a flat surface (table, mat, floor of a box).
+# The entire camera frame is the "cart surface".
 #
-# LAYOUT
-# ───────
-# Left panel  (2/3 of window): live camera + zone overlay
-# Right panel (1/3 of window): virtual cart list + event log
+#   ADD a product:
+#     Bring the item into the camera frame from any edge.
+#     Place it down and hold still for ~1 second.
+#     The system scans the still item and adds it to the cart.
 #
-# HOW TO RUN
-# ──────────
-#   python live_cart_demo.py
+#   REMOVE a product:
+#     Pick up the item and slide/lift it out of the camera frame.
+#     The system scans the item as it exits and removes it from the cart.
+#     Only compares against items already in the cart — fast and accurate.
 #
 # CONTROLS
-#   R  →  reset cart to empty
+#   R  →  reset cart
 #   Q  →  quit
 #
-# TUNING
-# ───────
-# All thresholds are in ml/config.py.
-# Most importantly:
-#   ZONE_RECT        — move/resize the green box to your gateway opening
-#   FG_PIXEL_THRESHOLD — raise if flickering lights cause false events
-#   EVENT_COOLDOWN_SEC — raise if one slow movement fires twice
+# TUNING (ml/config.py)
+#   FG_PIXEL_THRESHOLD  — raise if camera noise causes false triggers
+#   EDGE_MARGIN_FRACTION — how close to the edge counts as "exiting"
+#   SETTLE_WAIT_SEC     — how long to hold still before ADD scans
 # ---------------------------------------------------------------
 
 import time
@@ -37,157 +32,116 @@ from collections import deque
 import cv2
 import numpy as np
 
-from ml.config import CAMERA_INDEX, ZONE_RECT
+from ml.config import CAMERA_INDEX
 from ml.matcher import load_database
 from ml.zone_tracker import ZoneTracker
 
 # ── UI dimensions ─────────────────────────────────────────────────
-CAM_W, CAM_H   = 640, 480    # native capture size
-PANEL_W         = 280        # width of the right info panel
-WINDOW_W        = CAM_W + PANEL_W
-WINDOW_H        = CAM_H
+CAM_W, CAM_H = 640, 480
+PANEL_W       = 260
+WINDOW_W      = CAM_W + PANEL_W
+WINDOW_H      = CAM_H
 
 # ── Colours (BGR) ─────────────────────────────────────────────────
-C_BG         = (18,  18,  24)   # near-black panel background
+C_BG         = (15,  15,  22)
 C_WHITE      = (255, 255, 255)
-C_GRAY       = (140, 140, 150)
+C_GRAY       = (130, 130, 140)
 C_GREEN      = (60,  210,  80)
-C_RED        = (60,   60, 220)
+C_RED        = (70,   70, 230)
 C_YELLOW     = (0,   210, 255)
-C_CYAN       = (200, 220,   0)
-C_PANEL_LINE = (50,  50,  65)
+C_CYAN       = (210, 230,   0)
+C_PANEL_LINE = (45,  45,  60)
 
 FONT       = cv2.FONT_HERSHEY_DUPLEX
-FONT_SMALL = cv2.FONT_HERSHEY_SIMPLEX
+FONT_S     = cv2.FONT_HERSHEY_SIMPLEX
 
-# ── Event log buffer ──────────────────────────────────────────────
-MAX_LOG_ENTRIES = 10
-_event_log: deque = deque(maxlen=MAX_LOG_ENTRIES)
-
-# ── Virtual cart ──────────────────────────────────────────────────
-# A list of dicts, each: {"name": str, "qty": int}
-_cart: list[dict] = []
+# ── Global state ──────────────────────────────────────────────────
+MAX_LOG = 10
+_event_log: deque = deque(maxlen=MAX_LOG)
+_cart: list[dict] = []          # [{"name": str, "qty": int}, ...]
+_full_db = None                  # full embedding DB (loaded once at startup)
 
 
-def _add_to_cart(product_name: str) -> None:
-    """Increment qty if product already in cart, else append."""
-    clean = product_name.rstrip("?")   # strip uncertainty marker
+# ─────────────────────────────────────────────────────────────────
+# CART OPERATIONS
+# ─────────────────────────────────────────────────────────────────
+
+def _add_to_cart(name: str) -> None:
     for entry in _cart:
-        if entry["name"] == clean:
+        if entry["name"] == name:
             entry["qty"] += 1
             return
-    _cart.append({"name": clean, "qty": 1})
+    _cart.append({"name": name, "qty": 1})
 
 
-def _remove_from_cart(product_name: str) -> None:
-    """Decrement qty; remove entry if qty reaches 0."""
-    clean = product_name.rstrip("?")
+def _remove_from_cart(name: str) -> None:
     for entry in _cart:
-        if entry["name"] == clean:
+        if entry["name"] == name:
             entry["qty"] -= 1
             if entry["qty"] <= 0:
                 _cart.remove(entry)
             return
-    # Product not found — log but don't crash.
-    print(f"[cart] REMOVE requested for '{clean}' but it's not in the cart.")
+    print(f"[cart] REMOVE '{name}' — not in cart (ignored).")
 
+
+def _get_cart_db():
+    """
+    Build and return a database containing ONLY the items currently in
+    the cart.
+
+    This is passed to ZoneTracker so that REMOVE events only search
+    through products that are actually in the cart — faster and smarter
+    than searching the whole product catalogue.
+    """
+    if _full_db is None or not _cart:
+        return None
+    return {
+        e["name"]: _full_db[e["name"]]
+        for e in _cart
+        if e["name"] in _full_db
+    }
+
+
+# ─────────────────────────────────────────────────────────────────
+# EVENT CALLBACK (fired by ZoneTracker background thread)
+# ─────────────────────────────────────────────────────────────────
 
 def on_zone_event(direction: str, product_name: str, score: float) -> None:
-    """
-    Callback fired by ZoneTracker on each resolved crossing.
-    Updates the cart and appends to the event log.
-    """
-    uncertain = product_name.endswith("?")
+    """Called once per confirmed ADD or REMOVE crossing."""
     clean = product_name.rstrip("?")
 
     if direction == "ADD":
-        _add_to_cart(product_name)
-        action_str = "ADD"
-        color = C_GREEN
+        _add_to_cart(clean)
+        log_color  = C_GREEN
+        log_prefix = "ADD"
     else:
-        _remove_from_cart(product_name)
-        action_str = "REM"
-        color = C_RED
+        _remove_from_cart(clean)
+        log_color  = C_RED
+        log_prefix = "REM"
 
-    suffix = " [?]" if uncertain else ""
-    log_entry = {
-        "text":  f"{action_str}: {clean.replace('_', ' ')}{suffix}",
-        "color": color,
+    _event_log.appendleft({
+        "text":  "%s: %s  (%d%%)" % (log_prefix, clean.replace("_", " "), int(score * 100)),
+        "color": log_color,
         "time":  time.strftime("%H:%M:%S"),
-    }
-    _event_log.appendleft(log_entry)   # newest at top
+    })
 
 
-# ── Panel rendering ───────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────
+# CAMERA FEED HUD — cart overlay drawn directly on the cam frame
+# ─────────────────────────────────────────────────────────────────
 
-def _draw_panel(panel: np.ndarray, tracker: "ZoneTracker") -> None:
-    panel[:] = C_BG
-    W = panel.shape[1]
-    y = 0
-
-    def hline(yy: int, color: tuple = C_PANEL_LINE) -> int:
-        cv2.line(panel, (0, yy), (W, yy), color, 1)
-        return yy + 1
-
-    def text(s: str, yy: int, color=C_WHITE, scale=0.55, bold=False) -> int:
-        thickness = 2 if bold else 1
-        cv2.putText(panel, s, (10, yy), FONT_SMALL, scale, color, thickness, cv2.LINE_AA)
-        return yy + int(scale * 38)
-
-    def section(title: str, yy: int) -> int:
-        yy = hline(yy, C_PANEL_LINE)
-        cv2.rectangle(panel, (0, yy), (W, yy + 22), C_PANEL_LINE, -1)
-        cv2.putText(panel, title, (8, yy + 15), FONT_SMALL, 0.48, C_YELLOW, 1, cv2.LINE_AA)
-        return yy + 24
-
-    cv2.rectangle(panel, (0, 0), (W, 34), (30, 30, 45), -1)
-    cv2.putText(panel, "NXTCart", (8, 24), FONT, 0.75, C_CYAN, 2, cv2.LINE_AA)
-    y = 36
-
-    y = section("  ZONE STATUS", y)
-    state_color = {"idle": C_GREEN, "tracking": C_YELLOW, "identifying": C_CYAN, "cooldown": C_GRAY}.get(tracker.ui_state, C_WHITE)
-    y = text(f"State : {tracker.ui_state.upper()}", y, state_color, 0.50, bold=True)
-    y = text(f"Dir   : {tracker.ui_direction}", y, C_WHITE, 0.50)
-    y = text(f"FG px : {tracker.ui_fg_pixels}", y, C_GRAY, 0.45)
-    y += 4
-
-    y = section("  CART", y)
-    if not _cart: y = text("(empty)", y, C_GRAY, 0.50)
-    else:
-        for entry in _cart:
-            line = f"  {entry['name'].replace('_', ' ')}"
-            qty_str = f"x{entry['qty']}"
-            y = text(line, y, C_WHITE, 0.52)
-            (tw, _), _ = cv2.getTextSize(qty_str, FONT_SMALL, 0.52, 1)
-            cv2.putText(panel, qty_str, (W - tw - 10, y - 8), FONT_SMALL, 0.52, C_CYAN, 1, cv2.LINE_AA)
-    y += 4
-
-    y = section("  EVENTS", y)
-    if not _event_log: y = text("(none yet)", y, C_GRAY, 0.45)
-    else:
-        for entry in list(_event_log)[:7]:
-            y = text(f"{entry['time']}  {entry['text']}", y, entry["color"], 0.43)
-
-    controls_y = WINDOW_H - 52
-    hline(controls_y)
-    cv2.putText(panel, "R = reset cart", (10, controls_y + 16), FONT_SMALL, 0.45, C_GRAY, 1, cv2.LINE_AA)
-    cv2.putText(panel, "Q = quit", (10, controls_y + 34), FONT_SMALL, 0.45, C_GRAY, 1, cv2.LINE_AA)
-
-def _draw_cart_hud(cam_view: np.ndarray, tracker: "ZoneTracker") -> None:
+def _draw_cart_hud(cam_view: np.ndarray, tracker: ZoneTracker) -> None:
     """
-    Semi-transparent cart overlay on the camera feed (top-left corner).
-
-    Shows:
-      - Header: "CART (N items)"
-      - One row per product with quantity right-aligned
-      - "(empty)" when cart is empty
-      - Animated "| IDENTIFYING..." spinner while background thread runs
-      - Coloured border flash for 0.5 s after each ADD (green) / REMOVE (red)
+    Semi-transparent cart status box in the top-left corner of the
+    camera feed, plus:
+      - Coloured border flash on ADD (green) / REMOVE (red)
+      - Fading bottom banner showing the last event
+      - Animated spinner when the model is running
     """
     PAD    = 8
     ROW_H  = 22
     HEADER = 26
-    WIDTH  = 210
+    WIDTH  = 215
 
     n_rows = max(1, len(_cart))
     box_h  = HEADER + n_rows * ROW_H + PAD
@@ -195,113 +149,194 @@ def _draw_cart_hud(cam_view: np.ndarray, tracker: "ZoneTracker") -> None:
 
     # Semi-transparent dark background
     overlay = cam_view.copy()
-    cv2.rectangle(overlay, (x0, y0), (x0 + WIDTH, y0 + box_h), (10, 10, 20), -1)
-    cv2.rectangle(overlay, (x0, y0), (x0 + WIDTH, y0 + box_h), (70, 80, 90), 1)
-    cv2.addWeighted(overlay, 0.70, cam_view, 0.30, 0, cam_view)
+    cv2.rectangle(overlay, (x0, y0), (x0 + WIDTH, y0 + box_h), (8, 8, 18), -1)
+    cv2.rectangle(overlay, (x0, y0), (x0 + WIDTH, y0 + box_h), (60, 70, 80), 1)
+    cv2.addWeighted(overlay, 0.68, cam_view, 0.32, 0, cam_view)
 
     # Teal header bar
-    total_qty = sum(e["qty"] for e in _cart)
+    total_qty  = sum(e["qty"] for e in _cart)
     header_txt = "CART  (%d item%s)" % (total_qty, "s" if total_qty != 1 else "")
-    cv2.rectangle(cam_view, (x0, y0), (x0 + WIDTH, y0 + HEADER), (35, 85, 55), -1)
+    cv2.rectangle(cam_view, (x0, y0), (x0 + WIDTH, y0 + HEADER), (30, 80, 50), -1)
     cv2.putText(cam_view, header_txt, (x0 + PAD, y0 + HEADER - 7),
-                FONT_SMALL, 0.46, (200, 255, 210), 1, cv2.LINE_AA)
+                FONT_S, 0.46, (190, 255, 210), 1, cv2.LINE_AA)
 
     # Item rows
     if not _cart:
         cv2.putText(cam_view, "(empty)",
                     (x0 + PAD, y0 + HEADER + ROW_H - 6),
-                    FONT_SMALL, 0.42, C_GRAY, 1, cv2.LINE_AA)
+                    FONT_S, 0.42, C_GRAY, 1, cv2.LINE_AA)
     else:
         for i, entry in enumerate(_cart):
             ry   = y0 + HEADER + i * ROW_H
             name = entry["name"].replace("_", " ")
             qty  = "x%d" % entry["qty"]
-            # Alternating row tint
             if i % 2 == 0:
                 cv2.rectangle(cam_view, (x0 + 1, ry),
-                              (x0 + WIDTH - 1, ry + ROW_H), (22, 25, 38), -1)
+                              (x0 + WIDTH - 1, ry + ROW_H), (20, 22, 35), -1)
             cv2.putText(cam_view, "  " + name, (x0 + PAD, ry + ROW_H - 6),
-                        FONT_SMALL, 0.42, C_WHITE, 1, cv2.LINE_AA)
-            (tw, _), _ = cv2.getTextSize(qty, FONT_SMALL, 0.44, 1)
-            cv2.putText(cam_view, qty, (x0 + WIDTH - tw - PAD, ry + ROW_H - 6),
-                        FONT_SMALL, 0.44, C_CYAN, 1, cv2.LINE_AA)
+                        FONT_S, 0.42, C_WHITE, 1, cv2.LINE_AA)
+            (tw, _), _ = cv2.getTextSize(qty, FONT_S, 0.44, 1)
+            cv2.putText(cam_view, qty,
+                        (x0 + WIDTH - tw - PAD, ry + ROW_H - 6),
+                        FONT_S, 0.44, C_CYAN, 1, cv2.LINE_AA)
 
-    # Identifying spinner (bottom of cam view)
+    # Animated spinner while the model is running
     if tracker.ui_state == "identifying":
-        spinner = ["|", "/", "-", "\\"][int(time.time() * 5) % 4]
-        cv2.putText(cam_view, "%s  Identifying..." % spinner,
-                    (CAM_W // 2 - 90, CAM_H - 12),
-                    FONT_SMALL, 0.55, C_YELLOW, 1, cv2.LINE_AA)
+        spin = ["|", "/", "-", "\\"][int(time.time() * 5) % 4]
+        cv2.putText(cam_view, "%s  Identifying..." % spin,
+                    (CAM_W // 2 - 85, CAM_H - 12),
+                    FONT_S, 0.55, C_YELLOW, 1, cv2.LINE_AA)
 
-    # ADD/REMOVE border flash (0.5 s)
+    # Border flash: 0.5 s green (ADD) or red (REMOVE) border
     if tracker.last_event:
         age = time.time() - tracker.last_event["timestamp"]
         if age < 0.5:
-            flash_c = C_GREEN if tracker.last_event["direction"] == "ADD" else C_RED
-            cv2.rectangle(cam_view, (0, 0), (CAM_W - 1, CAM_H - 1), flash_c, 8)
+            fc = C_GREEN if tracker.last_event["direction"] == "ADD" else C_RED
+            cv2.rectangle(cam_view, (0, 0), (CAM_W - 1, CAM_H - 1), fc, 8)
 
-    # Event banner (bottom strip, fades over 3.5 s)
+    # Bottom banner fading over 3.5 s
     if tracker.last_event:
         ev  = tracker.last_event
         age = time.time() - ev["timestamp"]
         if 0 < age < 3.5:
             alpha = max(0.0, 1.0 - age / 3.5)
-            bar   = (0, 100, 35) if ev["direction"] == "ADD" else (25, 25, 110)
-            strip_y1, strip_y2 = CAM_H - 46, CAM_H
-            roi     = cam_view[strip_y1:strip_y2, :]
-            bg      = np.full_like(roi, bar)
-            cam_view[strip_y1:strip_y2, :] = cv2.addWeighted(
-                bg, alpha * 0.80, roi, 1.0 - alpha * 0.80, 0)
+            bar   = (0, 90, 30) if ev["direction"] == "ADD" else (25, 25, 100)
+            s1, s2 = CAM_H - 44, CAM_H
+            roi = cam_view[s1:s2, :]
+            bg  = np.full_like(roi, bar)
+            cam_view[s1:s2, :] = cv2.addWeighted(
+                bg, alpha * 0.82, roi, 1.0 - alpha * 0.82, 0)
             prod = ev["product_name"].replace("_", " ").rstrip("?")
-            txt  = "%s: %s  (%d%%)" % (ev["direction"], prod, int(ev["score"] * 100))
-            tc   = C_GREEN if ev["direction"] == "ADD" else (110, 110, 255)
-            cv2.putText(cam_view, txt, (12, strip_y2 - 12),
+            txt  = "%s: %s  (%d%%)" % (
+                ev["direction"], prod, int(ev["score"] * 100))
+            tc = C_GREEN if ev["direction"] == "ADD" else (110, 110, 255)
+            cv2.putText(cam_view, txt, (10, s2 - 11),
                         FONT, 0.72, tc, 2, cv2.LINE_AA)
 
 
-def main() -> None:
-    print("[live_cart_demo] Loading embedding database…")
-    try:
-        db = load_database()
-    except FileNotFoundError as e:
-        print(f"WARNING: {e}\nRunning without product identification.")
-        db = None
+# ─────────────────────────────────────────────────────────────────
+# RIGHT PANEL
+# ─────────────────────────────────────────────────────────────────
 
-    print(f"[live_cart_demo] Opening camera {CAMERA_INDEX}…")
+def _draw_panel(panel: np.ndarray, tracker: ZoneTracker) -> None:
+    panel[:] = C_BG
+    W = panel.shape[1]
+    y = 0
+
+    def hline(yy):
+        cv2.line(panel, (0, yy), (W, yy), C_PANEL_LINE, 1)
+        return yy + 1
+
+    def text(s, yy, color=C_WHITE, scale=0.52, bold=False):
+        cv2.putText(panel, s, (10, yy), FONT_S, scale,
+                    color, 2 if bold else 1, cv2.LINE_AA)
+        return yy + int(scale * 38)
+
+    def section(title, yy):
+        yy = hline(yy)
+        cv2.rectangle(panel, (0, yy), (W, yy + 22), C_PANEL_LINE, -1)
+        cv2.putText(panel, title, (8, yy + 15),
+                    FONT_S, 0.46, C_YELLOW, 1, cv2.LINE_AA)
+        return yy + 24
+
+    # Header
+    cv2.rectangle(panel, (0, 0), (W, 34), (28, 28, 42), -1)
+    cv2.putText(panel, "NXTCart", (8, 24), FONT, 0.72, C_CYAN, 2, cv2.LINE_AA)
+    y = 36
+
+    # Tracker status
+    y = section("  STATUS", y)
+    sc = {"idle": C_GREEN, "tracking": C_YELLOW,
+          "settling": (0, 200, 100), "identifying": C_CYAN,
+          "cooldown": C_GRAY}.get(tracker.ui_state, C_WHITE)
+    y = text("State: %s" % tracker.ui_state.upper(), y, sc, 0.48, bold=True)
+    y = text("Motion: %s" % tracker.ui_direction, y, C_WHITE, 0.46)
+    y = text("FG px: %d" % tracker.ui_fg_pixels, y, C_GRAY, 0.42)
+    y += 4
+
+    # Cart
+    y = section("  CART", y)
+    if not _cart:
+        y = text("(empty)", y, C_GRAY, 0.48)
+    else:
+        for entry in _cart:
+            name  = entry["name"].replace("_", " ")
+            qty   = "x%d" % entry["qty"]
+            y = text("  " + name, y, C_WHITE, 0.50)
+            (tw, _), _ = cv2.getTextSize(qty, FONT_S, 0.50, 1)
+            cv2.putText(panel, qty, (W - tw - 10, y - 8),
+                        FONT_S, 0.50, C_CYAN, 1, cv2.LINE_AA)
+    y += 4
+
+    # Event log
+    y = section("  EVENTS", y)
+    if not _event_log:
+        y = text("(none yet)", y, C_GRAY, 0.42)
+    else:
+        for e in list(_event_log)[:8]:
+            y = text("%s  %s" % (e["time"], e["text"]), y, e["color"], 0.40)
+
+    # Controls (bottom)
+    ctrl_y = WINDOW_H - 50
+    hline(ctrl_y)
+    cv2.putText(panel, "R = reset cart",
+                (10, ctrl_y + 16), FONT_S, 0.43, C_GRAY, 1, cv2.LINE_AA)
+    cv2.putText(panel, "Q = quit",
+                (10, ctrl_y + 32), FONT_S, 0.43, C_GRAY, 1, cv2.LINE_AA)
+
+
+# ─────────────────────────────────────────────────────────────────
+# MAIN
+# ─────────────────────────────────────────────────────────────────
+
+def main() -> None:
+    global _full_db
+
+    print("[live_cart_demo] Loading embedding database...")
+    try:
+        _full_db = load_database()
+    except FileNotFoundError as e:
+        print("WARNING:", e, "\nRunning without product identification.")
+
+    print("[live_cart_demo] Opening camera %d..." % CAMERA_INDEX)
     cap = cv2.VideoCapture(CAMERA_INDEX)
     if not cap.isOpened():
-        print(f"ERROR: Cannot open camera {CAMERA_INDEX}.  Change CAMERA_INDEX in ml/config.py.")
+        print("ERROR: Cannot open camera %d." % CAMERA_INDEX)
         return
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH,  CAM_W)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_H)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)   # no frame queuing = no lag
 
-    tracker = ZoneTracker(on_event=on_zone_event, db=db)
+    tracker = ZoneTracker(
+        on_event    = on_zone_event,
+        db          = _full_db,
+        get_cart_db = _get_cart_db,       # cart-only DB for fast REMOVE matching
+        frame_size  = (CAM_W, CAM_H),
+    )
 
     window = "NXTCart-Cam - Live Cart"
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(window, WINDOW_W, WINDOW_H)
 
-    # Pre-allocate right panel (stays in memory, redrawn each frame).
     panel = np.zeros((WINDOW_H, PANEL_W, 3), dtype=np.uint8)
 
-    print("[live_cart_demo] Ready.  Aim webcam at your gateway opening.")
-    print(f"                 Zone rect: {ZONE_RECT}  (edit in ml/config.py)")
-    print("                 R = reset cart  |  Q = quit\n")
+    print("[live_cart_demo] Ready.")
+    print("  ADD:    bring item into frame, place it down, hold still.")
+    print("  REMOVE: pick item up and slide it out of frame.")
+    print("  R = reset cart  |  Q = quit\n")
 
     while True:
         ok, frame = cap.read()
         if not ok or frame is None:
             continue
 
-        # ── Zone tracking overlay ─────────────────────────────────
         cam_view = tracker.process(frame)
 
-        # ── Cart HUD (top-left of camera) + event flash ───────────
+        # Cart HUD + flash overlaid directly on cam view
         _draw_cart_hud(cam_view, tracker)
 
-        # ── Composite: camera + right panel side by side ──────────
+        # Assemble final composite
         _draw_panel(panel, tracker)
         composite = np.hstack([cam_view, panel])
 
