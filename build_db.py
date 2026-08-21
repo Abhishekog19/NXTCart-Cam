@@ -90,13 +90,13 @@ def build_database() -> dict:
             try:
                 embedding = extract_embedding(fpath)
                 embeddings.append(embedding)
-                print(f"    {fname} → embedding shape {embedding.shape}")
+                print(f"    {fname} -> embedding shape {embedding.shape}")
             except Exception as e:
                 print(f"    WARNING: Could not process {fname}: {e}")
 
         if embeddings:
             database[product_name] = embeddings
-            print(f"  → {len(embeddings)} embedding(s) stored for '{product_name}'.\n")
+            print(f"  => {len(embeddings)} embedding(s) stored for '{product_name}'.\n")
 
     if not database:
         print("ERROR: No embeddings were produced. Check your reference images.")
@@ -107,7 +107,7 @@ def build_database() -> dict:
         pickle.dump(database, f)
 
     total_emb = sum(len(v) for v in database.values())
-    print(f"Saved database: {len(database)} product(s), {total_emb} embeddings → {DATABASE_PATH}")
+    print(f"Saved database: {len(database)} product(s), {total_emb} embeddings -> {DATABASE_PATH}")
     return database
 
 

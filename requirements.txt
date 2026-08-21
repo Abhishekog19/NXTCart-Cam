@@ -1,18 +1,21 @@
 # ---------------------------------------------------------------
-# NXTCart-Cam – Product Recognition System
-# Minimal dependencies.  Install with:
-#   pip install -r requirements.txt
+# NXTCart-Cam – dependencies  (Python 3.14, Windows)
+#
+# Install with:
+#   pip install --only-binary :all: -r requirements.txt
+#
+# The --only-binary flag tells pip to use pre-built wheels only,
+# never compile from source (no C compiler needed).
 # ---------------------------------------------------------------
 
 # Core vision & numerics
-opencv-python==4.10.0.84
-numpy==1.26.4
+opencv-python>=4.10.0      # ships abi3 wheels, works on any Python 3.x
+numpy>=2.0.0               # 2.x required for Python 3.13+; already on your system
 
-# TensorFlow Lite runtime (lighter than full TF, no GPU needed)
-# On a normal laptop use the wheel below.
-# On Raspberry Pi you'll swap this for the ARM wheel from
-#   https://github.com/google-coral/pycoral/releases
-tflite-runtime==2.14.0
+# TFLite runtime — Python 3.14 compatible
+# ai-edge-litert is Google's new name/distribution for the TFLite runtime.
+# It replaced the old tflite-runtime package and ships Python 3.13/3.14 wheels.
+ai-edge-litert>=1.0.0
 
 # HTTP download for the TFLite model (used once by embedding_extractor.py)
-requests==2.32.3
+requests>=2.32.0

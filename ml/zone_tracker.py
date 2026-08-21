@@ -41,6 +41,7 @@
 # ---------------------------------------------------------------
 
 import time
+import threading
 from collections import deque
 from typing import Callable, Optional
 
@@ -59,6 +60,12 @@ from ml.config import (
 )
 from ml.embedding_extractor import extract_embedding
 from ml.matcher import EmbeddingDB, match
+
+
+# Maximum number of snapshots to actually run inference on.
+# We pick them evenly spaced from the full snapshot buffer.
+# 3 snapshots × ~80ms each = ~240ms total — keeps the UI responsive.
+_MAX_INFERENCE_SNAPS = 3
 
 
 # ── Internal state machine states ────────────────────────────────
@@ -98,40 +105,36 @@ class ZoneTracker:
         self.zone_rect = zone_rect or ZONE_RECT   # (x, y, w, h)
 
         # ── Background subtractor ─────────────────────────────────
-        # We restrict it to the zone crop only (not the full frame),
-        # so irrelevant motion outside the zone is completely ignored.
         if BGS_METHOD == "KNN":
             self._bgs = cv2.createBackgroundSubtractorKNN(
                 detectShadows=True
             )
         else:
             self._bgs = cv2.createBackgroundSubtractorMOG2(
-                detectShadows=True   # mark shadows as 127, not 255
+                detectShadows=True
             )
 
         # ── Centroid history ──────────────────────────────────────
-        # A deque (double-ended queue) keeps only the last N positions.
-        # When it's full, the oldest is automatically dropped.
-        # Each entry: (cx_relative, cy_relative) — coordinates
-        # expressed as fractions of the zone width/height, so the
-        # decision logic doesn't depend on absolute pixel values.
         self._centroids: deque = deque(maxlen=CENTROID_HISTORY_LEN)
 
         # ── Snapshot buffer ───────────────────────────────────────
-        # Raw BGR frames captured while motion is active.
-        # We'll pick the best one for product matching after the event.
         self._snapshots: list[np.ndarray] = []
 
         # ── State machine ─────────────────────────────────────────
         self._state = _State.IDLE
-        self._cooldown_until = 0.0   # epoch time when cooldown expires
+        self._cooldown_until = 0.0
+
+        # ── Background identification thread ──────────────────────
+        # Identification (embedding + matching) runs in a separate
+        # thread so the camera loop is never blocked.
+        self._id_thread: Optional[threading.Thread] = None
+        self._identifying = False     # True while the thread is running
 
         # ── For the UI overlay ────────────────────────────────────
-        # These are set so live_cart_demo.py can read them each frame.
-        self.ui_state  = "idle"        # human-readable state
-        self.ui_direction = "—"        # "inward", "outward", or "—"
-        self.ui_fg_pixels = 0          # count of active foreground pixels
-        self.last_event: Optional[dict] = None  # last resolved event dict
+        self.ui_state  = "idle"
+        self.ui_direction = "--"
+        self.ui_fg_pixels = 0
+        self.last_event: Optional[dict] = None
 
     # ── Public API ────────────────────────────────────────────────
 
@@ -139,22 +142,16 @@ class ZoneTracker:
         """
         Process one camera frame.
 
-        Returns the frame with debug visualisations drawn on it
-        (zone rectangle, centroid dot, state text).
-        This is what live_cart_demo.py should display.
+        Returns the frame with debug visualisations drawn on it.
+        Never blocks: identification runs in a background thread.
         """
         x, y, w, h = self.zone_rect
         now = time.time()
 
         # ── Step 1: crop to zone ──────────────────────────────────
-        # Extract just the zone region from the full frame.
-        # All subsequent processing works on this small crop.
         zone_crop = frame[y : y + h, x : x + w]
 
         # ── Step 2: apply background subtractor to the crop ───────
-        # apply() returns a "foreground mask": white (255) where
-        # pixels differ from the learned background, black (0) where
-        # they match.  Shadows are grey (127); we treat them as bg.
         fg_mask = self._bgs.apply(
             zone_crop, learningRate=BGS_LEARNING_RATE
         )
@@ -163,8 +160,6 @@ class ZoneTracker:
         fg_binary = (fg_mask == 255).astype(np.uint8) * 255
 
         # ── Step 3: morphological cleanup ────────────────────────
-        # "Opening" (erode then dilate) removes tiny noise specks.
-        # "Closing" fills small holes in the foreground blob.
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
         fg_binary = cv2.morphologyEx(fg_binary, cv2.MORPH_OPEN, kernel)
         fg_binary = cv2.morphologyEx(fg_binary, cv2.MORPH_CLOSE, kernel)
@@ -177,13 +172,10 @@ class ZoneTracker:
         # ── Step 5: find centroid if active ───────────────────────
         centroid_rel: Optional[tuple[float, float]] = None
         if active:
-            # Moments are weighted sums of pixel positions.
-            # M["m00"] = area, M["m10"]/M["m00"] = x centroid, etc.
             M = cv2.moments(fg_binary)
             if M["m00"] > 0:
-                cx_abs = M["m10"] / M["m00"]   # centroid x in crop coords
-                cy_abs = M["m01"] / M["m00"]   # centroid y in crop coords
-                # Convert to fractions [0, 1] of zone size.
+                cx_abs = M["m10"] / M["m00"]
+                cy_abs = M["m01"] / M["m00"]
                 centroid_rel = (cx_abs / w, cy_abs / h)
 
         # ── Step 6: state machine ─────────────────────────────────
@@ -191,11 +183,9 @@ class ZoneTracker:
             if now >= self._cooldown_until:
                 self._state = _State.IDLE
                 self.ui_state = "idle"
-            # During cooldown: still show video, do nothing else.
 
         elif self._state == _State.IDLE:
             if active and centroid_rel is not None:
-                # Motion started → begin tracking.
                 self._state = _State.TRACKING
                 self._centroids.clear()
                 self._snapshots.clear()
@@ -206,27 +196,22 @@ class ZoneTracker:
 
         elif self._state == _State.TRACKING:
             if active and centroid_rel is not None:
-                # Still moving — accumulate data.
                 self._centroids.append(centroid_rel)
                 if len(self._snapshots) < MAX_SNAPSHOTS:
                     self._snapshots.append(frame.copy())
                 self._update_direction_ui()
 
             else:
-                # Motion stopped (or object fully left zone).
-                # Resolve the event if we have enough centroid history.
+                # Motion stopped — resolve event in background thread.
                 if len(self._centroids) >= 3:
-                    self._resolve_event()
-                else:
-                    # Too brief to be reliable — ignore.
-                    pass
-
+                    self._start_identification()
+                # Transition immediately so the UI stays responsive.
                 self._state = _State.COOLDOWN
                 self._cooldown_until = now + EVENT_COOLDOWN_SEC
                 self._centroids.clear()
                 self._snapshots.clear()
                 self.ui_state = "cooldown"
-                self.ui_direction = "—"
+                self.ui_direction = "--"
 
         # ── Step 7: draw visuals on the frame ────────────────────
         vis = self._draw(frame, fg_binary, centroid_rel, x, y, w, h)
@@ -235,45 +220,31 @@ class ZoneTracker:
     # ── Private helpers ───────────────────────────────────────────
 
     def _update_direction_ui(self) -> None:
-        """
-        Infer current travel direction from centroid history and update
-        the ui_direction string for the live display.
-        """
+        """Infer current travel direction from centroid history."""
         if len(self._centroids) < 2:
-            self.ui_direction = "—"
+            self.ui_direction = "--"
             return
-        first_y = self._centroids[0][1]   # y-fraction at start
-        last_y  = self._centroids[-1][1]  # y-fraction now
+        first_y = self._centroids[0][1]
+        last_y  = self._centroids[-1][1]
         dy = last_y - first_y
-        if abs(dy) < 0.05:               # centroid barely moved vertically
+        if abs(dy) < 0.05:
             self.ui_direction = "lateral"
         elif dy > 0:
-            self.ui_direction = "inward"  # moving down (toward bottom of zone)
+            self.ui_direction = "inward"
         else:
-            self.ui_direction = "outward" # moving up (toward top of zone)
+            self.ui_direction = "outward"
 
-    def _decide_direction(self) -> Optional[str]:
+    def _decide_direction(self, centroids: list) -> Optional[str]:
         """
-        Look at the full centroid history and decide ADD or REMOVE.
+        Decide ADD or REMOVE from centroid history.
 
         Returns "ADD", "REMOVE", or None (ambiguous).
-
-        Decision rule:
-            first centroid is in the TOP band  and
-            last  centroid is in the BOTTOM band  → ADD  (item going in)
-
-            first centroid is in the BOTTOM band and
-            last  centroid is in the TOP band     → REMOVE (item coming out)
-
-            anything else → ambiguous (lateral movement, jitter, etc.)
-
-        The band boundary is ENTRY_Y_FRACTION of the zone height.
         """
-        if len(self._centroids) < 2:
+        if len(centroids) < 2:
             return None
 
-        first_cy = self._centroids[0][1]   # relative y at start (0 = top, 1 = bottom)
-        last_cy  = self._centroids[-1][1]  # relative y at end
+        first_cy = centroids[0][1]
+        last_cy  = centroids[-1][1]
 
         above = lambda cy: cy < ENTRY_Y_FRACTION
         below = lambda cy: cy >= ENTRY_Y_FRACTION
@@ -282,76 +253,103 @@ class ZoneTracker:
             return "ADD"
         if below(first_cy) and above(last_cy):
             return "REMOVE"
-        return None   # didn't cross the midline cleanly
+        return None
 
-    def _resolve_event(self) -> None:
+    def _start_identification(self) -> None:
         """
-        Called once the crossing is complete.
+        Kick off product identification in a background thread.
 
-        1. Decide direction (ADD/REMOVE).
-        2. Pick best snapshot for matching.
-        3. Run the matcher.
-        4. Fire the on_event callback.
+        Takes a snapshot of the current centroids and snapshots,
+        clears the buffers, and starts the thread.  The main loop
+        continues rendering frames without any pause.
         """
-        direction = self._decide_direction()
-        if direction is None:
-            # Couldn't determine direction — too ambiguous to act on.
+        # Don't start a new thread if one is still running.
+        if self._identifying:
             return
 
-        # ── Identify the product ─────────────────────────────────
-        product_name = "unknown"
-        score        = 0.0
+        # Copy what we need — the buffers will be cleared by the caller.
+        centroids_copy = list(self._centroids)
+        snapshots_copy = list(self._snapshots)
 
-        if self._snapshots and self.db is not None:
-            best_score    = -1.0
-            best_snapshot = self._snapshots[0]
+        self._identifying = True
+        self.ui_state = "identifying"
 
-            # Run the matcher on every stored snapshot and keep
-            # the frame that produced the highest confident score.
-            for snap in self._snapshots:
-                try:
-                    emb    = extract_embedding(snap)
-                    result = match(emb, db=self.db)
-                    if result["top_score"] > best_score:
-                        best_score    = result["top_score"]
-                        best_snapshot = snap
-                        if result["confident"]:
-                            product_name = result["top_name"]
-                            score        = result["top_score"]
-                except Exception as e:
-                    print(f"[zone_tracker] Snapshot match error: {e}")
+        self._id_thread = threading.Thread(
+            target=self._resolve_event_threaded,
+            args=(centroids_copy, snapshots_copy),
+            daemon=True,
+        )
+        self._id_thread.start()
 
-            # If none of the snapshots was individually "confident",
-            # fall back to the best score we saw (mark uncertain).
-            if product_name == "unknown" and best_score > 0:
-                # Still report something — the caller can show it as uncertain.
-                try:
-                    emb    = extract_embedding(best_snapshot)
-                    result = match(emb, db=self.db)
-                    product_name = result["top_name"] + "?"  # "?" signals uncertain
-                    score        = result["top_score"]
-                except Exception:
-                    pass
+    def _resolve_event_threaded(
+        self,
+        centroids: list,
+        snapshots: list[np.ndarray],
+    ) -> None:
+        """
+        Runs in a background thread.  Identifies the product from
+        snapshots and fires the on_event callback.
+        """
+        try:
+            direction = self._decide_direction(centroids)
+            if direction is None:
+                return
 
-        elif self._snapshots and self.db is None:
-            # No DB loaded — this happens in unit tests or if build_db
-            # hasn't been run yet.
-            product_name = "no_db"
+            product_name = "unknown"
             score        = 0.0
 
-        # ── Fire callback ─────────────────────────────────────────
-        event = {
-            "direction":    direction,
-            "product_name": product_name,
-            "score":        round(score, 4),
-            "timestamp":    time.time(),
-        }
-        self.last_event = event
-        print(
-            f"[zone_tracker] EVENT: {direction}  product={product_name}"
-            f"  score={score:.3f}"
-        )
-        self.on_event(direction, product_name, score)
+            if snapshots and self.db is not None:
+                # Pick at most _MAX_INFERENCE_SNAPS evenly-spaced frames.
+                # E.g. if we have 6 snapshots and want 3, pick indices [0, 3, 5].
+                n = len(snapshots)
+                if n <= _MAX_INFERENCE_SNAPS:
+                    chosen = snapshots
+                else:
+                    indices = [
+                        int(i * (n - 1) / (_MAX_INFERENCE_SNAPS - 1))
+                        for i in range(_MAX_INFERENCE_SNAPS)
+                    ]
+                    chosen = [snapshots[i] for i in indices]
+
+                best_score = -1.0
+                best_name  = "unknown"
+
+                for snap in chosen:
+                    try:
+                        emb    = extract_embedding(snap)
+                        result = match(emb, db=self.db)
+
+                        if result["top_score"] > best_score:
+                            best_score = result["top_score"]
+                            best_name  = result["top_name"]
+
+                    except Exception as e:
+                        print(f"[zone_tracker] Snapshot match error: {e}")
+
+                if best_score > 0:
+                    product_name = best_name
+                    score = best_score
+
+            elif snapshots and self.db is None:
+                product_name = "no_db"
+
+            # ── Fire callback ─────────────────────────────────────
+            event = {
+                "direction":    direction,
+                "product_name": product_name,
+                "score":        round(score, 4),
+                "timestamp":    time.time(),
+            }
+            self.last_event = event
+            print(
+                f"[zone_tracker] EVENT: {direction}  product={product_name}"
+                f"  score={score:.3f}"
+            )
+            self.on_event(direction, product_name, score)
+
+        finally:
+            self._identifying = False
+            # Don't reset ui_state here — the main loop manages that.
 
     def _draw(
         self,

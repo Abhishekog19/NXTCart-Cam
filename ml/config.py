@@ -34,13 +34,13 @@ IMAGE_SIZE = 224
 #   for any "confident" call.  Cosine similarity runs from -1 to 1;
 #   products are typically 0.70–0.95 for a good match.
 #   Start here and tune down if you get too many "uncertain" hits.
-SCORE_THRESHOLD = 0.78
+SCORE_THRESHOLD = 0.55
 
 # MARGIN_THRESHOLD:
 #   Minimum gap between the #1 and #2 products.
 #   A small margin means two products look very similar to the model —
 #   we'd rather be cautious and say "uncertain" than guess wrong.
-MARGIN_THRESHOLD = 0.06
+MARGIN_THRESHOLD = 0.03
 
 # ── Multi-frame voting ────────────────────────────────────────────
 # How many frames to grab before deciding.
@@ -78,7 +78,7 @@ BGS_LEARNING_RATE = 0.005
 # Minimum number of foreground pixels inside the zone to be considered
 # "something is moving".  Raise this if you get false triggers from
 # lighting flicker; lower it if slow-moving objects are missed.
-FG_PIXEL_THRESHOLD = 400
+FG_PIXEL_THRESHOLD = 250
 
 # How many centroid positions to keep in memory when tracking a crossing.
 # 5–10 frames is plenty for direction detection.
@@ -105,4 +105,4 @@ EVENT_COOLDOWN_SEC = 0.4
 
 # How many frames captured during a crossing to keep as candidate
 # snapshots for product identification.
-MAX_SNAPSHOTS = 12
+MAX_SNAPSHOTS = 6
