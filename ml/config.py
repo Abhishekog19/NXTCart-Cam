@@ -72,10 +72,21 @@ DIFF_THRESHOLD = 30
 MIN_REGION_AREA = 3500
 
 # Grayscale standard deviation of a crop to be classified as "has an item".
-# Items (with labels, colours) have high texture → high std dev.
-# An empty surface (desk, mat) has low texture → low std dev.
-# Tune this down if items have subtle patterns; up if your surface is textured.
-TEXTURE_STD_THRESHOLD = 14
+# Used only as a MINIMUM floor — the ratio check below is the primary signal.
+TEXTURE_STD_THRESHOLD = 10
+
+# RATIO-based ADD/REMOVE classification.
+# We compare std_after / std_before (and its inverse).
+#
+#   ADD:    std_after  / std_before  > TEXTURE_RATIO_THRESHOLD  (item appeared)
+#   REMOVE: std_before / std_after   > TEXTURE_RATIO_THRESHOLD  (item disappeared)
+#   SWAP:   ratio close to 1.0                                  (item repositioned)
+#
+# Using a ratio makes the system independent of how textured your surface is.
+# Your data showed: empty→item = ratio 3.0, item→item = ratio 1.0-1.1.
+# 1.8 cleanly separates these two cases.
+TEXTURE_RATIO_THRESHOLD = 1.8
+
 
 # Minimum size of a crop (pixels in each dimension) to attempt scanning.
 MIN_CROP_PX = 80

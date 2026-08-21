@@ -47,6 +47,7 @@ from ml.config import (
     MIN_REGION_AREA,
     SCORE_THRESHOLD,
     STABLE_FRAMES_REQUIRED,
+    TEXTURE_RATIO_THRESHOLD,
     TEXTURE_STD_THRESHOLD,
 )
 from ml.embedding_extractor import extract_embedding
@@ -340,52 +341,69 @@ class ZoneTracker:
         W: int,  H:  int,
     ) -> None:
         """
-        Classify one changed region as ADD, REMOVE, or REPOSITION,
-        then scan and fire the appropriate event(s).
+        Classify one changed region as ADD, REMOVE, or REPOSITION.
+
+        Classification uses the RATIO of texture (grayscale std dev)
+        between the after and before crops — not an absolute threshold.
+        This works regardless of how textured the surface is.
+
+          ratio_add    = std_after  / std_before  >= TEXTURE_RATIO_THRESHOLD → ADD
+          ratio_remove = std_before / std_after   >= TEXTURE_RATIO_THRESHOLD → REMOVE
+          ratio near 1.0                                                     → SWAP
+
+        Example from real data:
+          Empty desk  std ≈ 25,  item placed std ≈ 75  → ratio 3.0  → ADD  ✓
+          Item still  std ≈ 75,  same still  std ≈ 77  → ratio 1.03 → SWAP ✓
         """
-        # Pad the bounding box so the item's full body is captured.
-        pad = 25
-        x1 = max(0, rx - pad);   y1 = max(0, ry - pad)
-        x2 = min(W, rx + rw + pad); y2 = min(H, ry + rh + pad)
+        pad = 20
+        x1 = max(0, rx - pad);       y1 = max(0, ry - pad)
+        x2 = min(W, rx + rw + pad);  y2 = min(H, ry + rh + pad)
 
         if (x2 - x1) < MIN_CROP_PX or (y2 - y1) < MIN_CROP_PX:
-            return  # crop is too small to identify
+            return
 
-        crop_b = before[y1:y2, x1:x2]  # what was there BEFORE
-        crop_a = after [y1:y2, x1:x2]  # what is  there AFTER
+        crop_b = before[y1:y2, x1:x2]
+        crop_a = after [y1:y2, x1:x2]
 
-        # ── Texture check ─────────────────────────────────────────
-        # Items have labels, colour blocks, text → high std dev.
-        # An empty surface (desk, mat) is uniform → low std dev.
-        std_b = float(np.std(
-            cv2.cvtColor(crop_b, cv2.COLOR_BGR2GRAY).astype(np.float32)
-        ))
-        std_a = float(np.std(
-            cv2.cvtColor(crop_a, cv2.COLOR_BGR2GRAY).astype(np.float32)
-        ))
+        gray_b = cv2.cvtColor(crop_b, cv2.COLOR_BGR2GRAY).astype(np.float32)
+        gray_a = cv2.cvtColor(crop_a, cv2.COLOR_BGR2GRAY).astype(np.float32)
+        std_b  = float(np.std(gray_b))
+        std_a  = float(np.std(gray_a))
 
-        has_b = std_b > TEXTURE_STD_THRESHOLD
-        has_a = std_a > TEXTURE_STD_THRESHOLD
+        # How much MORE texture is in after vs before (and vice-versa).
+        ratio_add    = std_a / max(std_b, 1.0)
+        ratio_remove = std_b / max(std_a, 1.0)
 
         print(
-            f"[zone_tracker]  region ({x1},{y1})-({x2},{y2})  "
-            f"std_before={std_b:.1f}  std_after={std_a:.1f}  "
-            f"has_before={has_b}  has_after={has_a}"
+            "[zone_tracker]  region (%d,%d)-(%d,%d)  "
+            "std_before=%.1f  std_after=%.1f  "
+            "ratio_add=%.2f  ratio_rem=%.2f"
+            % (x1, y1, x2, y2, std_b, std_a, ratio_add, ratio_remove)
         )
 
-        if has_a and not has_b:
-            # Something appeared → ADD (scan the after crop).
+        if ratio_add >= TEXTURE_RATIO_THRESHOLD:
+            # After has significantly more texture → something APPEARED → ADD.
+            print("[zone_tracker]  -> ADD  (item appeared)")
             self._scan_and_fire("ADD", crop_a)
 
-        elif has_b and not has_a:
-            # Something disappeared → REMOVE (scan the before crop).
+        elif ratio_remove >= TEXTURE_RATIO_THRESHOLD:
+            # Before had significantly more texture → something DISAPPEARED → REMOVE.
+            print("[zone_tracker]  -> REMOVE  (item left)")
             self._scan_and_fire("REMOVE", crop_b)
 
-        elif has_b and has_a:
-            # Content exists in both frames — item may have been
-            # repositioned, or a completely different item placed.
-            # Identify both crops.  If the same product → reposition (no event).
-            # If different products → REMOVE old, ADD new.
+        elif std_a > TEXTURE_STD_THRESHOLD and std_b > TEXTURE_STD_THRESHOLD:
+            # Both crops have item-level texture AND similar amounts of it.
+            # Could be: repositioning, or one product swapped for another.
+            cart_db = self.get_cart_db() if self.get_cart_db else None
+
+            if cart_db is None:
+                # Cart is empty — there is nothing to remove.
+                # Something must have just been placed → ADD.
+                print("[zone_tracker]  -> ADD  (similar texture, empty cart)")
+                self._scan_and_fire("ADD", crop_a)
+                return
+
+            # Identify both crops and check if it's the same product.
             name_b, score_b = self._identify(crop_b, use_cart_db=True)
             name_a, score_a = self._identify(crop_a, use_cart_db=False)
 
@@ -396,20 +414,18 @@ class ZoneTracker:
                 and score_a >= SCORE_THRESHOLD
             ):
                 print(
-                    f"[zone_tracker]  REPOSITIONED '{name_b}' "
-                    f"(score_b={score_b:.3f}, score_a={score_a:.3f}) — no cart change."
+                    "[zone_tracker]  REPOSITIONED '%s' "
+                    "(score_b=%.3f, score_a=%.3f) — no cart change."
+                    % (name_b, score_b, score_a)
                 )
             else:
-                # Different items (or one is unidentifiable) → treat as swap.
                 if name_b is not None and score_b >= SCORE_THRESHOLD:
                     self._fire_event("REMOVE", name_b, score_b)
                 if name_a is not None and score_a >= SCORE_THRESHOLD:
                     self._fire_event("ADD", name_a, score_a)
 
         else:
-            # Neither crop has clear item content — probably just lighting
-            # change or noise.  Ignore.
-            print("[zone_tracker]  Region has no item content in either frame — skipping.")
+            print("[zone_tracker]  -> skipped (low texture in both — noise)")
 
     # ─────────────────────────────────────────────────────────────
     # MATCHING HELPERS

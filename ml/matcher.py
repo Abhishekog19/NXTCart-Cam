@@ -34,6 +34,10 @@ import numpy as np
 
 from ml.config import DATABASE_PATH, SCORE_THRESHOLD
 
+# Minimum gap between the #1 and #2 product scores to be considered confident.
+# zone_tracker uses top_score directly, so this only affects the 'confident' field.
+_MARGIN_THRESHOLD = 0.03
+
 
 # ── Type alias for clarity ────────────────────────────────────────
 # The database structure that build_db.py saves:
@@ -160,7 +164,7 @@ def match(
     # BOTH conditions must hold:
     #   1. The top score is good enough on its own.
     #   2. The gap over #2 is large enough to be sure we picked the right one.
-    confident = (top_score >= SCORE_THRESHOLD) and (margin >= MARGIN_THRESHOLD)
+    confident = (top_score >= SCORE_THRESHOLD) and (margin >= _MARGIN_THRESHOLD)
 
     # ── Build full ranking for display ───────────────────────────
     rankings = [{"name": name, "score": score} for score, name in scores]
