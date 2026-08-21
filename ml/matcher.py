@@ -32,7 +32,7 @@ from typing import Optional
 
 import numpy as np
 
-from ml.config import DATABASE_PATH, MARGIN_THRESHOLD, SCORE_THRESHOLD
+from ml.config import DATABASE_PATH, SCORE_THRESHOLD
 
 
 # ── Type alias for clarity ────────────────────────────────────────
