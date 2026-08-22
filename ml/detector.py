@@ -122,6 +122,15 @@ class Detector(Protocol):
         """Forget any accumulated state (e.g. the background model)."""
         ...
 
+    def background_image(self) -> Optional[np.ndarray]:
+        """
+        The detector's best guess at what the scene looks like with nothing
+        in it, or None if it has no such notion.
+
+        Callers MUST handle None: it is a hint, not a guarantee.
+        """
+        ...
+
 
 # ═════════════════════════════════════════════════════════════════
 # TODAY'S IMPLEMENTATION:  MOG2 + contours + watershed
@@ -188,6 +197,29 @@ class BackgroundSubtractorDetector:
         self.frames_seen = 0
         self.last_fg_mask = None
         self.last_fg_pixels = 0
+
+    def background_image(self) -> Optional[np.ndarray]:
+        """
+        MOG2's learned model of the empty scene.
+
+        The tracker uses this to ask "does this item's spot now look like bare
+        background?" — direct evidence of departure that motion alone cannot
+        provide for a stationary object.
+
+        Returns None until the model has matured past warm-up, and swallows
+        backend errors, because presence checking is an enhancement: when it
+        is unavailable the tracker must fall back to its normal behaviour
+        rather than fail.
+        """
+        if self.frames_seen <= self.warmup_frames:
+            return None
+        try:
+            bg = self._bgs.getBackgroundImage()
+        except cv2.error:
+            return None
+        if bg is None or bg.size == 0:
+            return None
+        return bg
 
     # ─────────────────────────────────────────────────────────────
     # PUBLIC:  detect()
@@ -347,3 +379,13 @@ class OracleDetector:
 
     def reset(self) -> None:
         self.pending = []
+
+    def background_image(self) -> Optional[np.ndarray]:
+        """
+        The oracle has no background model — scripted detections are the
+        ground truth, so there is nothing to learn and nothing to compare
+        against.  Returning None makes the tracker's presence check skip
+        itself, which is what we want: the harness must exercise the removal
+        state machine on scripted geometry alone.
+        """
+        return None

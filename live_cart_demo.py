@@ -38,6 +38,7 @@ import cv2
 import numpy as np
 
 from ml.cart_state import cart_lines
+from ml.camera import FrameGrabber
 from ml.config import CAMERA_INDEX, VISIBILITY_GOOD_RATIO, VISIBILITY_WEAK_RATIO
 from ml.detector import BackgroundSubtractorDetector
 from ml.identity_tracker import IdentityTracker
@@ -223,13 +224,14 @@ def main() -> None:
         return
 
     print("[live_cart_demo] Opening camera %d..." % CAMERA_INDEX)
-    cap = cv2.VideoCapture(CAMERA_INDEX)
-    if not cap.isOpened():
-        print("ERROR: Cannot open camera %d." % CAMERA_INDEX)
+    try:
+        # Threaded grabber: keeps only the newest frame, so the display shows
+        # the present instead of replaying the driver's backlog.  See
+        # ml/camera.py for why cap.set(CAP_PROP_BUFFERSIZE, 1) cannot do this.
+        cap = FrameGrabber(CAMERA_INDEX, width=CAM_W, height=CAM_H)
+    except RuntimeError as e:
+        print("ERROR:", e)
         return
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_W)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_H)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
     detector = BackgroundSubtractorDetector()
     tracker = IdentityTracker(detector, recognizer, frame_size=(CAM_W, CAM_H))
@@ -258,7 +260,8 @@ def main() -> None:
     while True:
         ok, frame = cap.read()
         if not ok or frame is None:
-            continue
+            print("[live_cart_demo] Camera stopped returning frames.")
+            break
 
         frame = cv2.resize(frame, (CAM_W, CAM_H))
         tracker.process(frame)
@@ -294,6 +297,7 @@ def main() -> None:
 
     cap.release()
     cv2.destroyAllWindows()
+    print(f"[live_cart_demo] Dropped {cap.dropped} stale camera frames to stay live.")
 
 
 # Remembers how many transitions per track we have already shown in the

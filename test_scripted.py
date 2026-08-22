@@ -73,6 +73,17 @@ from ml.detector import BackgroundSubtractorDetector, Detection, OracleDetector
 from ml.identity_tracker import IdentityTracker
 from ml.recognizer import ColorCodeRecognizer
 
+# This report is drawn with box-drawing characters, which a default Windows
+# console (cp1252) cannot encode — the run used to die with UnicodeEncodeError
+# partway through printing, BEFORE showing its metrics, which is the one thing
+# it exists to show.  Fix it once here rather than per-print, and tolerate
+# consoles where reconfigure is unavailable.
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, OSError, ValueError):
+    pass
+
 FRAME_W, FRAME_H = 640, 480
 
 # ── synthetic timing ─────────────────────────────────────────────
@@ -528,17 +539,15 @@ def run_live(steps: List[Step], save_dir: Optional[str] = None) -> List[StepResu
     UI as live_cart_demo, so you can watch the states while you test.
     """
     from live_cart_demo import PANEL_W, draw_camera, draw_panel
+    from ml.camera import FrameGrabber
     from ml.recognizer import EmbeddingRecognizer
 
     print("[test_scripted] loading recognizer (embedding DB + model)...")
     recognizer = EmbeddingRecognizer()
 
-    cap = cv2.VideoCapture(CAMERA_INDEX)
-    if not cap.isOpened():
-        raise RuntimeError(f"Cannot open camera {CAMERA_INDEX}.")
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, FRAME_W)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, FRAME_H)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    # Same threaded grabber as the live demo, so what you are judging here is
+    # the behaviour you get there — including its latency.
+    cap = FrameGrabber(CAMERA_INDEX, width=FRAME_W, height=FRAME_H)
 
     detector = BackgroundSubtractorDetector()
     tracker = IdentityTracker(detector, recognizer, frame_size=(FRAME_W, FRAME_H))
@@ -555,6 +564,8 @@ def run_live(steps: List[Step], save_dir: Optional[str] = None) -> List[StepResu
     results: List[StepResult] = []
     before = tracker.cart()
     aborted = False
+    abort_reason = ""
+    frame = None
 
     for i, step in enumerate(steps, start=1):
         print(f"[step {i}/{len(steps)}]  ACTION: {step.label}"
@@ -563,7 +574,9 @@ def run_live(steps: List[Step], save_dir: Optional[str] = None) -> List[StepResu
         while True:
             ok, frame = cap.read()
             if not ok or frame is None:
-                continue
+                aborted = True
+                abort_reason = "camera stopped returning frames"
+                break
             frame = cv2.resize(frame, (FRAME_W, FRAME_H))
             tracker.process(frame)
 
@@ -579,9 +592,10 @@ def run_live(steps: List[Step], save_dir: Optional[str] = None) -> List[StepResu
                 break
             if key in (ord("q"), ord("Q"), 27):  # Q / ESC
                 aborted = True
+                abort_reason = "aborted by user"
                 break
         if aborted:
-            print("[test_scripted] aborted by user.")
+            print(f"[test_scripted] {abort_reason}.")
             break
 
         actual = tracker.cart()

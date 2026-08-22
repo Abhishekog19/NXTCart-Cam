@@ -31,7 +31,7 @@ import pickle
 import cv2
 
 from ml.config import DATABASE_PATH, REFERENCES_DIR
-from ml.embedding_extractor import extract_embedding
+from ml.embedding_extractor import EMBEDDING_DIM, backend_id, extract_embedding
 
 # Image extensions we'll look for.
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
@@ -103,11 +103,22 @@ def build_database() -> dict:
         return {}
 
     # ── Save to disk ──────────────────────────────────────────────
+    # Wrap the product mapping with a stamp naming the backend that
+    # produced these vectors.  ml/matcher.py refuses to load a database
+    # whose stamp doesn't match the running backend, because the two
+    # embedding spaces are incompatible and mixing them yields confident
+    # nonsense rather than an error.  See ml/matcher.py for the format.
+    payload = {
+        "backend": backend_id(),
+        "dim": EMBEDDING_DIM,
+        "products": database,
+    }
     with open(DATABASE_PATH, "wb") as f:
-        pickle.dump(database, f)
+        pickle.dump(payload, f)
 
     total_emb = sum(len(v) for v in database.values())
-    print(f"Saved database: {len(database)} product(s), {total_emb} embeddings -> {DATABASE_PATH}")
+    print(f"Saved database: {len(database)} product(s), {total_emb} embeddings "
+          f"[backend {payload['backend']}] -> {DATABASE_PATH}")
     return database
 
 

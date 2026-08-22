@@ -40,7 +40,7 @@ _MARGIN_THRESHOLD = 0.03
 
 
 # ── Type alias for clarity ────────────────────────────────────────
-# The database structure that build_db.py saves:
+# The product mapping that build_db.py saves:
 #   {
 #     "cola_can":  [emb_1, emb_2, …, emb_8],  ← list of 1280-D vectors
 #     "chips_bag": [emb_1, …, emb_6],
@@ -48,20 +48,50 @@ _MARGIN_THRESHOLD = 0.03
 #   }
 EmbeddingDB = dict[str, list[np.ndarray]]
 
+# ── On-disk format ────────────────────────────────────────────────
+# The pickle wraps the product mapping together with a stamp identifying
+# WHICH embedding backend produced the vectors:
+#
+#   {"backend": "onnx-mbv2-1280", "dim": 1280, "products": {name: [emb, …]}}
+#
+# WHY: ml/embedding_extractor.py has two backends (fast ONNX float, legacy
+# quantized TFLite) and they produce numerically incompatible vectors.
+# Comparing a query from one against a database built with the other does
+# not fail — it silently returns confident nonsense.  The stamp turns that
+# into a loud, actionable error instead.
+#
+# The stamp lives INSIDE the wrapper, never as a bare top-level key,
+# because match() iterates the product mapping directly — a loose key
+# would be treated as a product name.
+_PRODUCTS_KEY = "products"
+_BACKEND_KEY = "backend"
+
 # Module-level cache — load the DB only once per process.
 _db_cache: Optional[EmbeddingDB] = None
+
+
+def _rebuild_error(path: str, detail: str) -> FileNotFoundError:
+    return FileNotFoundError(
+        f"{detail}\n"
+        f"  Database: {path}\n\n"
+        f"Rebuild it from your reference photos:\n"
+        f"    python build_db.py"
+    )
 
 
 def load_database(path: str = DATABASE_PATH) -> EmbeddingDB:
     """
     Load (or return the cached) embedding database from disk.
 
-    The database is a plain Python dict saved with pickle.
-    Keys are product names; values are lists of embedding vectors.
+    Returns the product mapping: keys are product names, values are lists
+    of embedding vectors.
 
     Raises
     ------
-    FileNotFoundError – if build_db.py hasn't been run yet.
+    FileNotFoundError – if build_db.py hasn't been run yet, or if the
+        database on disk was built with a different embedding backend and
+        would produce meaningless similarities.  Both cases are fixed the
+        same way, by re-running build_db.py, so they share one error type.
     """
     global _db_cache
 
@@ -70,16 +100,47 @@ def load_database(path: str = DATABASE_PATH) -> EmbeddingDB:
 
     try:
         with open(path, "rb") as f:
-            _db_cache = pickle.load(f)
+            raw = pickle.load(f)
     except FileNotFoundError:
-        raise FileNotFoundError(
-            f"Embedding database not found at '{path}'.\n"
-            "Run   python build_db.py   first to generate it."
-        )
+        raise _rebuild_error(path, "Embedding database not found.")
 
-    n_products = len(_db_cache)
-    n_refs = sum(len(v) for v in _db_cache.values())
-    print(f"[matcher] Database loaded: {n_products} products, {n_refs} reference embeddings.")
+    if not isinstance(raw, dict):
+        raise _rebuild_error(
+            path, f"Embedding database is a {type(raw).__name__}, not a dict.")
+
+    # ── Verify the vectors were made by the backend we are running ──
+    if _PRODUCTS_KEY in raw:
+        from ml.embedding_extractor import backend_id
+
+        stored = raw.get(_BACKEND_KEY, "unknown")
+        current = backend_id()
+        if stored != current:
+            raise _rebuild_error(
+                path,
+                f"Embedding database was built with a different backend.\n"
+                f"  Database backend : {stored}\n"
+                f"  Current backend  : {current}\n"
+                f"The two produce incompatible embedding spaces, so the\n"
+                f"similarities would be meaningless.")
+        db = raw[_PRODUCTS_KEY]
+    else:
+        # Pre-stamp database: produced before the backend swap, so its
+        # vectors are from the old quantized-TFLite space no matter what we
+        # are running now.  Refuse rather than guess.
+        raise _rebuild_error(
+            path,
+            "Embedding database is in the old unstamped format, so its\n"
+            "vectors cannot be matched to the current embedding backend.")
+
+    if not isinstance(db, dict) or not db:
+        raise _rebuild_error(path, "Embedding database contains no products.")
+
+    _db_cache = db
+    n_products = len(db)
+    n_refs = sum(len(v) for v in db.values())
+    print(f"[matcher] Database loaded: {n_products} products, "
+          f"{n_refs} reference embeddings "
+          f"(backend {raw.get(_BACKEND_KEY, '?')}).")
     return _db_cache
 
 

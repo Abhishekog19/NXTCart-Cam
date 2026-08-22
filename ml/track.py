@@ -39,9 +39,15 @@ import math
 from collections import deque
 from typing import Deque, List, Optional, Tuple
 
+import cv2
 import numpy as np
 
-from ml.config import EVIDENCE_BUFFER_MAX, MERGE_AREA_RATIO
+from ml.config import (
+    EVIDENCE_BUFFER_MAX,
+    MERGE_AREA_RATIO,
+    MOVING_MIN_DISPLACEMENT,
+    PRESENCE_TEMPLATE_PX,
+)
 
 BBox = Tuple[int, int, int, int]
 
@@ -120,6 +126,27 @@ class Track:
         self._centroids.append(self._centroid_of(bbox))
         self.exit_progress: int = 0          # consecutive boundary-directed frames
         self.observations: int = 0           # frames where a box was accepted
+        # Consecutive observed frames this track has barely moved.  Recognition
+        # is expensive and unreliable on a moving, half-gripped item, so the
+        # verify gate spends inferences only on tracks that have settled.
+        self.still_frames: int = 0
+
+        # ── Inference bookkeeping ─────────────────────────────────
+        # How many times we have paid for recognition on this track.  Only
+        # used to pick fairly between competing candidates when the per-frame
+        # inference budget forces us to choose: fewest attempts goes first, so
+        # no track is starved and time-to-lock stays bounded.
+        self.recognition_attempts: int = 0
+
+        # ── Static presence evidence (see identity_tracker) ───────
+        # A small grayscale patch of what this item looks like where it sits,
+        # captured from clean high-visibility frames.  It answers "is the item
+        # still there?" on frames where the motion detector reports nothing —
+        # a question detection alone cannot answer for a stationary object.
+        self.presence_template: Optional[np.ndarray] = None
+        # Consecutive frames the item's spot has looked like empty background.
+        # Real departure evidence; any non-vacated frame resets it to 0.
+        self.vacated_frames: int = 0
 
         # ── Debug / metrics ───────────────────────────────────────
         # (frame_idx, from_state, to_state, reason)
@@ -205,6 +232,14 @@ class Track:
 
         self.visibility_ratio = float(np.clip(area / max(self._max_area, 1.0), 0.0, 1.0))
 
+        # Has this item settled?  Measured from the two most recent observed
+        # centroids, so an item that is briefly hidden and reappears somewhere
+        # else correctly reads as moving.
+        if self.displacement() < MOVING_MIN_DISPLACEMENT:
+            self.still_frames += 1
+        else:
+            self.still_frames = 0
+
     def visibility_jump(self) -> float:
         """
         Change in visibility since the previous observed frame.
@@ -248,6 +283,58 @@ class Track:
 
     def frames_unseen(self, frame_idx: int) -> int:
         return frame_idx - self.last_seen
+
+    def note_static_frame(self, frame_idx: int) -> None:
+        """
+        No detection matched this track, but a direct look at its ROI shows
+        the item is still sitting exactly where we left it.
+
+        This is the answer to "the motion detector reports nothing, so is the
+        item gone?" for an object that has simply stopped moving.  We refresh
+        last_seen so the track does not drift toward LOST, and keep visibility
+        high so it is not misread as occluded.
+
+        Geometry is deliberately NOT touched: there is no measured box to move
+        to, and the item has not moved anyway.  exit_progress is cleared
+        because "it is provably still in place" refutes any evidence that it
+        was on its way out.
+        """
+        self.last_seen = frame_idx
+        self.prev_visibility_ratio = self.visibility_ratio
+        self.visibility_ratio = 1.0
+        self.exit_progress = 0
+
+    # ─────────────────────────────────────────────────────────────
+    # STATIC PRESENCE TEMPLATE
+    #
+    # Used by identity_tracker to answer "is the item still sitting there?"
+    # on frames where the motion detector produced no detection for it.
+    # Stored at a fixed small size so comparisons are always between
+    # equal-size patches and cost well under a millisecond.
+    # ─────────────────────────────────────────────────────────────
+
+    def set_presence_template(self, patch: np.ndarray) -> None:
+        """
+        Remember what this item looks like where it currently sits.
+
+        `patch` is the raw ROI crop from the frame; it is converted to
+        grayscale (brightness-invariant matching handles the rest) and
+        normalised to a fixed size.  Silently ignores unusable crops rather
+        than raising, because a bad crop must never break tracking.
+        """
+        if patch is None or patch.size == 0:
+            return
+        if patch.ndim == 3:
+            patch = cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY)
+        try:
+            self.presence_template = cv2.resize(
+                patch, (PRESENCE_TEMPLATE_PX, PRESENCE_TEMPLATE_PX),
+                interpolation=cv2.INTER_AREA)
+        except cv2.error:
+            pass
+
+    def has_presence_template(self) -> bool:
+        return self.presence_template is not None
 
     # ─────────────────────────────────────────────────────────────
     # STATE TRANSITIONS  (every one is logged)

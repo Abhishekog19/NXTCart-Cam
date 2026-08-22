@@ -8,17 +8,45 @@ import os
 CAMERA_INDEX = 0
 
 # ── Paths ────────────────────────────────────────────────────────
-REFERENCES_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "references")
-DATABASE_PATH  = os.path.join(os.path.dirname(os.path.dirname(__file__)), "embedding_db.pkl")
-MODEL_PATH     = os.path.join(os.path.dirname(__file__), "mobilenet_v2_quant.tflite")
+REFERENCES_DIR  = os.path.join(os.path.dirname(os.path.dirname(__file__)), "references")
+DATABASE_PATH   = os.path.join(os.path.dirname(os.path.dirname(__file__)), "embedding_db.pkl")
+MODEL_PATH      = os.path.join(os.path.dirname(__file__), "mobilenet_v2_quant.tflite")
+ONNX_MODEL_PATH = os.path.join(os.path.dirname(__file__), "mobilenet_v2.onnx")
 
 # ── Model ────────────────────────────────────────────────────────
 IMAGE_SIZE = 224
 
+# EMBEDDING_BACKEND — which runtime computes the 1280-D embedding.
+#   "auto"    try the fast ONNX/cv2.dnn path, fall back to TFLite (default)
+#   "onnx"    ONNX only; fail loudly rather than silently running slow
+#   "tflite"  the legacy quantized path only
+#
+# WHY THERE IS A CHOICE AT ALL: the TFLite runtime on this platform
+# (ai-edge-litert 2.2.0 / Python 3.14 / Windows) segfaults with XNNPACK and
+# segfaults with num_threads > 1, leaving only its slowest configuration —
+# 1619 ms per call, which made the live demo untestable.  The same network
+# as float ONNX through cv2.dnn measures 6.5 ms with equal accuracy
+# (leave-one-out 19/20 either way).  See ml/embedding_extractor.py.
+#
+# The two backends produce DIFFERENT, incompatible embedding spaces, so
+# changing this REQUIRES rebuilding the database:  python build_db.py
+# (build_db stamps the backend into the pickle and matcher.py refuses a
+# mismatch, so a forgotten rebuild is an error, never silent nonsense.)
+EMBEDDING_BACKEND = "auto"
+
 # ── Matching ─────────────────────────────────────────────────────
 # Minimum cosine similarity for a match to count.
 # Raise this if you see wrong products being identified.
-SCORE_THRESHOLD = 0.62
+#
+# 0.72 comes from a grid search over references/ plus 20 unknown objects,
+# using the ONNX embedding space and the _MARGIN_THRESHOLD = 0.03 in
+# ml/matcher.py:
+#     17/20 true accepts, 0 WRONG, and 0/20 unknown objects falsely locked.
+# The previous 0.62 falsely locked 2/20 unknown objects — i.e. it would
+# invent a product for something that is not in the database at all, which
+# is the expensive kind of mistake.  Raise it further if you still see
+# wrong names; lower it if real items refuse to lock.
+SCORE_THRESHOLD = 0.72
 
 # ── Multi-frame voting (ml/multi_frame_vote.py) ───────────────────
 # These were referenced by multi_frame_vote.py but had gone missing
@@ -213,6 +241,56 @@ VISIBILITY_WEAK_RATIO = 0.40
 VERIFY_MIN_GOOD_FRAMES = 5
 EVIDENCE_BUFFER_MAX    = 10
 
+# ── PER-FRAME INFERENCE BUDGET ────────────────────────────────────
+# WHY THIS EXISTS
+#   _try_verify used to run recognition on EVERY unlocked track EVERY frame.
+#   In real footage 5-8 junk candidates (hands, shadows, partial blobs) are
+#   alive at once, so a single frame paid for 5-8 inferences.  At the old
+#   1619 ms per call that was 8-13 SECONDS per frame.  Even at 6.5 ms it has
+#   to be bounded or a crowded frame still stutters.
+#
+#   The caps are per-frame COUNTS, not a time budget, deliberately:
+#   process() must stay deterministic so test_scripted.py can replay an
+#   exact frame sequence and get an identical result.  A wall-clock budget
+#   would make the outcome depend on machine load.
+#
+#   Worst case per frame = 3 + 1 + 1 = 5 embeddings ~= 32 ms.
+#   Typical case (one item settling) = 1-2 embeddings ~= 6-13 ms.
+#
+# VERIFY_MAX_PER_FRAME       unlocked tracks that may be recognised per frame.
+#                            When several are eligible, the one chosen is
+#                            decided by a fixed key — fewest attempts so far
+#                            (round-robin, so no track is starved and the
+#                            worst-case time-to-lock stays bounded), then
+#                            highest visibility, then lowest track_id.
+# ASSOC_EMBED_MAX_PER_FRAME  detections that may be embedded for the
+#                            appearance tie-break during association.
+# REACQUIRE_MAX_PER_FRAME    unmatched detections that may be embedded while
+#                            trying to reacquire a LOST track.
+VERIFY_MAX_PER_FRAME      = 1
+ASSOC_EMBED_MAX_PER_FRAME = 3
+REACQUIRE_MAX_PER_FRAME   = 1
+
+# ── "SETTLED" GATE FOR VERIFICATION ───────────────────────────────
+# An inference is only worth paying for on a frame where the answer can be
+# trusted.  Recognising an item WHILE it is being carried — moving, tilted,
+# half-covered by the hand holding it — is what produced the garbage votes
+# and the conf=0.30 locks in the logs.  So a track must have stopped moving
+# before we spend anything on it.
+#
+# This is a speed fix and an accuracy fix at the same time: hands and
+# shadows are almost never still AND clean, so they drop out of the
+# inference pool entirely.
+#
+# VERIFY_MIN_STILL_FRAMES  consecutive frames with displacement below
+#                          MOVING_MIN_DISPLACEMENT before recognition may run.
+#                          Keep small — this delays every lock by that many
+#                          frames (2 frames ~= 70 ms at 30 fps).
+# VERIFY_MIN_QUALITY       detection-level quality floor (solidity).  A ragged
+#                          sliver of a blob is not worth an inference.
+VERIFY_MIN_STILL_FRAMES = 2
+VERIFY_MIN_QUALITY      = 0.45
+
 # ── Data association: detections <-> existing tracks ──────────────
 # A detection is matched to a track using centroid distance + IoU.
 #
@@ -233,6 +311,16 @@ EVIDENCE_BUFFER_MAX    = 10
 #                          one blob, no extra embedding is ever computed.
 #                          Raise toward 1.0 to trust appearance more when
 #                          items overlap; lower it to trust position more.
+#
+#                          KNOWN WEAKNESS, left alone on purpose: in the
+#                          ONNX embedding space similarities compress into
+#                          roughly 0.6-0.9, so `(1-w)*geo + w*sim` adds a
+#                          near-constant offset to every contended pair and
+#                          discriminates only weakly between them.
+#                          Rescaling similarity WITHIN the contended set
+#                          (min-max across just those pairs) would fix it,
+#                          but that changes association accuracy and belongs
+#                          in its own change with its own overlap testing.
 ASSOC_MAX_CENTROID_DIST = 140
 ASSOC_MIN_IOU           = 0.10
 ASSOC_AMBIGUOUS_MARGIN  = 0.12
@@ -284,12 +372,24 @@ MERGE_AREA_RATIO = 1.35
 #                          appearance embedding and a LOST track's LOCKED
 #                          identity_embedding to re-bind them (LOST ->
 #                          REACQUIRE -> PRESENT).
+#                          0.80, not 0.60.  The old value sat BELOW the
+#                          measured similarity ceiling for unknown objects
+#                          (0.632), so reacquisition accepted almost
+#                          anything — the live logs showed reacquires firing
+#                          at sim=0.638 / 0.652 / 0.682, barely above the
+#                          noise floor.  This comparison is far easier than
+#                          general recognition: it matches a detection
+#                          against ONE specific instance of the same
+#                          physical item in the same lighting, so it should
+#                          score much higher than a cross-product match.
+#                          TUNE THIS FIRST from the live log — every
+#                          reacquire prints its sim=.
 # REACQUIRE_MAX_DIST       how far (px) from a LOST track's last position a
 #                          detection may appear and still be considered a
 #                          plausible reacquisition.
 OCCLUDED_TO_LOST_FRAMES  = 18
 UNCONFIRMED_PRUNE_FRAMES = 12
-REACQUIRE_SIMILARITY     = 0.60
+REACQUIRE_SIMILARITY     = 0.80
 REACQUIRE_MAX_DIST       = 240
 
 # ── Exit detection: the ONLY path that removes an item ────────────
@@ -308,6 +408,25 @@ REACQUIRE_MAX_DIST       = 240
 EXIT_BOUNDARY_MARGIN    = 45
 MOVING_MIN_DISPLACEMENT = 7
 EXIT_CONFIRM_FRAMES     = 3
+
+# EXIT_EVIDENCE_GRACE_FRAMES
+#   How many consecutive no-detection frames a track may have WITHOUT losing
+#   its accumulated exit_progress.
+#
+#   Why this is needed: removing an item means putting a hand over it.  The
+#   hand merges with or covers the item, the track goes unmatched, and
+#   _update_unmatched used to zero exit_progress on the spot — erasing the
+#   evidence of the very departure it was collecting, before it could reach
+#   EXIT_CONFIRM_FRAMES.  A removal could therefore almost never complete.
+#
+#   Scope is deliberately narrow: this grace applies ONLY to the
+#   "no detection at all" case, where nothing can corrupt the track's
+#   geometry because nothing was measured.  It does NOT apply to
+#   Track.note_merged_frame (a merged blob CAN drag a stationary track
+#   toward the edge — that reset is what stopped a measured near-false
+#   REMOVE) nor to the low-visibility reset in _locked_state_machine (a
+#   stationary item being covered up should lose its progress).
+EXIT_EVIDENCE_GRACE_FRAMES = 2
 
 # EXIT_CLIP_MARGIN
 #   An item on its way out of frame gets CLIPPED by the frame edge, so its
@@ -329,6 +448,65 @@ EXIT_CLIP_MARGIN = 8
 #   displacement is treated as an artefact and is not allowed to count as
 #   motion toward the exit.
 DEOCCLUSION_VIS_JUMP = 0.22
+
+# ═════════════════════════════════════════════════════════════════
+# STATIC PRESENCE CHECK  (identity_tracker.py / detector.py)
+# ═════════════════════════════════════════════════════════════════
+#
+# THE PROBLEM THIS SOLVES
+#   MOG2 reports MOTION, not objects.  An item that has been put down and
+#   left alone stops producing detections, so its track slid
+#   PRESENT -> OCCLUDED -> LOST while the item was still sitting there in
+#   plain view.  Staying counted in the cart was correct, but the cost was
+#   severe: a LOST track is not in _MATCHABLE and is skipped by
+#   unmatched_tracks, so it can never again accumulate the outward-motion
+#   evidence that EXITING -> REMOVED requires.  Sliding that item away
+#   therefore could not remove it.
+#
+#   The old code had no way to ask "is the item still there?" — presence was
+#   inferred purely from "did MOG2 see motion here", which is the wrong
+#   question about a stationary object.
+#
+# WHAT WE DO INSTEAD
+#   For a LOCKED track that got no detection this frame, compare the CURRENT
+#   pixels in its own box against two references:
+#     1. a small grayscale template of the item, saved when we could see it
+#        clearly, and
+#     2. the same box taken from MOG2's learned background image
+#        (cv2.BackgroundSubtractor.getBackgroundImage()).
+#   Both comparisons use normalised cross-correlation (TM_CCOEFF_NORMED),
+#   which is brightness/contrast invariant and costs well under a
+#   millisecond on a 64px patch.
+#
+#     looks like the item        -> STILL THERE: stay PRESENT
+#     looks like the background  -> VACATED:     count a departure frame
+#     looks like neither         -> OCCLUDED:    something is on top of it
+#
+#   "Neither" defaulting to occlusion keeps the safety property: ambiguity
+#   never removes a cart item.
+#
+# PRESENCE_ITEM_MATCH      correlation with the item's own template at or
+#                          above which the item is judged still present.
+# PRESENCE_BG_MATCH        correlation with the learned background at or
+#                          above which the spot is judged empty.  BOTH this
+#                          AND a below-PRESENCE_ITEM_MATCH item score are
+#                          required to call a frame vacated.
+# PRESENCE_VACATED_FRAMES  consecutive vacated frames before the track is
+#                          REMOVED.  Any single non-vacated frame resets the
+#                          count to zero.  This is the new removal path, and
+#                          it is stronger evidence than tracked motion: it is
+#                          direct proof the item is no longer where it was,
+#                          observable even though the hand was covering the
+#                          item during the entire departure.
+#                          Raise it if lighting flicker ever causes a
+#                          phantom removal; lower it for snappier removals.
+# PRESENCE_TEMPLATE_PX     the item template and the ROI are both resized to
+#                          this square before correlating, so the comparison
+#                          is cheap and size-independent.
+PRESENCE_ITEM_MATCH     = 0.55
+PRESENCE_BG_MATCH       = 0.60
+PRESENCE_VACATED_FRAMES = 5
+PRESENCE_TEMPLATE_PX    = 64
 
 # ── Detection zone (identity_tracker.py / UI) ─────────────────────
 # The active "cart surface" region as a fraction of the frame
