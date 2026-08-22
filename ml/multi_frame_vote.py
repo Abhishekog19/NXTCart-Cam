@@ -28,8 +28,93 @@ from ml.config import (
     FRAME_INTERVAL_SEC,
     NUM_FRAMES,
 )
-from ml.embedding_extractor import extract_embedding
 from ml.matcher import EmbeddingDB, match
+
+# NOTE: extract_embedding is imported LAZILY inside capture_and_vote()
+# rather than at module level.  Reason: vote_over_results() below is pure
+# counting logic with no model dependency, and the identity tracker imports
+# it on every frame.  Keeping the TFLite import out of module scope means
+# the tracking / identity / cart layer can be imported and unit-tested on a
+# machine with no TFLite runtime installed.  capture_and_vote() behaves
+# exactly as before.
+
+
+def vote_over_results(
+    results: list[dict],
+    total_frames: Optional[int] = None,
+) -> dict:
+    """
+    Majority-vote over a list of ALREADY-COMPUTED match() results.
+
+    This is the pure, camera-free core of the voting logic.  It is used
+    in two places:
+
+      • capture_and_vote() below, which grabs its own burst of frames
+        (the original demo.py path), and
+
+      • the identity tracker (ml/identity_tracker.py), which collects one
+        match() result per GOOD-visibility frame for a single track and
+        then calls this to decide whether to LOCK that track's identity
+        (VERIFYING -> CONFIRMED).
+
+    Keeping the counting in one function means both paths agree on exactly
+    what "the frames agreed" means, and both honour AGREE_THRESHOLD.
+
+    Parameters
+    ----------
+    results : list of match() dicts
+        Each must have at least "top_name" and "confident" keys.
+    total_frames : int, optional
+        How many frames were attempted (for reporting).  Defaults to
+        len(results).
+
+    Returns
+    -------
+    dict — same shape capture_and_vote has always returned:
+        final_name, confident, vote_count, total_frames, message, last_result
+    """
+    total = len(results) if total_frames is None else total_frames
+
+    if not results:
+        return {
+            "final_name": "uncertain",
+            "confident": False,
+            "vote_count": 0,
+            "total_frames": total,
+            "message": "Uncertain — no frames captured.",
+            "last_result": {},
+        }
+
+    # Only frames that were INDIVIDUALLY confident get a vote.
+    # An uncertain frame from the matcher does not get to vote.
+    confident_names = [r["top_name"] for r in results if r.get("confident")]
+    vote_counts: Counter = Counter(confident_names)
+
+    if not vote_counts:
+        return {
+            "final_name": "uncertain",
+            "confident": False,
+            "vote_count": 0,
+            "total_frames": total,
+            "message": "Uncertain — needs a clearer view.",
+            "last_result": results[-1],
+        }
+
+    winner_name, winner_votes = vote_counts.most_common(1)[0]
+    confident = winner_votes >= AGREE_THRESHOLD
+
+    return {
+        "final_name": winner_name,
+        "confident": confident,
+        "vote_count": winner_votes,
+        "total_frames": total,
+        "message": (
+            f"Confident: {winner_name}  ({winner_votes}/{total} frames agreed)"
+            if confident else
+            "Uncertain — needs a clearer view."
+        ),
+        "last_result": results[-1],
+    }
 
 
 def capture_and_vote(
@@ -60,11 +145,13 @@ def capture_and_vote(
         "message"       (str)  – human-readable verdict
         "last_result"   (dict) – the raw match() dict from the last frame
     """
+    # Lazy import: only this camera-burst path needs the TFLite model.
+    from ml.embedding_extractor import extract_embedding
+
     own_cap = False
     if cap is None:
         cap = cv2.VideoCapture(CAMERA_INDEX)
         own_cap = True
-
     if not cap.isOpened():
         raise RuntimeError(
             f"Cannot open camera index {CAMERA_INDEX}. "
@@ -92,56 +179,6 @@ def capture_and_vote(
         if own_cap:
             cap.release()
 
-    if not frame_results:
-        return {
-            "final_name": "uncertain",
-            "confident": False,
-            "vote_count": 0,
-            "total_frames": 0,
-            "message": "Uncertain — no frames captured.",
-            "last_result": {},
-        }
-
-    # ── Count how many frames voted for each product ─────────────
-    # We only count "confident" frames in the vote.
-    # An uncertain frame from the matcher doesn't get a vote.
-    confident_names = [
-        r["top_name"] for r in frame_results if r["confident"]
-    ]
-
-    vote_counts: Counter = Counter(confident_names)
-
-    total_captured = len(frame_results)
-
-    if not vote_counts:
-        # No frame was individually confident.
-        return {
-            "final_name": "uncertain",
-            "confident": False,
-            "vote_count": 0,
-            "total_frames": total_captured,
-            "message": "Uncertain — needs a clearer view.",
-            "last_result": frame_results[-1],
-        }
-
-    # The product that got the most confident votes.
-    winner_name, winner_votes = vote_counts.most_common(1)[0]
-
-    if winner_votes >= AGREE_THRESHOLD:
-        return {
-            "final_name": winner_name,
-            "confident": True,
-            "vote_count": winner_votes,
-            "total_frames": total_captured,
-            "message": f"Confident: {winner_name}  ({winner_votes}/{total_captured} frames agreed)",
-            "last_result": frame_results[-1],
-        }
-    else:
-        return {
-            "final_name": winner_name,  # best guess, but flagged uncertain
-            "confident": False,
-            "vote_count": winner_votes,
-            "total_frames": total_captured,
-            "message": "Uncertain — needs a clearer view.",
-            "last_result": frame_results[-1],
-        }
+    # Delegate the actual counting to the shared, camera-free voter so
+    # this burst path and the identity tracker stay in perfect agreement.
+    return vote_over_results(frame_results, total_frames=len(frame_results))

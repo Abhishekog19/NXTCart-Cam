@@ -1,300 +1,210 @@
 # ---------------------------------------------------------------
-# live_cart_demo.py  --  NXTCart Smart Cart Demo
+# live_cart_demo.py  --  NXTCart live cart, persistent-identity build
 #
-# WHAT THIS DOES
-# ───────────────
-# Points the webcam at a flat surface (table, mat, tray).
-# The entire frame is the "cart surface".
+# WHAT YOU SHOULD SEE (and what to watch for)
+# ────────────────────────────────────────────
+# Point the webcam at a flat surface.  The whole frame is the cart; the
+# thin border band is the EXIT ZONE.
 #
-# ADD a product
-#   Reach in, place the item on the surface, pull your hand away.
-#   The system compares the scene before and after — if something
-#   appeared → it identifies the item and adds it to the cart.
+#   ADD     place an item on the surface and take your hand away.
+#           A yellow "verifying..." box appears, then it locks to a green
+#           box with the product name.  That name is now FROZEN.
 #
-# REMOVE a product
-#   Pick up the item and lift/slide it out of frame.
-#   The system sees something disappeared from the scene → identifies
-#   it from the items already in the cart → removes it.
+#   COVER   put a second item on top of the first.  THIS IS THE TEST.
+#           The covered item's box turns purple (OCCLUDED) but its LABEL
+#           DOES NOT CHANGE, and it STAYS IN THE CART.  That is the whole
+#           point of the rebuild — watch the label, not the box.
 #
-# Multiple items can be added/removed in a single reach-in.
+#   REMOVE  slide an item out across the frame edge.  Only then does the
+#           cart lose it (box goes cyan MOVING -> orange EXITING -> gone).
+#
+#   HIDE    cover an item completely with your hand and hold.  It goes
+#           OCCLUDED then grey LOST — and STILL counts in the cart,
+#           because being hidden is not the same as being gone.  Uncover
+#           it and it is reacquired by its locked appearance.
 #
 # CONTROLS
-#   R  →  reset cart to empty
-#   Q  →  quit
+#   R  reset (clears tracks + relearns the background)
+#   Q  quit
 #
-# TUNING (ml/config.py)
-#   SCORE_THRESHOLD      — raise if wrong products are matched
-#   FG_PIXEL_THRESHOLD   — raise if camera noise triggers false events
-#   TEXTURE_STD_THRESHOLD — lower if items have subtle patterns
-#   DIFF_THRESHOLD        — raise if lighting flicker causes false diffs
+# The cart panel is DERIVED from the tracks every frame — nothing in this
+# file ever adds to or removes from a cart list by hand.
 # ---------------------------------------------------------------
 
-import threading
 import time
 from collections import deque
 
 import cv2
 import numpy as np
 
-from ml.config import CAMERA_INDEX
-from ml.matcher import load_database
-from ml.zone_tracker import ZoneTracker
+from ml.cart_state import cart_lines
+from ml.config import CAMERA_INDEX, VISIBILITY_GOOD_RATIO, VISIBILITY_WEAK_RATIO
+from ml.detector import BackgroundSubtractorDetector
+from ml.identity_tracker import IdentityTracker
+from ml.recognizer import EmbeddingRecognizer
+from ml.track import TrackState
 
-# ── Window dimensions ─────────────────────────────────────────────
 CAM_W, CAM_H = 640, 480
-PANEL_W       = 260
-WINDOW_W      = CAM_W + PANEL_W
-WINDOW_H      = CAM_H
+PANEL_W = 300
 
-# ── Colours (BGR) ─────────────────────────────────────────────────
-C_BG         = (14,  14,  20)
-C_WHITE      = (255, 255, 255)
-C_GRAY       = (120, 120, 130)
-C_GREEN      = (55,  210,  75)
-C_RED        = (70,   70, 230)
-C_YELLOW     = (0,   210, 255)
-C_CYAN       = (215, 235,   0)
-C_PANEL_SEP  = (40,  40,  55)
-
-FONT   = cv2.FONT_HERSHEY_DUPLEX
+FONT = cv2.FONT_HERSHEY_DUPLEX
 FONT_S = cv2.FONT_HERSHEY_SIMPLEX
 
-# ── Cart & event log ──────────────────────────────────────────────
-_cart_lock  = threading.Lock()    # on_zone_event fires from a background thread
-_cart: list[dict] = []           # [{"name": str, "qty": int}, ...]
-_event_log: deque  = deque(maxlen=12)
-_full_db = None                   # full embedding DB (loaded at startup)
+C_BG = (14, 14, 20)
+C_WHITE = (255, 255, 255)
+C_GRAY = (120, 120, 130)
+C_DIM = (70, 70, 82)
+C_CYAN = (215, 235, 0)
+C_YELLOW = (0, 210, 255)
+C_SEP = (40, 40, 55)
+
+# One colour per state so the behaviour is readable at a glance.
+STATE_COLOR = {
+    TrackState.NEW:       (150, 150, 160),
+    TrackState.VERIFYING: (0, 210, 255),    # yellow  – deciding, no identity yet
+    TrackState.CONFIRMED: (55, 210, 75),    # green   – just locked
+    TrackState.PRESENT:   (55, 210, 75),    # green   – in the cart, visible
+    TrackState.MOVING:    (215, 235, 0),    # cyan    – moving
+    TrackState.EXITING:   (0, 140, 255),    # orange  – leaving
+    TrackState.OCCLUDED:  (220, 90, 220),   # purple  – hidden, STILL counted
+    TrackState.LOST:      (130, 130, 130),  # grey    – untracked, STILL counted
+    TrackState.REACQUIRE: (255, 170, 0),    # blue    – just found again
+}
+
+_transition_log: deque = deque(maxlen=9)
 
 
 # ─────────────────────────────────────────────────────────────────
-# CART OPERATIONS  (all called with _cart_lock held)
+# CAMERA VIEW
 # ─────────────────────────────────────────────────────────────────
 
-def _add_to_cart(name: str) -> None:
-    for e in _cart:
-        if e["name"] == name:
-            e["qty"] += 1
-            return
-    _cart.append({"name": name, "qty": 1})
+def draw_camera(frame: np.ndarray, tracker: IdentityTracker) -> np.ndarray:
+    out = frame.copy()
+    zl, zt, zr, zb = tracker.zone
 
+    # Active zone + exit band.
+    cv2.rectangle(out, (zl, zt), (zr, zb), (60, 60, 75), 1)
+    cv2.putText(out, "cart zone (border = exit)", (zl + 4, zt + 14),
+                FONT_S, 0.38, (90, 90, 110), 1, cv2.LINE_AA)
 
-def _remove_from_cart(name: str) -> None:
-    for e in _cart:
-        if e["name"] == name:
-            e["qty"] -= 1
-            if e["qty"] <= 0:
-                _cart.remove(e)
-            return
-    print(f"[cart] REMOVE '{name}' — not in cart.")
+    # Raw detections, drawn faintly — these are candidates, NOT identities.
+    for d in tracker.last_detections:
+        x, y, w, h = d.bbox
+        cv2.rectangle(out, (x, y), (x + w, y + h), C_DIM, 1)
 
+    # Tracks.
+    for t in tracker.active_tracks():
+        x, y, w, h = t.bbox
+        color = STATE_COLOR.get(t.state, C_WHITE)
+        thick = 3 if t.is_locked else 2
+        cv2.rectangle(out, (x, y), (x + w, y + h), color, thick)
 
-def _get_cart_db():
-    """
-    Return a database filtered to only items currently in the cart.
-    Called by ZoneTracker during REMOVE scanning so the model only
-    has to compare against 1-5 products instead of the full catalogue.
-    """
-    if _full_db is None:
-        return None
-    with _cart_lock:
-        names = {e["name"] for e in _cart}
-    return {k: v for k, v in _full_db.items() if k in names} or None
+        label = t.label()
+        state = t.state
+        # Lock marker makes "this name can no longer change" explicit.
+        head = f"#{t.track_id} {label}" + ("  [LOCKED]" if t.is_locked else "")
+        (tw, th), _ = cv2.getTextSize(head, FONT_S, 0.5, 1)
+        # Stagger label height per track so that two adjacent/overlapping
+        # items (exactly the case we care about) don't hide each other's
+        # labels — the label is the thing you are supposed to be watching.
+        stagger = 30 * (t.track_id % 2)
+        ly = max(th + 4, y - 22 - stagger)
+        cv2.rectangle(out, (x, ly - th - 4), (x + max(tw, 96) + 8, ly + 16), (10, 10, 16), -1)
+        cv2.rectangle(out, (x, ly - th - 4), (x + max(tw, 96) + 8, ly + 16), color, 1)
+        cv2.putText(out, head, (x + 4, ly), FONT_S, 0.5, C_WHITE, 1, cv2.LINE_AA)
+        cv2.putText(out, state, (x + 4, ly + 13), FONT_S, 0.44, color, 1, cv2.LINE_AA)
 
+        # Visibility bar — the input to the recognition gate.
+        bar_w = max(w, 60)
+        vy = y + h + 6
+        if vy < CAM_H - 6:
+            cv2.rectangle(out, (x, vy), (x + bar_w, vy + 4), (35, 35, 45), -1)
+            fill = int(bar_w * float(np.clip(t.visibility_ratio, 0, 1)))
+            vis_c = ((55, 210, 75) if t.visibility_ratio >= VISIBILITY_GOOD_RATIO
+                     else (0, 210, 255) if t.visibility_ratio >= VISIBILITY_WEAK_RATIO
+                     else (70, 70, 230))
+            cv2.rectangle(out, (x, vy), (x + fill, vy + 4), vis_c, -1)
 
-# ─────────────────────────────────────────────────────────────────
-# EVENT CALLBACK  (called from ZoneTracker background thread)
-# ─────────────────────────────────────────────────────────────────
-
-def on_zone_event(direction: str, product_name: str, score: float) -> None:
-    """Thread-safe callback: update cart + append to event log."""
-    clean = product_name.rstrip("?")
-
-    with _cart_lock:
-        if direction == "ADD":
-            _add_to_cart(clean)
-            color  = C_GREEN
-            prefix = "ADD"
-        else:
-            _remove_from_cart(clean)
-            color  = C_RED
-            prefix = "REM"
-
-    _event_log.appendleft({
-        "text":  "%s: %s  (%d%%)" % (prefix, clean.replace("_", " "), int(score * 100)),
-        "color": color,
-        "time":  time.strftime("%H:%M:%S"),
-    })
+    return out
 
 
 # ─────────────────────────────────────────────────────────────────
-# CAMERA HUD  (drawn directly on cam view each frame)
+# SIDE PANEL
 # ─────────────────────────────────────────────────────────────────
 
-def _draw_cart_hud(cam: np.ndarray, tracker: ZoneTracker) -> None:
-    """
-    Semi-transparent cart overlay in the top-left of the camera feed.
-
-    Shows the live cart contents so an audience watching the webcam
-    can see the cart state without looking at the side panel.
-
-    Also shows:
-      • Green/red border flash on ADD/REMOVE (0.5 s)
-      • Fading bottom banner with last event (3.5 s)
-      • Animated spinner when the model is running
-    """
-    PAD    = 8
-    ROW_H  = 22
-    HEADER = 26
-    WIDTH  = 215
-
-    with _cart_lock:
-        cart_copy   = list(_cart)
-        total_qty   = sum(e["qty"] for e in cart_copy)
-
-    n_rows = max(1, len(cart_copy))
-    box_h  = HEADER + n_rows * ROW_H + PAD
-    x0, y0 = 8, 8
-
-    # Semi-transparent dark background
-    ov = cam.copy()
-    cv2.rectangle(ov, (x0, y0), (x0 + WIDTH, y0 + box_h), (6, 6, 16), -1)
-    cv2.rectangle(ov, (x0, y0), (x0 + WIDTH, y0 + box_h), (55, 65, 75), 1)
-    cv2.addWeighted(ov, 0.68, cam, 0.32, 0, cam)
-
-    # Teal header
-    header_txt = "CART  (%d item%s)" % (total_qty, "s" if total_qty != 1 else "")
-    cv2.rectangle(cam, (x0, y0), (x0 + WIDTH, y0 + HEADER), (28, 75, 48), -1)
-    cv2.putText(cam, header_txt, (x0 + PAD, y0 + HEADER - 7),
-                FONT_S, 0.46, (185, 255, 205), 1, cv2.LINE_AA)
-
-    # Item rows
-    if not cart_copy:
-        cv2.putText(cam, "(empty)",
-                    (x0 + PAD, y0 + HEADER + ROW_H - 6),
-                    FONT_S, 0.42, C_GRAY, 1, cv2.LINE_AA)
-    else:
-        for i, entry in enumerate(cart_copy):
-            ry  = y0 + HEADER + i * ROW_H
-            qty = "x%d" % entry["qty"]
-            if i % 2 == 0:
-                cv2.rectangle(cam, (x0 + 1, ry),
-                              (x0 + WIDTH - 1, ry + ROW_H), (18, 20, 32), -1)
-            cv2.putText(cam, "  " + entry["name"].replace("_", " "),
-                        (x0 + PAD, ry + ROW_H - 6),
-                        FONT_S, 0.42, C_WHITE, 1, cv2.LINE_AA)
-            (tw, _), _ = cv2.getTextSize(qty, FONT_S, 0.44, 1)
-            cv2.putText(cam, qty,
-                        (x0 + WIDTH - tw - PAD, ry + ROW_H - 6),
-                        FONT_S, 0.44, C_CYAN, 1, cv2.LINE_AA)
-
-    # Spinner while model runs
-    if tracker._identifying:
-        spin = ["|", "/", "-", "\\"][int(time.time() * 5) % 4]
-        cv2.putText(cam, "%s  Analyzing..." % spin,
-                    (CAM_W // 2 - 75, CAM_H - 12),
-                    FONT_S, 0.52, C_YELLOW, 1, cv2.LINE_AA)
-
-    # Border flash for 0.5 s after each event
-    if tracker.last_event:
-        age = time.time() - tracker.last_event["timestamp"]
-        if age < 0.5:
-            fc = C_GREEN if tracker.last_event["direction"] == "ADD" else C_RED
-            cv2.rectangle(cam, (0, 0), (CAM_W - 1, CAM_H - 1), fc, 8)
-
-    # Fading bottom banner for 3.5 s
-    if tracker.last_event:
-        ev  = tracker.last_event
-        age = time.time() - ev["timestamp"]
-        if 0 < age < 3.5:
-            alpha = max(0.0, 1.0 - age / 3.5)
-            bar   = (0, 85, 28) if ev["direction"] == "ADD" else (22, 22, 95)
-            s1, s2 = CAM_H - 44, CAM_H
-            roi = cam[s1:s2, :]
-            bg  = np.full_like(roi, bar)
-            cam[s1:s2, :] = cv2.addWeighted(
-                bg, alpha * 0.82, roi, 1.0 - alpha * 0.82, 0)
-            prod = ev["product_name"].replace("_", " ").rstrip("?")
-            txt  = "%s: %s  (%d%%)" % (
-                ev["direction"], prod, int(ev["score"] * 100))
-            tc = C_GREEN if ev["direction"] == "ADD" else (115, 115, 255)
-            cv2.putText(cam, txt, (10, s2 - 11),
-                        FONT, 0.72, tc, 2, cv2.LINE_AA)
-
-
-# ─────────────────────────────────────────────────────────────────
-# RIGHT PANEL
-# ─────────────────────────────────────────────────────────────────
-
-def _draw_panel(panel: np.ndarray, tracker: ZoneTracker) -> None:
+def draw_panel(panel: np.ndarray, tracker: IdentityTracker, fps: float) -> None:
     panel[:] = C_BG
     W = panel.shape[1]
-    y = 0
 
     def hline(yy):
-        cv2.line(panel, (0, yy), (W, yy), C_PANEL_SEP, 1)
+        cv2.line(panel, (0, yy), (W, yy), C_SEP, 1)
         return yy + 1
 
-    def text(s, yy, color=C_WHITE, scale=0.50, bold=False):
-        cv2.putText(panel, s, (10, yy), FONT_S, scale,
-                    color, 2 if bold else 1, cv2.LINE_AA)
-        return yy + int(scale * 38)
+    def text(s, yy, color=C_WHITE, scale=0.46):
+        cv2.putText(panel, s, (10, yy), FONT_S, scale, color, 1, cv2.LINE_AA)
+        return yy + int(scale * 40)
 
     def section(title, yy):
         yy = hline(yy)
-        cv2.rectangle(panel, (0, yy), (W, yy + 22), C_PANEL_SEP, -1)
-        cv2.putText(panel, title, (8, yy + 15),
-                    FONT_S, 0.46, C_YELLOW, 1, cv2.LINE_AA)
-        return yy + 24
+        cv2.rectangle(panel, (0, yy), (W, yy + 20), C_SEP, -1)
+        cv2.putText(panel, title, (8, yy + 14), FONT_S, 0.44, C_YELLOW, 1, cv2.LINE_AA)
+        return yy + 23
 
-    # Header
-    cv2.rectangle(panel, (0, 0), (W, 34), (24, 24, 38), -1)
-    cv2.putText(panel, "NXTCart", (8, 24), FONT, 0.72, C_CYAN, 2, cv2.LINE_AA)
-    y = 36
+    cv2.rectangle(panel, (0, 0), (W, 32), (24, 24, 38), -1)
+    cv2.putText(panel, "NXTCart", (8, 23), FONT, 0.68, C_CYAN, 2, cv2.LINE_AA)
+    cv2.putText(panel, "locked identity", (110, 22), FONT_S, 0.40, C_GRAY, 1, cv2.LINE_AA)
+    y = 34
 
-    # Tracker status
-    y = section("  STATUS", y)
-    sc = {
-        "learning":  C_GRAY,
-        "stable":    C_GREEN,
-        "disturbed": C_YELLOW,
-        "settling":  (0, 200, 100),
-        "cooldown":  C_GRAY,
-    }.get(tracker.ui_state, C_WHITE)
-    y = text("State: %s" % tracker.ui_state.upper(), y, sc, 0.48, bold=True)
-    y = text("FG px: %d" % tracker.ui_fg_pixels,     y, C_GRAY, 0.42)
-    y += 4
-
-    # Cart
-    y = section("  CART", y)
-    with _cart_lock:
-        cart_copy = list(_cart)
-    if not cart_copy:
-        y = text("(empty)", y, C_GRAY, 0.48)
+    # ── CART (derived from tracks) ────────────────────────────────
+    y = section("  CART  (derived from tracks)", y)
+    lines = cart_lines(tracker.tracks)
+    if not lines:
+        y = text("(empty)", y, C_GRAY)
     else:
-        for entry in cart_copy:
-            name = entry["name"].replace("_", " ")
-            qty  = "x%d" % entry["qty"]
-            y    = text("  " + name, y, C_WHITE, 0.50)
-            (tw, _), _ = cv2.getTextSize(qty, FONT_S, 0.50, 1)
-            cv2.putText(panel, qty, (W - tw - 10, y - 8),
-                        FONT_S, 0.50, C_CYAN, 1, cv2.LINE_AA)
-    y += 4
+        for ln in lines:
+            name = ln["name"].replace("_", " ")
+            y0 = y
+            y = text("  " + name, y, C_WHITE, 0.48)
+            qty = "x%d" % ln["qty"]
+            (tw, _), _ = cv2.getTextSize(qty, FONT_S, 0.48, 1)
+            cv2.putText(panel, qty, (W - tw - 10, y0 + 12), FONT_S, 0.48,
+                        C_CYAN, 1, cv2.LINE_AA)
+            if ln["note"]:
+                y = text("    (%s — still counted)" % ln["note"], y, C_GRAY, 0.38)
+    y += 3
 
-    # Event log
-    y = section("  EVENTS", y)
-    if not _event_log:
-        y = text("(none yet)", y, C_GRAY, 0.42)
+    # ── TRACKS ────────────────────────────────────────────────────
+    y = section("  TRACKS", y)
+    active = tracker.active_tracks()
+    if not active:
+        y = text("(none)", y, C_GRAY)
     else:
-        for e in list(_event_log)[:8]:
-            y = text("%s  %s" % (e["time"], e["text"]), y, e["color"], 0.40)
+        for t in active[:7]:
+            c = STATE_COLOR.get(t.state, C_WHITE)
+            y = text("#%d %s" % (t.track_id, t.label()), y, c, 0.44)
+            y = text("   %s  vis %d%%" % (t.state, int(t.visibility_ratio * 100)),
+                     y, C_GRAY, 0.38)
+    y += 3
 
-    # Controls
-    ctrl_y = WINDOW_H - 50
-    hline(ctrl_y)
-    cv2.putText(panel, "R = reset cart",
-                (10, ctrl_y + 16), FONT_S, 0.43, C_GRAY, 1, cv2.LINE_AA)
-    cv2.putText(panel, "Q = quit",
-                (10, ctrl_y + 32), FONT_S, 0.43, C_GRAY, 1, cv2.LINE_AA)
+    # ── TRANSITIONS ───────────────────────────────────────────────
+    y = section("  STATE CHANGES", y)
+    if not _transition_log:
+        y = text("(none yet)", y, C_GRAY, 0.40)
+    else:
+        for entry in list(_transition_log):
+            y = text(entry, y, C_GRAY, 0.36)
+
+    # ── FOOTER ────────────────────────────────────────────────────
+    fy = CAM_H - 62
+    hline(fy)
+    cv2.putText(panel, "purple/grey = hidden but IN cart", (10, fy + 15),
+                FONT_S, 0.37, (220, 90, 220), 1, cv2.LINE_AA)
+    cv2.putText(panel, "only edge exit removes an item", (10, fy + 29),
+                FONT_S, 0.37, (0, 140, 255), 1, cv2.LINE_AA)
+    cv2.putText(panel, "R = reset    Q = quit", (10, fy + 45),
+                FONT_S, 0.40, C_GRAY, 1, cv2.LINE_AA)
+    cv2.putText(panel, "%.1f fps  f%d" % (fps, tracker.frame_idx), (10, fy + 58),
+                FONT_S, 0.36, C_DIM, 1, cv2.LINE_AA)
 
 
 # ─────────────────────────────────────────────────────────────────
@@ -302,68 +212,93 @@ def _draw_panel(panel: np.ndarray, tracker: ZoneTracker) -> None:
 # ─────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    global _full_db
-
-    print("[live_cart_demo] Loading embedding database...")
+    print("[live_cart_demo] Loading recognizer (embedding DB + model)...")
     try:
-        _full_db = load_database()
+        recognizer = EmbeddingRecognizer()
     except FileNotFoundError as e:
-        print("WARNING:", e, "\nRunning without product identification.")
+        print("ERROR:", e)
+        return
+    except Exception as e:
+        print(f"ERROR: could not initialise the recognizer: {e}")
+        return
 
     print("[live_cart_demo] Opening camera %d..." % CAMERA_INDEX)
     cap = cv2.VideoCapture(CAMERA_INDEX)
     if not cap.isOpened():
         print("ERROR: Cannot open camera %d." % CAMERA_INDEX)
         return
-
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  CAM_W)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, CAM_W)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, CAM_H)
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)   # eliminate frame queuing lag
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
-    tracker = ZoneTracker(
-        on_event    = on_zone_event,
-        db          = _full_db,
-        get_cart_db = _get_cart_db,
-        frame_size  = (CAM_W, CAM_H),
-    )
+    detector = BackgroundSubtractorDetector()
+    tracker = IdentityTracker(detector, recognizer, frame_size=(CAM_W, CAM_H))
 
-    window = "NXTCart-Cam - Live Cart"
+    # Warm the model so the first real frame isn't slow.
+    ok, warm = cap.read()
+    if ok:
+        try:
+            recognizer.embed(warm)
+        except Exception:
+            pass
+
+    window = "NXTCart-Cam - Persistent Identity Cart"
     cv2.namedWindow(window, cv2.WINDOW_NORMAL)
-    cv2.resizeWindow(window, WINDOW_W, WINDOW_H)
+    cv2.resizeWindow(window, CAM_W + PANEL_W, CAM_H)
+    panel = np.zeros((CAM_H, PANEL_W, 3), dtype=np.uint8)
 
-    panel = np.zeros((WINDOW_H, PANEL_W, 3), dtype=np.uint8)
+    print("[live_cart_demo] Ready.")
+    print("  Place an item, wait for it to lock (green + [LOCKED]).")
+    print("  Then cover it with another item: the label must NOT change.")
+    print("  Slide an item out of frame to remove it.  R = reset, Q = quit.\n")
 
-    print("[live_cart_demo] Ready.  (warm-up: ~2 seconds)")
-    print("  ADD    — place item in frame, remove hand, hold still.")
-    print("  REMOVE — lift item out of frame.")
-    print("  R = reset cart  |  Q = quit\n")
+    seen_transitions = 0
+    fps, last_t = 0.0, time.time()
 
     while True:
         ok, frame = cap.read()
         if not ok or frame is None:
             continue
 
-        cam_view = tracker.process(frame)
-        _draw_cart_hud(cam_view, tracker)
-        _draw_panel(panel, tracker)
+        frame = cv2.resize(frame, (CAM_W, CAM_H))
+        tracker.process(frame)
 
-        composite = np.hstack([cam_view, panel])
-        cv2.imshow(window, composite)
+        # Mirror any NEW state transitions into the side-panel log.
+        for t in tracker.tracks:
+            already = _seen.get(t.track_id, 0)
+            fresh = t.transitions[already:]
+            for (fi, old, new, reason) in fresh:
+                _transition_log.appendleft("#%d %s>%s %s" % (
+                    t.track_id, old[:4], new[:4], (t.product_id or "")[:9]))
+            if fresh:
+                _seen[t.track_id] = len(t.transitions)
+
+        cam_view = draw_camera(frame, tracker)
+        now = time.time()
+        dt = now - last_t
+        last_t = now
+        if dt > 0:
+            fps = 0.85 * fps + 0.15 * (1.0 / dt) if fps else 1.0 / dt
+        draw_panel(panel, tracker, fps)
+
+        cv2.imshow(window, np.hstack([cam_view, panel]))
 
         key = cv2.waitKey(1) & 0xFF
         if key in (ord("q"), ord("Q")):
-            print("[live_cart_demo] Quitting.")
             break
-        elif key in (ord("r"), ord("R")):
-            with _cart_lock:
-                _cart.clear()
-            _event_log.clear()
-            tracker.last_event = None
-            tracker.ui_regions = []
-            print("[live_cart_demo] Cart reset.")
+        if key in (ord("r"), ord("R")):
+            tracker.reset()
+            _transition_log.clear()
+            _seen.clear()
+            print("[live_cart_demo] Reset.")
 
     cap.release()
     cv2.destroyAllWindows()
+
+
+# Remembers how many transitions per track we have already shown in the
+# side panel, so each state change is logged exactly once.
+_seen: dict = {}
 
 
 if __name__ == "__main__":
