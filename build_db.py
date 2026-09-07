@@ -32,6 +32,7 @@ import cv2
 
 from ml.config import DATABASE_PATH, REFERENCES_DIR
 from ml.embedding_extractor import EMBEDDING_DIM, backend_id, extract_embedding
+from ml.verifier import colour_hist
 
 # Image extensions we'll look for.
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
@@ -67,6 +68,10 @@ def build_database() -> dict:
 
     # database:  { product_name: [embedding_1, embedding_2, …] }
     database: dict[str, list] = {}
+    # colours:   { product_name: [hist_1, hist_2, …] } — one per SAME photo,
+    # so the verifier's colour channel has multiple references per SKU that
+    # are paired to the appearance references above (acceptance rule 4).
+    colours: dict[str, list] = {}
 
     for product_name in sorted(product_dirs):
         product_path = os.path.join(REFERENCES_DIR, product_name)
@@ -83,19 +88,27 @@ def build_database() -> dict:
 
         print(f"Processing: {product_name}  ({len(image_files)} image(s))")
         embeddings = []
+        hists = []
 
         for fname in image_files:
             fpath = os.path.join(product_path, fname)
 
             try:
                 embedding = extract_embedding(fpath)
+                # Read the SAME file for the colour histogram so appearance
+                # and colour references are paired to one photo.
+                img = cv2.imread(fpath)
+                hist = colour_hist(img) if img is not None else None
                 embeddings.append(embedding)
-                print(f"    {fname} -> embedding shape {embedding.shape}")
+                hists.append(hist)
+                print(f"    {fname} -> embedding shape {embedding.shape}"
+                      f"{'  +colour' if hist is not None and hist.any() else ''}")
             except Exception as e:
                 print(f"    WARNING: Could not process {fname}: {e}")
 
         if embeddings:
             database[product_name] = embeddings
+            colours[product_name] = hists
             print(f"  => {len(embeddings)} embedding(s) stored for '{product_name}'.\n")
 
     if not database:
@@ -112,6 +125,13 @@ def build_database() -> dict:
         "backend": backend_id(),
         "dim": EMBEDDING_DIM,
         "products": database,
+        # NEW: per-SKU colour histograms, paired one-to-one with the photos
+        # in "products".  ml/matcher.py ignores unknown keys, so an older
+        # matcher still loads this file unchanged; ml/verifier.py reads it for
+        # the colour channel.  Absent from pre-existing databases, which is
+        # fine — the verifier treats a missing colour ref as "cannot pass
+        # colour", never as "accept".
+        "colours": colours,
     }
     with open(DATABASE_PATH, "wb") as f:
         pickle.dump(payload, f)

@@ -517,3 +517,119 @@ ZONE_LEFT   = 0.03
 ZONE_TOP    = 0.03
 ZONE_RIGHT  = 0.97
 ZONE_BOTTOM = 0.97
+
+
+# ═════════════════════════════════════════════════════════════════
+# BARCODE-GATED VERIFICATION  (frame_source / item_follower /
+#                              visibility / verifier / custody)
+# ═════════════════════════════════════════════════════════════════
+#
+# THIS IS A DIFFERENT PIPELINE from the persistent-identity tracker above.
+# The tracker answers "what is on the surface and did it leave?" as an
+# open-set problem.  The verification pipeline answers a much narrower,
+# far more reliable question, gated by a barcode scan:
+#
+#       "The scanner says this is SKU X.  Is the item I watched travel
+#        from the scanner into the cart ACTUALLY X — yes / no / unsure?"
+#
+# Turning recognition into a 1-vs-1 test is what makes it trustworthy, and
+# it is the only thing that can catch the attack weight cannot: scanning a
+# cheap item and dropping in a same-weight expensive one.  Appearance +
+# colour, checked on the SAME crops, are the two independent channels.
+#
+# Everything here errs toward RETRY / SUSPECT / MISMATCH.  No knob and no
+# code path is allowed to turn ambiguity into acceptance.
+
+# ── Frame source (ml/frame_source.py) ─────────────────────────────
+# CAMERA_SOURCE   which FrameSource verify_demo.py builds:
+#                   "webcam"  local device via FrameGrabber  (tonight)
+#                   "mjpeg"   ESP32-CAM HTTP stream           (tomorrow)
+# ESP32_STREAM_URL MJPEG/HTTP URL of the ESP32-CAM when CAMERA_SOURCE=mjpeg.
+#                  Typically http://<cam-ip>:81/stream .  Ignored otherwise.
+CAMERA_SOURCE    = "webcam"
+ESP32_STREAM_URL = "http://192.168.4.1:81/stream"
+
+# ── Spatial regions for the scan→cart journey (frame fractions) ───
+# SCANNER_REGION    where an item first appears after being scanned; the
+#                   follower LOCKS the first qualifying item whose centroid
+#                   is inside this box.  (left, top, right, bottom).
+# CART_ENTRY_REGION reaching this region is the spatial half of the "the
+#                   item actually went into the cart" gate.  The camera sits
+#                   opposite the scanner, so by default the item travels from
+#                   one side of the frame to the other.
+# These are deliberately generous defaults; retune once the ESP32-CAM is
+# mounted and the real geometry is known.
+SCANNER_REGION    = (0.00, 0.00, 0.45, 1.00)   # left side of frame
+CART_ENTRY_REGION = (0.55, 0.00, 1.00, 1.00)   # right side of frame
+
+# ── Crop collection across the trajectory (item_follower.py) ──────
+# VERIFY_BURST_FRAMES  max clean crops kept for one transaction.  Crops are
+#                      SAMPLED across the whole movement (not just the last
+#                      few), each downscaled to IMAGE_SIZE, so the memory
+#                      cost is bounded (~VERIFY_BURST_FRAMES * 224*224*3 B).
+# VERIFY_MIN_USABLE_FRAMES  fewest usable crops before a verdict may be
+#                      anything other than RETRY.  Too few clean views of the
+#                      item = not enough evidence = ask the shopper to redo it.
+VERIFY_BURST_FRAMES      = 12
+VERIFY_MIN_USABLE_FRAMES = 3
+
+# ── Follower continuity (item_follower.py) ────────────────────────
+# VERIFY_LOST_GRACE_FRAMES  consecutive frames the locked target may go with
+#                           no acceptable detection before the follower gives
+#                           up and the transaction becomes RETRY.  (The item
+#                           was briefly occluded by the hand — allow a little,
+#                           but a real loss of continuity must not be papered
+#                           over, so this is small.)
+VERIFY_LOST_GRACE_FRAMES = 6
+
+# ── Verifier thresholds (ml/verifier.py) ──────────────────────────
+# THESE ARE ABSOLUTE, NOT RANK-BASED.  With a single expected SKU the
+# matcher's "top match == expected" is vacuously true, so it proves nothing;
+# a raw similarity floor is the only thing that actually tests the hypothesis.
+#
+# VERIFY_APPEARANCE_THRESHOLD  min cosine similarity between a live crop's
+#                     embedding and the expected SKU's BEST reference for that
+#                     crop to count as an appearance "pass".  Seeded from
+#                     SCORE_THRESHOLD (0.72), the measured operating point of
+#                     the ONNX embedding space, and retuned tomorrow on real
+#                     products / the deployment camera.
+# VERIFY_COLOR_THRESHOLD  min colour-histogram similarity (same metric as
+#                     ColorCodeRecognizer) between a live crop and the SKU's
+#                     BEST colour reference to count as a colour "pass".
+#                     Colour is a coarse channel, so this is a target to be
+#                     tuned tomorrow; it exists to catch the same-weight,
+#                     different-colour swap, not to make fine distinctions.
+# VERIFY_PASS_FRACTION  fraction of usable crops that must pass a channel for
+#                     that channel to be considered satisfied overall.  This
+#                     is the multi-view smoothing: one bad frame cannot fail a
+#                     good item and one lucky frame cannot pass a wrong one.
+VERIFY_APPEARANCE_THRESHOLD = 0.72
+VERIFY_COLOR_THRESHOLD      = 0.55
+VERIFY_PASS_FRACTION        = 0.50
+
+# ── Transaction gating (ml/custody.py) ────────────────────────────
+# VERIFY_TXN_TIMEOUT_SEC  wall-clock budget for one scan→verify transaction.
+#                     If the item never reaches the cart region, or the weight
+#                     never changes-and-settles within this long, the
+#                     transaction resolves RETRY instead of hanging.  A demo
+#                     value; retune with the real weight-settle latency.
+VERIFY_TXN_TIMEOUT_SEC = 12.0
+
+# ── Usable-view test (ml/visibility.py) ───────────────────────────
+# "Is there enough of a PRODUCT in this crop to judge it?"  Decided from
+# several cues together so that a low-saturation product (white/beige
+# packaging) is NOT mistaken for an empty / occluded view:
+#
+# VIS_MIN_CROP_PX  smallest side (px) of a crop worth judging.  (Reuses the
+#                  spirit of MIN_CROP_PX above; kept separate so the verify
+#                  path can be tuned without touching the scene-compare path.)
+# VIS_TEXTURE_MIN  minimum grayscale standard deviation.  A flat, textureless
+#                  patch (a hand, a blank surface, motion blur) sits below
+#                  this; a real product's print/edges sit above it.  This is
+#                  the cue that does NOT depend on colour, so it is what keeps
+#                  a white box from being called invisible.
+# VIS_EDGE_MIN     minimum Laplacian energy (edge content), a second
+#                  colour-independent cue for the same reason.
+VIS_MIN_CROP_PX = 60
+VIS_TEXTURE_MIN = 12.0
+VIS_EDGE_MIN    = 8.0
