@@ -154,6 +154,7 @@ def draw_panel(panel, controller, last_result, fps, no_data, last_latency_ms):
 
     y = text("SCAN (barcode mock)", y, (0, 210, 255), 0.44)
     y = text("  SKU: %s" % (controller.expected_sku or "-"), y, (255, 255, 255))
+    y = text("  txn: %s" % (controller.txn_id or "-"), y, (150, 180, 200), 0.4)
     y += 4
 
     y = text("TRANSACTION", y, (0, 210, 255), 0.44)
@@ -179,6 +180,9 @@ def draw_panel(panel, controller, last_result, fps, no_data, last_latency_ms):
             last_result.colour_pass_frac * 100), y, (210, 210, 210), 0.4)
         y = text("  usable crops: %d" % last_result.usable_crops, y,
                  (210, 210, 210), 0.4)
+        y = text("  txn %s   dw %.0fg" % (
+            last_result.txn_id or "-", last_result.weight_delta), y,
+            (150, 150, 170), 0.38)
         # Wrap the reason across lines.
         y += 2
         for line in _wrap(last_result.reason, 40):
@@ -248,6 +252,25 @@ def main():
     while True:
         ok, frame, meta = source.read()
         if not ok or frame is None:
+            # A source that is merely reconnecting (ESP32-CAM over WiFi) returns
+            # a transient miss but is NOT stopped — keep the UI alive and wait
+            # for it to come back rather than quitting.  A truly finished source
+            # (webcam released, stream permanently down) has stopped=True.
+            if not getattr(source, "stopped", True):
+                panel[:] = (14, 14, 20)
+                msg = "Waiting for camera stream..."
+                cv2.putText(panel, msg, (12, CAM_H // 2), FONT, 0.5,
+                            (0, 170, 255), 1, cv2.LINE_AA)
+                err = getattr(source, "error", None)
+                if err:
+                    for i, line in enumerate(_wrap(str(err), 40)):
+                        cv2.putText(panel, line, (12, CAM_H // 2 + 24 + i * 18),
+                                    FONT, 0.38, (150, 150, 160), 1, cv2.LINE_AA)
+                waiting = np.zeros((CAM_H, CAM_W, 3), dtype=np.uint8)
+                cv2.imshow(window, np.hstack([waiting, panel]))
+                if (cv2.waitKey(30) & 0xFF) in (ord("q"), ord("Q")):
+                    break
+                continue
             print("[verify_demo] Camera stopped.")
             break
         frame = cv2.resize(frame, (CAM_W, CAM_H))
@@ -294,12 +317,7 @@ def main():
             pending_settle_at = time.time() + WEIGHT_SETTLE_DELAY
             print("[verify_demo] Weight changing... will settle shortly.")
         elif key in (ord("r"), ord("R")):
-            # Reset by starting a throwaway scan then clearing — simplest is to
-            # rebuild the controller's transaction via a fresh scan of nothing.
-            controller.state = controller.state.__class__ if False else "IDLE"
-            controller.txn = None
-            controller.follower = None
-            controller.follow_status = FollowStatus.WAITING
+            controller.reset()
             print("[verify_demo] Transaction reset.")
 
     source.release()

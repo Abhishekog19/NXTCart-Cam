@@ -12,9 +12,18 @@
 #
 # Photos are still saved exactly where build_db.py expects them:
 #   references/<product_name>/001.jpg, 002.jpg, …
-# so the existing insertion workflow is unchanged — this only makes the
-# photos you feed it better and more consistent.  See REFERENCE_SOP.md for
-# the why behind each pose.
+# so the existing insertion workflow is unchanged.  What IS saved is the
+# CROPPED product (via ml/product_crop.crop_product), the same crop the live
+# path applies, so references and live crops share one framing domain — and a
+# frame the cropper cannot resolve confidently cannot be saved at all.
+#
+# WHICH CAMERA
+# ─────────────
+# Capture runs through the SAME frame source the verifier uses
+# (ml/frame_source.make_frame_source), selected by config.CAMERA_SOURCE.  So
+# setting CAMERA_SOURCE="mjpeg" captures references THROUGH the ESP32-CAM in
+# its mounted position — the whole point of acceptance rule 0 (shoot on the
+# deployment camera so reference and live image domains match).
 #
 # WHY POSES MATTER (acceptance rule 4)
 # ─────────────────────────────────────
@@ -22,8 +31,7 @@
 # references only show the front face, a shopper holding the item sideways
 # scores low on appearance for no good reason.  Capturing each side, a
 # rotation, a hand-grip, and a tilt gives the "best angle" match something
-# to actually match against — and shooting on the DEPLOYMENT camera keeps
-# the reference and live image domains the same.
+# to actually match against.
 #
 # HOW TO RUN
 # ──────────
@@ -34,8 +42,11 @@ import os
 import sys
 
 import cv2
+import numpy as np
 
-from ml.config import CAMERA_INDEX, REFERENCES_DIR
+from ml.config import CAMERA_SOURCE, REFERENCES_DIR
+from ml.frame_source import make_frame_source
+from ml.product_crop import crop_product
 from ml.visibility import assess
 
 # The guided pose script.  Each entry is (label, on-screen instruction).
@@ -57,7 +68,7 @@ MIN_PHOTOS = 5
 
 
 def _draw_guide(display, product_name, pose_label, pose_hint, saved,
-                pose_idx, usable, reason):
+                pose_idx, can_save, status_text):
     cv2.putText(display, f"Product: {product_name}   Saved: {saved}",
                 (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
     cv2.putText(display,
@@ -66,12 +77,13 @@ def _draw_guide(display, product_name, pose_label, pose_hint, saved,
     cv2.putText(display, pose_hint, (10, 82),
                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (200, 200, 200), 1)
 
-    # Live usable-view indicator — the same assess() the verifier will use.
-    if usable:
-        cv2.putText(display, "VIEW OK - SPACE to save", (10, 112),
+    # Live indicator — reflects BOTH that the product could be cropped AND that
+    # the crop is a usable view (the same assess() the verifier will use).
+    if can_save:
+        cv2.putText(display, f"{status_text} - SPACE to save", (10, 112),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 230, 0), 2)
     else:
-        cv2.putText(display, f"VIEW POOR ({reason}) - adjust", (10, 112),
+        cv2.putText(display, f"{status_text} - adjust", (10, 112),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 120, 255), 2)
 
     cv2.putText(display,
@@ -80,7 +92,7 @@ def _draw_guide(display, product_name, pose_label, pose_hint, saved,
                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, (180, 180, 180), 1)
 
 
-def capture_for_product(product_name: str, cap: cv2.VideoCapture) -> int:
+def capture_for_product(product_name: str, source) -> int:
     save_dir = os.path.join(REFERENCES_DIR, product_name)
     os.makedirs(save_dir, exist_ok=True)
 
@@ -97,29 +109,55 @@ def capture_for_product(product_name: str, cap: cv2.VideoCapture) -> int:
     pose_idx = 0
 
     while True:
-        ok, frame = cap.read()
+        ok, frame, _meta = source.read()
         if not ok or frame is None:
-            print("[capture] ERROR: Could not read camera frame.")
+            # A source that is merely reconnecting (ESP32-CAM over WiFi)
+            # returns a transient miss but is NOT stopped — keep the UI alive
+            # and wait rather than aborting the capture.
+            if not getattr(source, "stopped", True):
+                wait = np.zeros((240, 480, 3), dtype=np.uint8)
+                cv2.putText(wait, "Waiting for camera stream...", (12, 120),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 170, 255), 1)
+                cv2.imshow(window_name, wait)
+                if (cv2.waitKey(30) & 0xFF) in (ord("q"), ord("Q")):
+                    break
+                continue
+            print("[capture] ERROR: camera stopped / could not read frame.")
             break
 
-        # Judge the WHOLE frame as the stand-in crop here.  At capture time we
-        # do not run the detector, so we assess the centre region the operator
-        # is framing the product into.
-        vis = assess(frame)
+        # Crop to the product the SAME way build_db.py and the live path do, so
+        # what we SAVE is exactly what will be embedded and matched.  Only when
+        # the crop resolves AND is a usable view can this frame be saved.
+        res = crop_product(frame)
         display = frame.copy()
+        if res.ok:
+            vis = assess(res.crop)
+            can_save = vis.usable
+            status_text = "VIEW OK" if vis.usable else f"VIEW POOR ({vis.reason})"
+        else:
+            can_save = False
+            status_text = f"NO CROP ({res.status})"
+
+        # Show the crop box so the operator sees exactly what will be stored.
+        if res.bbox is not None:
+            x, y, w, h = res.bbox
+            box_col = (0, 230, 0) if can_save else (0, 120, 255)
+            cv2.rectangle(display, (x, y), (x + w, y + h), box_col, 2)
+
         label, hint = POSES[pose_idx]
         _draw_guide(display, product_name, label, hint, saved, pose_idx,
-                    vis.usable, vis.reason)
+                    can_save, status_text)
         cv2.imshow(window_name, display)
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord(" "):
-            if not vis.usable:
-                print(f"  Skipped save — view not usable ({vis.reason}). "
+            if not can_save:
+                print(f"  Skipped save — {status_text}. "
                       f"Adjust framing/lighting and try again.")
                 continue
             filename = os.path.join(save_dir, f"{counter:03d}.jpg")
-            cv2.imwrite(filename, frame)
+            # Save the CROP, not the whole frame.
+            cv2.imwrite(filename, res.crop)
             saved += 1
             counter += 1
             print(f"  Saved {filename}  (pose: {label}, {saved} total)")
@@ -145,43 +183,47 @@ def capture_for_product(product_name: str, cap: cv2.VideoCapture) -> int:
 
 
 def main():
-    cap = cv2.VideoCapture(CAMERA_INDEX)
-    if not cap.isOpened():
-        print(f"ERROR: Cannot open camera index {CAMERA_INDEX}. "
-              f"Try changing CAMERA_INDEX in ml/config.py.")
+    try:
+        source = make_frame_source(CAMERA_SOURCE)
+    except Exception as e:
+        print(f"ERROR: Cannot open camera source '{CAMERA_SOURCE}': {e}\n"
+              f"Check CAMERA_SOURCE / CAMERA_INDEX / ESP32_STREAM_URL in "
+              f"ml/config.py.")
         sys.exit(1)
 
     print("=" * 60)
     print("  NXTCart-Cam — Guided Reference Capture")
     print("=" * 60)
-    print(f"  Camera index : {CAMERA_INDEX}")
+    print(f"  Camera source: {CAMERA_SOURCE}")
     print(f"  Save location: {REFERENCES_DIR}")
     print(f"  Poses/product: {[p[0] for p in POSES]}")
     print(f"  Min photos   : {MIN_PHOTOS}")
-    print("  See REFERENCE_SOP.md for the full procedure.")
+    print("  Saved photos are CROPPED to the product (same crop as the live")
+    print("  path). See REFERENCE_SOP.md for the full procedure.")
     print("=" * 60)
 
     total_products = 0
     total_photos = 0
 
-    while True:
-        print()
-        name = input("Enter product name (ENTER with no name to finish): ").strip()
-        if not name:
-            print("[capture] Finished capturing references.")
-            break
+    try:
+        while True:
+            print()
+            name = input("Enter product name (ENTER with no name to finish): ").strip()
+            if not name:
+                print("[capture] Finished capturing references.")
+                break
 
-        safe_name = "".join(c if c.isalnum() or c in ("_", "-") else "_"
-                            for c in name)
-        if safe_name != name:
-            print(f"[capture] Using folder name: '{safe_name}'")
+            safe_name = "".join(c if c.isalnum() or c in ("_", "-") else "_"
+                                for c in name)
+            if safe_name != name:
+                print(f"[capture] Using folder name: '{safe_name}'")
 
-        saved = capture_for_product(safe_name, cap)
-        total_products += 1
-        total_photos += saved
-
-    cap.release()
-    cv2.destroyAllWindows()
+            saved = capture_for_product(safe_name, source)
+            total_products += 1
+            total_photos += saved
+    finally:
+        source.release()
+        cv2.destroyAllWindows()
 
     print(f"\n[capture] Summary: {total_products} product(s), "
           f"{total_photos} photo(s).")
