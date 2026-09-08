@@ -633,3 +633,58 @@ VERIFY_TXN_TIMEOUT_SEC = 12.0
 VIS_MIN_CROP_PX = 60
 VIS_TEXTURE_MIN = 12.0
 VIS_EDGE_MIN    = 8.0
+
+# ── Reference / live product cropping (ml/product_crop.py) ─────────
+# A reference photo and a live frame must be cropped to the product the SAME
+# way, or a genuine match scores low purely because the reference is a wide
+# whole-frame shot and the live input is a tight product crop (two different
+# framing domains).  crop_product() finds the product by GRADIENT ENERGY —
+# polarity-independent, so it works whether the product is lighter OR darker
+# than the surface behind it — and, crucially, REJECTS an image it cannot crop
+# confidently so an ambiguous reference never poisons the database.
+#
+# CROP_MIN_AREA_FRAC  the product's bounding box must fill at least this
+#                     fraction of the frame, else the shot is TOO_SMALL (the
+#                     product is too far away to judge — mirrors VIS_MIN_CROP_PX
+#                     in spirit but measured against the whole frame).
+# CROP_AMBIG_RATIO    if a SECOND gradient region is at least this fraction of
+#                     the largest one (and not enclosed by it), the crop is
+#                     AMBIGUOUS — two things are in shot and we refuse to guess
+#                     which is "the product", exactly as the live follower
+#                     refuses to guess between two contesting detections.
+# CROP_MARGIN         fraction of the detected box added as padding on each
+#                     side so a tight box does not clip the product edge.
+# CROP_MIN_PX         smallest acceptable crop side (px) after padding; below
+#                     this there is too little to judge (shares the intent of
+#                     VIS_MIN_CROP_PX).
+CROP_MIN_AREA_FRAC = 0.10
+CROP_AMBIG_RATIO   = 0.55
+CROP_MARGIN        = 0.08
+CROP_MIN_PX        = 60
+
+# ── Colour fingerprint format (ml/verifier.py, build_db.py) ───────
+# The colour reference format is VERSIONED because its meaning changed.
+#
+# v1 (old) built an HSV hue–saturation histogram over ONLY the saturated
+# pixels of a crop.  That silently discarded white / grey / beige packaging:
+# an unsaturated product produced an all-zero fingerprint, so colour could
+# never pass and a genuine white box could never reach MATCH.
+#
+# v2 (current) additionally bins the ACHROMATIC (low-saturation) pixels by
+# brightness, so a white box has a real "mostly bright & colourless"
+# fingerprint that matches other white boxes yet still differs from a coloured
+# swap.  Because a v1 vector and a v2 vector have different lengths AND
+# different meanings, ml.verifier.load_colour_db REFUSES a database whose
+# colour_format is not COLOUR_FORMAT_VERSION (colour disabled → MATCH becomes
+# unreachable, a safe degradation) and tells you to rerun build_db.py.
+#
+# COLOUR_SAT_MIN / COLOUR_VAL_MIN  a pixel is CHROMATIC (its hue is real) only
+#                     when it is both saturated and bright enough; these gate
+#                     the hue–saturation part.
+# COLOUR_ACH_VAL_MIN  achromatic pixels darker than this are dropped as sensor
+#                     noise / shadow; the rest are binned by brightness so
+#                     white, grey and near-black read differently.
+COLOUR_FORMAT_VERSION = 2
+COLOUR_SAT_MIN     = 90
+COLOUR_VAL_MIN     = 60
+COLOUR_ACH_VAL_MIN = 40

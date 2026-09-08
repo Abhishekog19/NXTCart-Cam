@@ -32,6 +32,16 @@
 #     • broken follow      ambiguous / merged / lost item -> RETRY (the
 #                          follower already refuses to guess; custody just
 #                          surfaces it).
+#     • stale/mismatched    a weight settle tagged for a DIFFERENT transaction,
+#       weight settle       or time-stamped before this scan opened, is DROPPED
+#                           — a late settle from the previous item cannot
+#                           complete this one, so consecutive items are never
+#                           cross-bound.
+#
+# Every scan opens a transaction with an id; that id (and the settled weight
+# delta) is stamped onto the VerdictResult, so downstream fusion can correlate
+# a camera result with the exact scan — and reject one that arrives against the
+# wrong transaction.
 #
 # Nothing here can turn ambiguity into acceptance; every uncertain path is
 # RETRY, and only a clean MATCH from the verifier accepts.
@@ -62,6 +72,7 @@ class TxnState:
 class Transaction:
     expected_sku: str
     started_ts: float
+    txn_id: str = ""
     reached_cart: bool = False
     weight_settled: bool = False
     weight_delta: float = 0.0
@@ -99,20 +110,41 @@ class CustodyController:
         self.last_result: Optional[VerdictResult] = None
         # For the UI: the follower's status this frame.
         self.follow_status: str = FollowStatus.WAITING
+        # Fallback transaction-id generator, used only when a scan arrives
+        # without a backend-provided id, so every result still carries one.
+        self._local_txn_seq = 0
+
+    def _next_local_txn_id(self) -> str:
+        self._local_txn_seq += 1
+        return f"cam-local-{self._local_txn_seq}"
 
     # ── per-frame entry point ─────────────────────────────────────
 
     def process(self, frame: np.ndarray, meta) -> Optional[VerdictResult]:
-        # 1. Barcode first — a new scan supersedes any open transaction.
+        # 1. Barcode first — a new scan supersedes any open transaction.  If it
+        #    aborted one, surface that RETRY THIS frame (the fresh transaction
+        #    opened by the same scan continues on following frames).
         scanned = self.barcode.poll()
         if scanned is not None:
-            self._on_scan(scanned)
+            aborted = self._on_scan(scanned.sku, scanned.txn_id)
+            if aborted is not None:
+                return aborted
 
-        # 2. Weight events (change / settle) bind to the open transaction.
+        # 2. Weight events (change / settle) bind to the open transaction — but
+        #    ONLY if the settle actually belongs to it.  A settle tagged for a
+        #    different transaction, or time-stamped before this scan opened
+        #    (a late settle from the previous item), is dropped so consecutive
+        #    items can never be cross-bound.
         evt = self.weight.poll()
-        if evt is not None and self.txn is not None and evt.phase == WeightPhase.SETTLED:
-            self.txn.weight_settled = True
-            self.txn.weight_delta = evt.delta
+        if (evt is not None and self.txn is not None
+                and evt.phase == WeightPhase.SETTLED):
+            evt_txn = getattr(evt, "txn_id", None)
+            evt_ts = getattr(evt, "ts", None)
+            mismatched = evt_txn is not None and evt_txn != self.txn.txn_id
+            stale = evt_ts is not None and evt_ts < self.txn.started_ts
+            if not mismatched and not stale:
+                self.txn.weight_settled = True
+                self.txn.weight_delta = evt.delta
 
         # 3. No open transaction -> nothing to do.
         if self.state != TxnState.FOLLOWING or self.txn is None or self.follower is None:
@@ -147,16 +179,31 @@ class CustodyController:
 
     # ── transaction lifecycle ─────────────────────────────────────
 
-    def _on_scan(self, sku: str) -> None:
-        # A second scan while one is open voids the open one.
+    def _on_scan(self, sku: str, txn_id: Optional[str] = None) -> Optional[VerdictResult]:
+        """
+        Open a fresh transaction for `sku`.  If one was already open, ABORT it
+        first (the shopper re-scanned, so the half-finished one is void) and
+        RETURN that abort verdict so the caller can surface it; the new
+        transaction is opened regardless and continues on later frames.
+
+        `txn_id` is the backend-provided transaction id; when absent a local
+        id is generated so the result always carries one.
+        """
+        aborted: Optional[VerdictResult] = None
         if self.state == TxnState.FOLLOWING and self.txn is not None:
-            self._resolve(Verdict.RETRY,
-                          "A new item was scanned before the previous one "
-                          "finished. Previous scan cancelled.")
-        self.txn = Transaction(expected_sku=sku, started_ts=time.monotonic())
+            aborted = self._resolve(
+                Verdict.RETRY,
+                "A new item was scanned before the previous one finished. "
+                "Previous scan cancelled.")
+        self.txn = Transaction(
+            expected_sku=sku,
+            started_ts=time.monotonic(),
+            txn_id=txn_id or self._next_local_txn_id(),
+        )
         self.follower = ItemFollower(self.frame_size)
         self.state = TxnState.FOLLOWING
         self.follow_status = FollowStatus.WAITING
+        return aborted
 
     def _resolve_retry_broken(self, status: str) -> VerdictResult:
         reason = {
@@ -181,17 +228,34 @@ class CustodyController:
         return self._finish(result)
 
     def _finish(self, result: VerdictResult) -> VerdictResult:
+        # Stamp the transaction identity and the bound weight change onto the
+        # result BEFORE clearing the transaction, so every camera verdict can
+        # be correlated to its scan (and its weight) downstream.
+        if self.txn is not None:
+            result.txn_id = self.txn.txn_id
+            result.weight_delta = self.txn.weight_delta
         self.last_result = result
         self.state = TxnState.IDLE
         self.txn = None
         self.follower = None
         return result
 
+    def reset(self) -> None:
+        """Abandon any open transaction and return to IDLE (operator reset)."""
+        self.state = TxnState.IDLE
+        self.txn = None
+        self.follower = None
+        self.follow_status = FollowStatus.WAITING
+
     # ── introspection for the UI ──────────────────────────────────
 
     @property
     def expected_sku(self) -> Optional[str]:
         return self.txn.expected_sku if self.txn else None
+
+    @property
+    def txn_id(self) -> Optional[str]:
+        return self.txn.txn_id if self.txn else None
 
     @property
     def reached_cart(self) -> bool:

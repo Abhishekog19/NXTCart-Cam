@@ -156,15 +156,36 @@ class MJPEGSource:
                 self._cond.notify_all()
             return
 
-        try:
-            resp = requests.get(self.url, stream=True, timeout=self._timeout)
-        except Exception as e:
+        # WiFi MJPEG from an ESP32-CAM drops and stalls routinely.  Rather than
+        # die on the first hiccup (which would end the whole demo), reconnect
+        # with a short backoff until we are explicitly released.  Each attempt
+        # decodes into the SAME single-frame slot, so reconnection costs no
+        # extra memory.
+        while True:
             with self._cond:
-                self._error = f"cannot open MJPEG stream {self.url}: {e}"
-                self._stopped = True
-                self._cond.notify_all()
-            return
+                if self._stopped:
+                    break
+            try:
+                self._stream_once(requests)
+            except Exception as e:
+                with self._cond:
+                    # Record the last error for the UI but keep trying — a
+                    # transient drop should self-heal, not stop the lane.
+                    self._error = f"MJPEG stream error ({self.url}): {e}"
+            with self._cond:
+                if self._stopped:
+                    break
+            time.sleep(0.5)  # backoff before reconnecting
 
+        with self._cond:
+            self._stopped = True
+            self._cond.notify_all()
+
+    def _stream_once(self, requests) -> None:
+        """Open the stream and pump newest-frame-only until it ends/drops."""
+        resp = requests.get(self.url, stream=True, timeout=self._timeout)
+        with self._cond:
+            self._error = None  # connected; clear any prior transient error
         buf = b""
         for chunk in resp.iter_content(chunk_size=4096):
             with self._cond:
@@ -186,10 +207,10 @@ class MJPEGSource:
                         self._frame = frame
                         self._seq += 1
                         self._cond.notify_all()
-
-        with self._cond:
-            self._stopped = True
-            self._cond.notify_all()
+            # Guard against unbounded growth if EOI never arrives (corrupt
+            # stream): keep only a bounded tail so RAM can't creep on the Pi.
+            elif len(buf) > 1_000_000:
+                buf = buf[-4096:]
 
     def read(self, timeout: float = 2.0) -> Tuple[bool, Optional[np.ndarray], Optional[FrameMeta]]:
         deadline = time.monotonic() + timeout
@@ -215,6 +236,14 @@ class MJPEGSource:
     def error(self) -> Optional[str]:
         with self._cond:
             return self._error
+
+    @property
+    def stopped(self) -> bool:
+        """True only when permanently finished (released) — NOT during a
+        transient reconnect.  Lets a consumer tell 'wait, it'll come back'
+        from 'it's over'."""
+        with self._cond:
+            return self._stopped
 
     def release(self) -> None:
         with self._cond:

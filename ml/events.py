@@ -7,9 +7,16 @@
 # hardware exists — only a laptop.  But the verification logic is defined
 # ENTIRELY in terms of two events:
 #
-#     • a BARCODE scan   -> "the expected SKU is X"
+#     • a BARCODE scan   -> "the expected SKU is X, under transaction T"
 #     • a WEIGHT change  -> "something of mass m was added, and the scale
-#                            has now settled"
+#                            has now settled" (optionally tagged with T)
+#
+# Every scan opens a TRANSACTION with an id (T).  The camera stamps that id
+# onto its verdict and the weight channel may carry it too, so consecutive
+# items cannot be cross-bound: a weight settle that belongs to the previous
+# scan (or arrives out of order) is identifiable and can be rejected.  When
+# the backend supplies its own transaction id at scan time we use it verbatim;
+# otherwise the mock generates one so results always carry an id.
 #
 # So we hide each behind a tiny protocol and provide a MOCK driver for
 # tonight (keyboard / programmatic) and leave a clearly-marked seam where
@@ -35,10 +42,18 @@ from typing import List, Optional, Protocol, runtime_checkable
 # BARCODE
 # ═════════════════════════════════════════════════════════════════
 
+@dataclass
+class ScanEvent:
+    """One barcode scan: which SKU, under which transaction, and when."""
+    sku: str
+    txn_id: str
+    ts: float
+
+
 @runtime_checkable
 class BarcodeSource(Protocol):
-    def poll(self) -> Optional[str]:
-        """Return a freshly scanned SKU since the last poll, else None."""
+    def poll(self) -> Optional["ScanEvent"]:
+        """Return a freshly scanned item since the last poll, else None."""
         ...
 
 
@@ -47,17 +62,26 @@ class MockBarcodeSource:
     A barcode scanner you drive by hand.
 
     The demo calls `scan(sku)` when the operator presses a key; `poll()`
-    then returns that SKU exactly once.  This is the tonight stand-in for a
-    USB-HID scanner, whose real driver would instead read the digits the
-    scanner "types" and return them from poll().
+    then returns that scan exactly once as a ScanEvent.  This is the tonight
+    stand-in for a USB-HID scanner, whose real driver would instead read the
+    digits the scanner "types" and return them from poll().
+
+    A transaction id is attached to every scan: the backend may pass its own
+    (`scan(sku, txn_id=...)`); otherwise a monotonic mock id is generated so a
+    result always has an id to correlate against.
     """
 
     def __init__(self, skus: Optional[List[str]] = None) -> None:
         self.skus = list(skus or [])
-        self._pending: Optional[str] = None
+        self._pending: Optional[ScanEvent] = None
+        self._counter = 0
 
-    def scan(self, sku: str) -> None:
-        self._pending = sku
+    def scan(self, sku: str, txn_id: Optional[str] = None) -> str:
+        """Queue a scan; returns the transaction id used."""
+        self._counter += 1
+        tid = txn_id or f"mock-txn-{self._counter}"
+        self._pending = ScanEvent(sku=sku, txn_id=tid, ts=time.monotonic())
+        return tid
 
     def scan_next(self) -> Optional[str]:
         """Cycle to the next known SKU (demo convenience for a keypress)."""
@@ -69,9 +93,9 @@ class MockBarcodeSource:
         self.scan(sku)
         return sku
 
-    def poll(self) -> Optional[str]:
-        sku, self._pending = self._pending, None
-        return sku
+    def poll(self) -> Optional[ScanEvent]:
+        evt, self._pending = self._pending, None
+        return evt
 
 
 # ═════════════════════════════════════════════════════════════════
@@ -91,6 +115,10 @@ class WeightEvent:
     grams: float
     delta: float           # change vs. the last stable total (0 unless SETTLED)
     ts: float
+    # Optional transaction id the weight change belongs to.  When the backend
+    # tags settles with the scan's transaction, custody can reject a settle
+    # meant for a different (e.g. previous) item.  None = untagged.
+    txn_id: Optional[str] = None
 
 
 @runtime_checkable
@@ -118,14 +146,15 @@ class MockWeightSource:
         self._stable_grams = start_grams
         self._queue: List[WeightEvent] = []
 
-    def begin_change(self) -> None:
+    def begin_change(self, txn_id: Optional[str] = None) -> None:
         self._queue.append(WeightEvent(WeightPhase.CHANGING, self._grams, 0.0,
-                                       time.monotonic()))
+                                       time.monotonic(), txn_id))
 
-    def settle(self, delta_grams: float) -> None:
+    def settle(self, delta_grams: float, txn_id: Optional[str] = None,
+               ts: Optional[float] = None) -> None:
         self._grams = self._stable_grams + delta_grams
         evt = WeightEvent(WeightPhase.SETTLED, self._grams, delta_grams,
-                          time.monotonic())
+                          time.monotonic() if ts is None else ts, txn_id)
         self._stable_grams = self._grams
         self._queue.append(evt)
 
