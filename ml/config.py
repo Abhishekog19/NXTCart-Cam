@@ -688,3 +688,45 @@ COLOUR_FORMAT_VERSION = 2
 COLOUR_SAT_MIN     = 90
 COLOUR_VAL_MIN     = 60
 COLOUR_ACH_VAL_MIN = 40
+
+# ── AI verification backend (ml/ai_backend.py) ────────────────────
+# A SECOND, INDEPENDENT verifier that answers the same 1-vs-1 question as the
+# local MobileNet+HSV path: "the scanner says SKU X — is this X?"  It exists so
+# the two can be compared head to head on the SAME labelled images
+# (compare_backends.py), because the local path's accuracy has never actually
+# been measured — the thresholds above are seeded guesses, not findings.
+#
+# ONE CLIENT, TWO DESTINATIONS.  OpenRouter and Ollama both speak the
+# OpenAI-compatible /chat/completions API, so only the base URL changes:
+#
+#     cloud  ->  https://openrouter.ai/api/v1   + OPENROUTER_API_KEY in the env
+#     local  ->  http://localhost:11434/v1      (Ollama; no key needed)
+#
+# So "test in the cloud for a cent, then move it onto a local box" is a config
+# edit, not a rewrite.  Nothing here runs in the live checkout path today; the
+# AI backend is an offline comparison subject until the numbers justify more.
+#
+# AI_BACKEND_MODEL  the vision model to ask.  Cloud examples, cheapest first:
+#                   inclusionai/ling-3.0-flash-vl:free  (free tier — start here)
+#                   z-ai/glm-5.3-flash                  (best value)
+#                   For Ollama use a local tag, e.g. "minicpm-v4.6:1b".
+# AI_BACKEND_TIMEOUT_SEC  hard ceiling on one call.  On timeout the backend
+#                   returns RETRY — never MATCH — so a slow or dead endpoint
+#                   can never turn into an acceptance.
+# AI_BACKEND_MAX_SIDE  longest side (px) the crop is downscaled to before being
+#                   sent.  Providers bill per image mostly independent of
+#                   resolution, but a smaller payload is faster over WiFi and
+#                   512 keeps the label legible.
+AI_BACKEND_BASE_URL    = "https://openrouter.ai/api/v1"
+AI_BACKEND_MODEL       = "inclusionai/ling-3.0-flash-vl:free"
+AI_BACKEND_TIMEOUT_SEC = 20.0
+AI_BACKEND_MAX_SIDE    = 512
+
+# ── Bake-off dataset (capture_dataset.py, compare_backends.py) ────
+# Where labelled transactions are written.  Each transaction becomes one
+# folder of full-resolution crops plus a meta.json recording the expected SKU
+# and YOUR ground-truth label (genuine / swap).  Full resolution on purpose:
+# downscaling later is easy, upscaling is impossible, and the local backend
+# resizes at scoring time anyway (ml/recognizer.py), so keeping the originals
+# costs only disk and preserves every option.
+DATASET_DIR = "datasets"

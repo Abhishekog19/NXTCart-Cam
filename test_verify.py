@@ -644,6 +644,314 @@ def test_txn_id_and_weight_binding():
           f"r={r} settled={ctrl.weight_settled}")
 
 
+# ═════════════════════════════════════════════════════════════════
+# BACKEND SEAM  (local and AI are interchangeable peers)
+# ═════════════════════════════════════════════════════════════════
+
+def test_backend_protocol():
+    print("\n[backends] the two verifiers are interchangeable")
+    from ml.ai_backend import VLMBackend
+    from ml.backends import LocalBackend, VerificationBackend
+
+    verifier = _make_verifier(0.9, 0.9)
+    local = LocalBackend(verifier)
+
+    # runtime_checkable Protocol: both must satisfy it, or compare_backends
+    # cannot treat them as peers.
+    check("LocalBackend satisfies VerificationBackend",
+          isinstance(local, VerificationBackend))
+    check("VLMBackend satisfies VerificationBackend",
+          isinstance(VLMBackend(api_key="x"), VerificationBackend))
+
+    # The wrapper must not change the verdict — it exists only to add a name.
+    crops = [_usable_crop() for _ in range(VERIFY_MIN_USABLE_FRAMES + 1)]
+    direct = verifier.verify("sku_a", crops)
+    wrapped = local.verify("sku_a", crops)
+    check("LocalBackend forwards unchanged",
+          wrapped.verdict == direct.verdict == Verdict.MATCH,
+          f"{wrapped.verdict} vs {direct.verdict}")
+    check("LocalBackend has a name for the table", local.name == "local")
+
+
+# ═════════════════════════════════════════════════════════════════
+# AI BACKEND: reply -> verdict mapping
+# ═════════════════════════════════════════════════════════════════
+
+class FakeHTTP:
+    """
+    Stands in for the `requests` module inside ml.ai_backend._ask.
+
+    The backend imports requests lazily *inside* the method, so injecting a
+    fake into sys.modules exercises the REAL code path — payload build, HTTP
+    handling, JSON parse, verdict mapping — with only the socket replaced.
+    Testing just the mapping function would skip the parts most likely to
+    break.
+    """
+
+    class Timeout(Exception):
+        pass
+
+    def __init__(self, reply=None, status=200, usage=None, raise_exc=None,
+                 body=None):
+        self.reply = reply
+        self.status = status
+        self.usage = usage or {"prompt_tokens": 1800, "completion_tokens": 20,
+                               "total_tokens": 1820}
+        self.raise_exc = raise_exc
+        self.body = body
+        self.calls = []
+
+    def post(self, url, headers=None, json=None, timeout=None):
+        self.calls.append({"url": url, "json": json, "timeout": timeout})
+        if self.raise_exc is not None:
+            raise self.raise_exc
+        return _FakeResponse(self.status, self.reply, self.usage, self.body)
+
+
+class _FakeResponse:
+    def __init__(self, status, reply, usage, body=None):
+        self.status_code = status
+        self._reply = reply
+        self._usage = usage
+        self._body = body
+        self.text = reply if isinstance(reply, str) else "error body"
+
+    def json(self):
+        if self._body is not None:
+            return self._body
+        return {"choices": [{"message": {"content": self._reply}}],
+                "usage": self._usage}
+
+
+def _ai_verdict(reply=None, status=200, raise_exc=None, body=None,
+                n_crops=None):
+    """Drive VLMBackend with a canned HTTP layer and return its VerdictResult."""
+    import sys as _sys
+    from ml.ai_backend import VLMBackend
+
+    fake = FakeHTTP(reply=reply, status=status, raise_exc=raise_exc, body=body)
+    saved = _sys.modules.get("requests")
+    _sys.modules["requests"] = fake
+    try:
+        backend = VLMBackend(api_key="test-key")
+        n = n_crops if n_crops is not None else VERIFY_MIN_USABLE_FRAMES + 1
+        crops = [_usable_crop() for _ in range(n)]
+        return backend.verify("sku_a", crops), fake
+    finally:
+        if saved is not None:
+            _sys.modules["requests"] = saved
+        else:
+            _sys.modules.pop("requests", None)
+
+
+def test_ai_verdict_mapping():
+    print("\n[ai] model reply -> verdict")
+
+    r, fake = _ai_verdict('{"matches": true, "confident": true, '
+                          '"reason": "Lays Classic, red bag"}')
+    check("confident yes -> MATCH", r.verdict == Verdict.MATCH, r.verdict)
+    check("reason is carried through", "red bag" in r.reason, r.reason)
+    check("token usage recorded", getattr(r, "ai_tokens", 0) == 1820,
+          str(getattr(r, "ai_tokens", None)))
+
+    r, _ = _ai_verdict('{"matches": true, "confident": false, '
+                       '"reason": "blurry"}')
+    check("unsure yes -> SUSPECT (not MATCH)", r.verdict == Verdict.SUSPECT,
+          r.verdict)
+
+    r, _ = _ai_verdict('{"matches": false, "confident": true, '
+                       '"reason": "this is a blue box, not red"}')
+    check("confident no -> MISMATCH", r.verdict == Verdict.MISMATCH, r.verdict)
+
+    r, _ = _ai_verdict('{"matches": false, "confident": false, '
+                       '"reason": "cannot see it"}')
+    check("unsure no -> SUSPECT (does not accuse)",
+          r.verdict == Verdict.SUSPECT, r.verdict)
+
+    # The request itself must be well formed, or a live call would 400.
+    _, fake = _ai_verdict('{"matches": true, "confident": true, "reason": "x"}')
+    payload = fake.calls[0]["json"]
+    content = payload["messages"][1]["content"]
+    check("endpoint is /chat/completions",
+          fake.calls[0]["url"].endswith("/chat/completions"),
+          fake.calls[0]["url"])
+    check("exactly one image is sent",
+          sum(1 for p in content if p.get("type") == "image_url") == 1)
+    check("image is a base64 data URI",
+          content[0]["image_url"]["url"].startswith("data:image/jpeg;base64,"))
+    check("temperature is 0 (repeatable)", payload["temperature"] == 0)
+    check("timeout is passed to requests", fake.calls[0]["timeout"] > 0)
+
+
+# ═════════════════════════════════════════════════════════════════
+# AI BACKEND: every failure path must fail CLOSED
+# ═════════════════════════════════════════════════════════════════
+
+def test_ai_fails_closed():
+    print("\n[ai] every failure resolves RETRY, never MATCH")
+
+    cases = [
+        ("network timeout", dict(raise_exc=FakeHTTP.Timeout("timed out"))),
+        ("HTTP 500", dict(reply="upstream exploded", status=500)),
+        ("HTTP 429 rate limited", dict(reply="slow down", status=429)),
+        ("empty reply", dict(reply="")),
+        ("prose, no JSON", dict(reply="I think that looks like the product!")),
+        ("malformed JSON", dict(reply='{"matches": true, "conf')),
+        ("missing 'confident'", dict(reply='{"matches": true}')),
+        ("missing 'matches'", dict(reply='{"confident": true}')),
+        ("non-boolean matches", dict(reply='{"matches": "yes", '
+                                           '"confident": true}')),
+        ("wrong response shape", dict(body={"unexpected": "shape"})),
+    ]
+    for name, kwargs in cases:
+        r, _ = _ai_verdict(**kwargs)
+        check(f"{name} -> RETRY", r.verdict == Verdict.RETRY, r.verdict)
+        check(f"{name} does not accept", not r.accepted, r.verdict)
+
+    # No key and a remote host: must not even try, and must not accept.
+    # The env vars are popped first because VLMBackend falls back to them, so
+    # a developer with a real key exported would otherwise not run this test.
+    import os as _os
+
+    from ml.ai_backend import VLMBackend
+    saved = (_os.environ.pop("OPENROUTER_API_KEY", None),
+             _os.environ.pop("OPENAI_API_KEY", None))
+    try:
+        backend = VLMBackend(api_key="")
+        crops = [_usable_crop() for _ in range(VERIFY_MIN_USABLE_FRAMES + 1)]
+        r = backend.verify("sku_a", crops)
+        check("no API key -> RETRY", r.verdict == Verdict.RETRY, r.verdict)
+    finally:
+        if saved[0] is not None:
+            _os.environ["OPENROUTER_API_KEY"] = saved[0]
+        if saved[1] is not None:
+            _os.environ["OPENAI_API_KEY"] = saved[1]
+
+    # Guard parity with the local path: the same too-few-crops and
+    # broken-custody rules, so the comparison measures models, not guards.
+    r, fake = _ai_verdict('{"matches": true, "confident": true, "reason": "x"}',
+                          n_crops=VERIFY_MIN_USABLE_FRAMES - 1)
+    check("too few crops -> RETRY (same rule as local)",
+          r.verdict == Verdict.RETRY, r.verdict)
+    check("too few crops makes no API call", len(fake.calls) == 0,
+          f"{len(fake.calls)} calls")
+
+    from ml.ai_backend import VLMBackend as _V
+    b = _V(api_key="k")
+    r = b.verify("sku_a", [_usable_crop() for _ in range(6)],
+                 follower_broken=True)
+    check("broken custody -> RETRY", r.verdict == Verdict.RETRY, r.verdict)
+
+
+def test_ai_reply_parsing():
+    print("\n[ai] tolerant parsing of real-world model output")
+    from ml.ai_backend import _parse
+
+    ok = _parse('{"matches": true, "confident": true, "reason": "red bag"}')
+    check("plain JSON parses", ok == (True, True, "red bag"), str(ok))
+
+    fenced = _parse('```json\n{"matches": false, "confident": true, '
+                    '"reason": "blue"}\n```')
+    check("```json fenced block parses", fenced == (False, True, "blue"),
+          str(fenced))
+
+    chatty = _parse('Sure! Here is my answer:\n'
+                    '{"matches": true, "confident": false, "reason": "dark"}')
+    check("JSON after prose parses", chatty == (True, False, "dark"),
+          str(chatty))
+
+    no_reason = _parse('{"matches": true, "confident": true}')
+    check("missing reason is tolerated (not a safety field)",
+          no_reason is not None and no_reason[0] is True, str(no_reason))
+
+    # And the things that must NOT parse, because a default here would be a
+    # silent accept.
+    for bad, why in [
+        ('{"matches": true}', "missing confident"),
+        ('{"confident": true}', "missing matches"),
+        ('{"matches": 1, "confident": true}', "int instead of bool"),
+        ('{"matches": "true", "confident": "true"}', "strings not bools"),
+        ("", "empty"),
+        ("not json at all", "prose only"),
+        ("[1,2,3]", "wrong JSON type"),
+    ]:
+        check(f"refuses: {why}", _parse(bad) is None, repr(bad))
+
+
+# ═════════════════════════════════════════════════════════════════
+# COMPARISON METRICS  (FAR / FRR are the decision, so they must be right)
+# ═════════════════════════════════════════════════════════════════
+
+def test_comparison_metrics():
+    print("\n[compare] FAR / FRR arithmetic")
+    from compare_backends import (BackendRun, Case, LABEL_GENUINE, LABEL_SWAP,
+                                  _mark, summarise)
+
+    cases = [
+        Case("g1", "sku_a", LABEL_GENUINE),
+        Case("g2", "sku_a", LABEL_GENUINE),
+        Case("g3", "sku_a", LABEL_GENUINE),
+        Case("g4", "sku_a", LABEL_GENUINE),
+        Case("s1", "sku_a", LABEL_SWAP),
+        Case("s2", "sku_a", LABEL_SWAP),
+        Case("s3", "sku_a", LABEL_SWAP),
+        Case("s4", "sku_a", LABEL_SWAP),
+    ]
+    run = BackendRun(name="t")
+    run.verdicts = {
+        "g1": Verdict.MATCH,       # correct
+        "g2": Verdict.MATCH,       # correct
+        "g3": Verdict.MISMATCH,    # FALSE REJECT
+        "g4": Verdict.RETRY,       # friction, not an error
+        "s1": Verdict.MISMATCH,    # caught
+        "s2": Verdict.SUSPECT,     # caught (flagged)
+        "s3": Verdict.MATCH,       # FALSE ACCEPT — theft
+        "s4": Verdict.RETRY,       # not judged
+    }
+    s = summarise(run, cases)
+
+    check("FAR = 1 of 4 swaps", abs(s["far"] - 0.25) < 1e-9, str(s["far"]))
+    check("FRR = 1 of 4 genuine", abs(s["frr"] - 0.25) < 1e-9, str(s["frr"]))
+    check("catch rate = 2 of 4 swaps", abs(s["catch_rate"] - 0.5) < 1e-9,
+          str(s["catch_rate"]))
+    check("pass rate = 2 of 4 genuine", abs(s["pass_rate"] - 0.5) < 1e-9,
+          str(s["pass_rate"]))
+    check("retry rate = 2 of 8", abs(s["retry_rate"] - 0.25) < 1e-9,
+          str(s["retry_rate"]))
+    check("the false accept is named", s["false_accepts"] == ["s3"],
+          str(s["false_accepts"]))
+    check("the false reject is named", s["false_rejects"] == ["g3"],
+          str(s["false_rejects"]))
+
+    # SUSPECT on a genuine item IS a false reject: the shopper is stopped.
+    run2 = BackendRun(name="t2")
+    run2.verdicts = {c.name: Verdict.SUSPECT for c in cases}
+    s2 = summarise(run2, cases)
+    check("SUSPECT on genuine counts as a false reject",
+          abs(s2["frr"] - 1.0) < 1e-9, str(s2["frr"]))
+    check("SUSPECT on a swap is a catch, not an accept",
+          s2["far"] == 0.0 and abs(s2["catch_rate"] - 1.0) < 1e-9,
+          f"far={s2['far']} catch={s2['catch_rate']}")
+
+    # The marks that drive the printed report.
+    check("swap+MATCH marks as danger",
+          _mark(LABEL_SWAP, Verdict.MATCH) == "!!")
+    check("genuine+MISMATCH marks as false reject",
+          _mark(LABEL_GENUINE, Verdict.MISMATCH) == "xx")
+    check("genuine+MATCH marks ok", _mark(LABEL_GENUINE, Verdict.MATCH) == "ok")
+    check("swap+MISMATCH marks ok", _mark(LABEL_SWAP, Verdict.MISMATCH) == "ok")
+    check("a crash never marks ok", _mark(LABEL_GENUINE, "ERROR") == "!!")
+
+    # An all-RETRY backend has a perfect FAR and is useless. The report must
+    # be able to show that, or it would recommend the safest useless thing.
+    run3 = BackendRun(name="t3")
+    run3.verdicts = {c.name: Verdict.RETRY for c in cases}
+    s3 = summarise(run3, cases)
+    check("all-RETRY backend: FAR 0 but retry rate 100%",
+          s3["far"] == 0.0 and abs(s3["retry_rate"] - 1.0) < 1e-9,
+          f"far={s3['far']} retry={s3['retry_rate']}")
+
+
 def main():
     print("=" * 60)
     print("  NXTCart-Cam — headless verification branch coverage")
@@ -663,6 +971,11 @@ def main():
     test_follower_seq_dedupe()
     test_custody_gating_and_flow()
     test_txn_id_and_weight_binding()
+    test_backend_protocol()
+    test_ai_verdict_mapping()
+    test_ai_fails_closed()
+    test_ai_reply_parsing()
+    test_comparison_metrics()
 
     print("\n" + "=" * 60)
     if _failures:
