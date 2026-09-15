@@ -1,12 +1,42 @@
-# NXTCart-Cam — Pi + ESP32-CAM Deployment & Integration Guide
+# NXTCart-Cam — Deployment, Camera Bake-Off & Integration Guide
 
-Everything you need to run the camera-verification module on the Raspberry Pi with
-the ESP32-CAM, what to copy, what to delete, how to test, and how to wire it into
-the cart backend so it makes a product decision.
+Everything you need to run the camera-verification module on the Raspberry Pi: what to
+copy, what to delete, **how to choose the camera and the verifier by measurement**, and
+how to wire it into the cart backend so it makes a product decision.
 
 > This is the **hardware/deployment** companion to [`REFERENCE_SOP.md`](REFERENCE_SOP.md)
 > (how to shoot reference photos) and [`ARCHITECTURE.md`](ARCHITECTURE.md) (why it's
 > built this way). Read those for the *why*; this file is the *how*.
+
+## The open question this guide now answers
+
+Two things are **undecided**, and they are entangled:
+
+1. **Which camera?** The **ESP32-CAM** is cheap, wireless and needs no host port — but
+   its image quality is poor, and image quality is the *entire input* to this module. A
+   **USB webcam** (the detachable one you already have) sees far more detail, at the cost
+   of a cable to the Pi.
+2. **Which verifier?** The **local** path (MobileNetV2 embedding + HSV colour) or an
+   **AI vision model** called over an API.
+
+**Both cameras are live candidates. We pick the one that measures better — not the one
+that sounds better.** Neither question can be answered alone: a bad camera makes a good
+verifier look useless, and a good camera can rescue a mediocre one. So §6 runs **all four
+combinations** on labelled data and prints one table:
+
+| Test | Camera | Verifier | What it costs to run |
+|---|---|---|---|
+| **1** | ESP32-CAM | local ML only, no AI | free, offline |
+| **2** | ESP32-CAM | AI vision model | ~1¢ for the whole run |
+| **3** | USB webcam | local ML only, no AI | free, offline |
+| **4** | USB webcam | AI vision model | ~1¢ for the whole run |
+
+The winner is decided on **FAR** (how often a swapped item is waved through), not on
+"accuracy" — see §6.0. Everything needed to run all four already exists in the repo; §6
+is the procedure, not a to-do list.
+
+> **On this Windows machine use `py -3`, not `python`.** The Pi commands below use
+> `python3`. Same scripts, different launcher.
 
 ---
 
@@ -15,26 +45,49 @@ the cart backend so it makes a product decision.
 ```
  ┌──────────────┐   MJPEG over WiFi     ┌───────────────────────────────┐
  │  ESP32-CAM   │ ───────────────────▶  │        Raspberry Pi (2 GB)     │
- │ (streams     │  http://IP:81/stream  │                                │
- │  video only) │                       │  THIS MODULE (Python):         │
- └──────────────┘                       │   frame_source → detector →    │
-                                        │   item_follower → verifier →   │
- ┌──────────────┐   USB-HID (types)     │   custody  ─────────────▶ VERDICT
- │ Barcode gun  │ ───────────────────▶  │                                │
- └──────────────┘                       │  + your cart backend / display │
- ┌──────────────┐   serial "W:1234\n"   │  + payment gateway             │
+ │  CANDIDATE A │  http://IP:81/stream  │                                │
+ └──────────────┘                       │  THIS MODULE (Python):         │
+ ┌──────────────┐   USB / UVC           │   frame_source → detector →    │
+ │  USB webcam  │ ───────────────────▶  │   item_follower → verifier →   │
+ │  CANDIDATE B │  /dev/video0          │   custody  ─────────────▶ VERDICT
+ └──────────────┘                       │                                │
+ ┌──────────────┐   USB-HID (types)     │  + your cart backend / display │
+ │ Barcode gun  │ ───────────────────▶  │  + payment gateway             │
+ └──────────────┘                       │                                │
+ ┌──────────────┐   serial "W:1234\n"   │                                │
  │ Arduino+cell │ ───────────────────▶  │                                │
  └──────────────┘                       └───────────────────────────────┘
+        ▲
+        └─ exactly ONE of A or B ships. §6 decides which, from measurements.
 ```
 
-- **The ESP32-CAM is *only a camera.*** It runs its own firmware and serves an MJPEG
-  stream. This module never runs *on* the ESP32 — it runs on the Pi and **pulls** the
-  ESP32's stream over WiFi. There is nothing to "load onto" the ESP32 from this repo.
-- **The Pi runs all the Python.** It consumes the camera stream, the barcode scans,
-  and the Arduino's settled-weight events, and produces one verdict per transaction.
+- **Either camera is just a camera.** The ESP32-CAM runs its own firmware and serves an
+  MJPEG stream; the webcam is a UVC device on `/dev/video0`. This module never runs *on*
+  the ESP32 — it runs on the Pi and **pulls** the stream. There is nothing to "load onto"
+  the ESP32 from this repo.
+- **Nothing downstream knows which camera it is.** Both arrive through the same
+  `FrameSource` seam (`ml/frame_source.py`), which stamps every frame with a monotonic
+  `seq`. The detector, follower and verifier are identical either way — which is exactly
+  what makes a fair bake-off possible.
+- **The Pi runs all the Python.** It consumes the camera stream, the barcode scans, and
+  the Arduino's settled-weight events, and produces one verdict per transaction.
 - **The barcode and the load cell are inputs you feed in** through two tiny driver
-  seams (§8). Tonight they're mocks; on the Pi you replace them with the real USB /
+  seams (§8). Today they're mocks; on the Pi you replace them with the real USB /
   serial readers.
+
+### Trade-offs, before any measurement
+
+| | ESP32-CAM | USB webcam |
+|---|---|---|
+| Image quality | **Poor** — small sensor, heavy JPEG, soft lens | **Good** — the reason it's a candidate |
+| Mounting | Free — wireless, place it anywhere | Cable run to the Pi |
+| Pi USB ports | None used | One used (barcode gun also wants one) |
+| Failure mode | WiFi drops, stalls, reconnects | Effectively none once plugged in |
+| Latency to first frame | WiFi RTT + decode | Near zero |
+| Cost | ~₹400 | Already owned |
+
+The ESP32-CAM wins on mounting; the webcam wins on the thing that actually feeds the
+model. **That is why this is measured rather than argued.**
 
 ---
 
@@ -68,8 +121,9 @@ at runtime or is a tool/data you need.
 ```
 ml/__init__.py
 ml/config.py               # all tuning knobs live here
-ml/camera.py               # webcam grabber (WebcamSource wraps it; harmless to keep)
-ml/frame_source.py         # webcam + ESP32 MJPEG source
+ml/camera.py               # webcam grabber (WebcamSource wraps it — REQUIRED if the
+                           #   webcam wins the bake-off; keep it either way, it's tiny)
+ml/frame_source.py         # webcam + ESP32 MJPEG source, behind one seam
 ml/detector.py             # background-subtraction blob detector
 ml/events.py               # barcode + weight seams (mock now, real driver later)
 ml/item_follower.py        # single-target lock + follow
@@ -77,8 +131,10 @@ ml/visibility.py           # usable-view test (texture/edge, not colour)
 ml/verifier.py             # MATCH/SUSPECT/MISMATCH/RETRY/UNAVAILABLE
 ml/custody.py              # transaction gating → VerdictResult
 ml/recognizer.py           # EmbeddingRecognizer (appearance channel)
-ml/matcher.py              # loads embedding_db.pkl, cosine, backend-stamp guard
+ml/matcher.py              # loads the .pkl, cosine, backend-stamp guard
 ml/embedding_extractor.py  # runs the model (ONNX via cv2.dnn, or TFLite fallback)
+ml/backends.py             # VerificationBackend protocol + LocalBackend wrapper
+ml/ai_backend.py           # VLMBackend — only needed if AI wins the bake-off
 ```
 
 **Model file — keep ONE (see §7):**
@@ -92,17 +148,38 @@ ml/mobilenet_v2_quant.tflite  #  3.5 MB — the fallback; keep only if using TFL
 
 ```
 verify_demo.py             # the runnable two-pane demo / smoke test
-build_db.py                # (re)builds embedding_db.pkl from references/
-capture_references.py      # guided reference-photo capture on the ESP32-CAM
+build_db.py                # (re)builds a .pkl from a references dir  [--references --out]
+capture_references.py      # guided reference-photo capture           [--source --out]
 test_verify.py             # headless logic test — run this first on the Pi
-embedding_db.pkl           # 107 KB — the reference database (rebuild after capture)
-references/                # 1.1 MB — your reference photos (rebuild source)
 requirements.txt
 REFERENCE_SOP.md           # capture procedure (needed when you shoot on the Pi)
 DEPLOYMENT.md              # this file
 ```
 
-That's the whole footprint: **source ≈ 0.2 MB, DB + references ≈ 1.2 MB, one model
+**Bake-off tooling — needed until the camera decision is made (§6), then optional:**
+
+```
+capture_dataset.py         # labelled G/X capture   [--source --url --index --db]
+compare_backends.py        # local vs AI on one dataset          [--db --backends]
+run_bakeoff.py             # all four tests, one ranked table
+datasets/                  # the labelled transactions you capture
+```
+
+**Reference sets and databases — ONE PAIR PER CAMERA while the bake-off runs:**
+
+```
+references_esp32/     +  embedding_db_esp32.pkl
+references_webcam/    +  embedding_db_webcam.pkl
+```
+
+> **Why two of everything.** A reference photo doesn't just record a product, it records
+> that product *as seen by one camera* — sensor noise, white balance, lens softness and
+> JPEG quality are baked in. Scoring ESP32 crops against webcam-built references measures
+> the **gap between two cameras**, not the accuracy of either, and the table would blame
+> the camera for a mistake made in setup. After the winner is chosen, keep only the
+> winner's pair and rename them to plain `references/` + `embedding_db.pkl`.
+
+That's the whole footprint: **source ≈ 0.25 MB, one DB + references ≈ 1.2 MB, one model
 3.5–13.6 MB.** Trivial for an SD card; the RAM story is §1/§7.
 
 ---
@@ -147,8 +224,9 @@ rm -f ml/identity_tracker.py ml/zone_tracker.py ml/track.py ml/multi_frame_vote.
 rm -rf __pycache__ ml/__pycache__ scripts
 ```
 
-> Don't delete `ml/camera.py` even if you only use the ESP32-CAM — `verify_demo.py`
-> can still fall back to `CAMERA_SOURCE="webcam"` for bench testing, and it's tiny.
+> **Don't delete `ml/camera.py`.** The USB webcam is a live candidate to *be* the
+> deployment camera (§6), and `WebcamSource` wraps this module. Even if the ESP32-CAM
+> wins, keep it for bench testing — it's tiny.
 
 ---
 
@@ -184,31 +262,81 @@ python3 -c "import cv2; n=cv2.dnn.readNetFromONNX('ml/mobilenet_v2.onnx'); print
 
 ---
 
-## 5. Point the Pi at the ESP32-CAM
+## 5. Connect the camera (either candidate)
 
-### 5a. On the ESP32-CAM (one-time, done with Arduino IDE — not from this repo)
-Flash it with a streaming sketch (the stock **`CameraWebServer`** example works). It
-serves MJPEG at **`http://<ESP32-IP>:81/stream`**. Two network modes:
+Every tool in this repo takes `--source` on the command line, so **you never have to edit
+`ml/config.py` to switch cameras.** That matters more than convenience: the bake-off runs
+the same tools four times against different hardware, and a config edit forgotten between
+runs produces a dataset silently captured on the wrong camera — which looks completely
+normal on disk and invalidates every number downstream.
+
+`ml/config.py` only supplies the **defaults** used when a flag is omitted.
+
+### 5a. Candidate A — ESP32-CAM (`--source mjpeg`)
+
+One-time, with the Arduino IDE (not from this repo): flash a streaming sketch — the stock
+**`CameraWebServer`** example works. It serves MJPEG at **`http://<ESP32-IP>:81/stream`**.
+Two network modes:
 
 - **AP mode** (ESP32 is its own access point): the Pi joins the ESP32's WiFi; the
   stream is at `http://192.168.4.1:81/stream` — this is the repo default.
 - **Station mode** (ESP32 joins your WiFi/router): read the IP it prints on the serial
   monitor at boot, e.g. `http://192.168.1.57:81/stream`.
 
-Confirm the stream is alive from the Pi before touching Python:
+Confirm the stream is alive **before touching Python**:
 
 ```bash
-curl -sI http://192.168.4.1:81/stream    # expect HTTP 200, content-type multipart/x-mixed-replace
+curl -sI http://192.168.4.1:81/stream
 ```
 
-### 5b. In `ml/config.py`
-```python
-CAMERA_SOURCE   = "mjpeg"                              # was "webcam" for the laptop
-ESP32_STREAM_URL = "http://192.168.4.1:81/stream"      # match your ESP32's mode/IP
+Expect `HTTP 200` and `content-type: multipart/x-mixed-replace`. Then point any tool at
+it with `--source mjpeg --url http://192.168.4.1:81/stream`.
+
+**Set the ESP32's own image settings before capturing anything.** They are firmware-side
+and this repo cannot change them, but they materially affect the only input the model
+gets. In the `CameraWebServer` sketch or its web UI:
+
+| Setting | Use | Why |
+|---|---|---|
+| `framesize` | **VGA (640×480)** | Matches the 640×480 the tools resize to; larger just costs WiFi bandwidth and stalls |
+| `quality` | **10–12** (lower = better) | JPEG blocking is a *colour-channel* confound, and colour is what catches a same-weight swap |
+| `vflip` / `hmirror` | as mounted | Fix orientation **now** — references and live crops must agree |
+| AWB / AEC | on | Leave auto unless the lane lighting is fixed |
+
+Whatever you choose, **do not change it after capturing references.** A firmware setting
+changed mid-bake-off silently moves the image domain and invalidates the run.
+
+The MJPEG source **auto-reconnects** on WiFi drops (it won't die on the first hiccup),
+so a flaky link self-heals; tools show "Waiting for camera stream…" while it retries.
+
+### 5b. Candidate B — USB webcam (`--source webcam`)
+
+Plug it in. Find its index:
+
+```bash
+ls /dev/video*
 ```
 
-Then set the **regions** to match where items actually appear in the ESP32's mounted
-view (they're fractions of the frame `(x0, y0, x1, y1)`):
+Usually `/dev/video0` → `--index 0`. If the Pi has another camera attached (or the webcam
+exposes a metadata node), try `--index 1`. On Windows the indices are 0, 1, 2… in
+enumeration order; there is no `/dev` to list, so just try them.
+
+```bash
+python3 -c "import cv2; c=cv2.VideoCapture(0); ok,f=c.read(); print(ok, None if f is None else f.shape); c.release()"
+```
+
+Expect `True (480, 640, 3)`. If `False`, try the next index.
+
+- **Disable any autofocus hunting** if the webcam has it — a lens racking in and out
+  mid-transit produces blurred crops the visibility gate then discards, which shows up as
+  `RETRY`, not as a bad camera.
+- **Mount it where the ESP32-CAM would go**, at the same height and angle. If the two
+  cameras see the lane differently, §6 is comparing viewpoints, not sensors.
+
+### 5c. Regions — do this for whichever camera you mount
+
+Set the **regions** to match where items actually appear in that camera's mounted view
+(fractions of the frame, `(x0, y0, x1, y1)`):
 
 ```python
 SCANNER_REGION     = (0.00, 0.00, 0.45, 1.00)   # left band: where a scanned item enters
@@ -216,65 +344,356 @@ CART_ENTRY_REGION  = (0.55, 0.00, 1.00, 1.00)   # right band: the cart mouth
 ```
 
 The camera is mounted **opposite the scanner**, so items travel across the frame. Run
-the demo once (§6) and watch the on-screen `scanner` / `cart entry` boxes — nudge these
+`verify_demo.py` once and watch the on-screen `scanner` / `cart entry` boxes — nudge these
 fractions until an item genuinely starts in the scanner box and ends in the cart box.
 
-The MJPEG source **auto-reconnects** on WiFi drops (it won't die on the first hiccup),
-so a flaky link self-heals; the demo shows "Waiting for camera stream…" while it retries.
+> **The two cameras may need different regions** if their fields of view differ. Check
+> them separately, and re-check after any re-mount. Regions that don't match the view are
+> the single most common cause of everything ending in `RETRY`.
 
 ---
 
-## 6. Capture references, build the DB, and test — step by step
+## 6. The four-way camera bake-off — step by step
 
-Do these **in order** on the Pi, with the ESP32-CAM mounted where it will actually run.
+This is the section that **decides the hardware**. It runs four tests and ranks them:
 
-**Step 1 — logic smoke test (no camera, no model needed):**
+| Test | Camera | Verifier | Command flavour |
+|---|---|---|---|
+| **1** | ESP32-CAM | local ML only | `--source mjpeg`, `--backends local` |
+| **2** | ESP32-CAM | AI vision | `--source mjpeg`, `--backends ai` |
+| **3** | USB webcam | local ML only | `--source webcam`, `--backends local` |
+| **4** | USB webcam | AI vision | `--source webcam`, `--backends ai` |
+
+**All the code exists.** Nothing below asks you to write anything.
+
+---
+
+### 6.0 First: the number that decides it
+
+Do **not** rank these on "accuracy". This is a theft-prevention component, and the two
+ways of being wrong cost wildly different amounts:
+
+| Metric | What happened | What it costs |
+|---|---|---|
+| **FAR** — false accept | a **swap** was called `MATCH` | **the theft succeeds and nobody ever finds out** |
+| **FRR** — false reject | a **genuine** item was called `MISMATCH`/`SUSPECT` | an honest shopper is stopped, staff called — expensive, but a human fixes it |
+| **Retry rate** | either was called `RETRY` | pure friction; the shopper re-presents the item |
+
+**A configuration with better headline accuracy but a worse FAR is the worse
+configuration.** It is letting thefts through in order to avoid annoying people. So the
+ranking is: **FAR first, then FRR, then retry rate**, and a tie goes to the local backend
+because it is free and ~200× faster. That policy lives in `rank_cells()` in
+`run_bakeoff.py` and is covered by `test_verify.py`.
+
+`RETRY` is scored separately from both, deliberately: a backend that answers `RETRY` to
+everything has a **perfect FAR** and is completely useless. Without its own column it
+would look like the safest option on the table.
+
+---
+
+### 6.1 What you need before you start
+
+**Products — this is the part people get wrong.**
+
+- **8–12 real products** you'd actually stock.
+- Among them, **at least 3 same-weight pairs**: two items of near-identical weight but
+  different colour/appearance (two similar bottles, two similar cartons). *This is the
+  entire attack.* A swap between a 200 g packet and a 2 kg bag proves nothing — the load
+  cell already catches it. Only a same-weight swap tests the camera.
+- Include **at least one low-saturation product** (white/beige carton, rice bag, clear
+  bottle). These are the hardest for the colour channel and you want to know now.
+
+**Hardware**
+
+- ESP32-CAM, flashed and streaming (§5a), settings frozen.
+- The USB webcam (§5b).
+- A mount that puts **both cameras in the same position** — same height, same angle, same
+  distance. If they see different things, §6 compares viewpoints, not sensors.
+
+**For tests 2 and 4 only — an API key**
+
 ```bash
-python3 test_verify.py          # expect: ALL CHECKS PASSED
+export OPENROUTER_API_KEY=sk-or-...
 ```
-If this fails, stop — the code didn't copy correctly. Nothing else will work.
 
-**Step 2 — capture references through the ESP32-CAM** (this is the accuracy step;
-see [`REFERENCE_SOP.md`](REFERENCE_SOP.md) for poses/lighting):
+(Windows: `setx OPENROUTER_API_KEY sk-or-...`, then open a new shell.)
+
+Get it from [openrouter.ai](https://openrouter.ai). One key reaches every vision model,
+so you can try several without new accounts. **$10 is far more than this project will
+ever use** — a 60-case run costs well under one cent. Start on a `:free` model to
+validate the plumbing, then switch to `z-ai/glm-5.3-flash` for the real numbers.
+
+No key? Tests 2 and 4 report `SKIPPED — no API key`. Tests 1 and 3 still run and still
+answer the camera question for the local path. **They are never silently skipped**, and a
+missing key can never produce a `MATCH` — every failure path in `ml/ai_backend.py` returns
+`RETRY`, which `test_verify.py` checks in ten different ways.
+
+**Budget the time.** Roughly 1 hour per camera for references + dataset. Do both **on the
+same day, in the same light** (see 6.5).
+
+---
+
+### 6.2 Step 0 — prove the code is intact (2 minutes, no hardware)
+
 ```bash
-python3 capture_references.py   # walks the pose set, shows VIEW OK / VIEW POOR
+py -3 test_verify.py
 ```
-Shoot **on the deployment camera** so live crops and references share an image domain.
-Include your deliberate **same-weight pairs** (the attack you're defending).
 
-**Step 3 — build the database:**
+Expect **`ALL CHECKS PASSED`** (132 checks). This runs fully offline — no camera, no
+model, no API key, no network. If it fails, **stop**: nothing below will mean anything.
+
+---
+
+### 6.3 Phase A — ESP32-CAM: references, then dataset
+
+Mount the ESP32-CAM in its final position and **don't move it until Phase A is done.**
+
+**A1 — capture reference photos through the ESP32-CAM:**
+
 ```bash
-python3 build_db.py             # writes embedding_db.pkl
+py -3 capture_references.py --source mjpeg --url http://192.168.4.1:81/stream --out references_esp32
 ```
-Confirm the tail line reports the product count, the backend stamp
-(`[backend onnx-mbv2-1280]` for ONNX) **and** the colour format (`colour v2`). Each photo
-is cropped to the product first (the *same* crop the live path applies); a reference that
-can't be cropped confidently is reported `REJECT … (AMBIGUOUS / TOO_SMALL / EMPTY)` and
-skipped, so a mis-framed photo never poisons a SKU. **Re-run this every time** you
-add/remove photos, **change the backend** (§7), **or upgrade the colour-fingerprint
-format.** The DB carries a colour-format version and the verifier **disables colour on a
-stale stamp** — which makes `MATCH` unreachable (`SUSPECT` at best, the safe direction) —
-until you rebuild, so an out-of-date DB fails safe rather than silently mis-scoring.
 
-**Step 4 — end-to-end demo (the real smoke test):**
+It walks a fixed pose set per product and shows a live **VIEW OK / VIEW POOR** indicator —
+the same usable-view test the live verifier applies — so you can only save frames the
+system can actually judge. Full procedure, poses and lighting:
+[`REFERENCE_SOP.md`](REFERENCE_SOP.md).
+
+Type each product name at the prompt; press ENTER on an empty name to finish.
+
+**A2 — build the ESP32 database:**
+
+```bash
+py -3 build_db.py --references references_esp32 --out embedding_db_esp32.pkl
+```
+
+Confirm the tail line reports your product count, the backend stamp
+(`[backend onnx-mbv2-1280]`) **and** `colour v2`. Photos the cropper can't resolve are
+reported `REJECT … (AMBIGUOUS / TOO_SMALL / EMPTY)` and skipped rather than stored
+mis-framed.
+
+**A3 — capture the labelled ESP32 dataset:**
+
+```bash
+py -3 capture_dataset.py --name esp32 --source mjpeg --url http://192.168.4.1:81/stream --db embedding_db_esp32.pkl
+```
+
+For each transaction: press **S** to scan a SKU, carry the item across the frame into the
+cart box, press **W** for the weight event — then **label what you actually did**:
+
+| Key | Meaning |
+|---|---|
+| **G** | **genuine** — the item really was the scanned SKU |
+| **X** | **swap** — you deliberately carried a *different* item |
+| **D** | discard (fumbled run, mis-scan) |
+| **R** | reset a stuck transaction |
+| **Q** | quit |
+
+**Target: ~30 genuine and ~30 swap.** Fewer than 20 total and the error rates are mostly
+noise — the tool warns you when you quit under that.
+
+**Vary the handling deliberately.** Different angles, speeds, hand positions, a few
+awkward runs. A dataset of only clean presentations flatters every backend equally and
+tells you nothing about the hard cases you actually care about.
+
+Each transaction is written to `datasets/esp32/<timestamp>_<sku>_<label>/` as
+full-resolution PNG crops plus a `meta.json` recording the label, the SKU **and which
+camera shot it**. Crops are full-res and PNG on purpose: downscaling later is trivial,
+upscaling is impossible, and JPEG artefacts are a colour-channel confound.
+
+---
+
+### 6.4 Phase B — USB webcam: references, then dataset
+
+Now **swap the camera**, putting the webcam in the same position at the same height and
+angle. Repeat everything with `--source webcam`:
+
+**B1 — references:**
+
+```bash
+py -3 capture_references.py --source webcam --index 0 --out references_webcam
+```
+
+**B2 — database:**
+
+```bash
+py -3 build_db.py --references references_webcam --out embedding_db_webcam.pkl
+```
+
+**B3 — labelled dataset:**
+
+```bash
+py -3 capture_dataset.py --name webcam --source webcam --index 0 --db embedding_db_webcam.pkl
+```
+
+**Use the same products, the same swaps, and the same counts as Phase A.**
+
+> **Why a second set of references at all?** Because a reference photo records the
+> product *as seen by one camera* — sensor noise, white balance, lens softness and JPEG
+> quality are baked in. If you score ESP32 crops against webcam-built references, genuine
+> items fail for a reason that has nothing to do with the product, and the table blames
+> the camera for a setup mistake. `ml/matcher.py` caches databases **by path** so both can
+> be loaded in one process without one silently masquerading as the other.
+
+---
+
+### 6.5 Fairness rules — read before capturing, not after
+
+Within one camera, tests 1-vs-2 and 3-vs-4 are **exact**: both backends score the
+identical saved crops in the identical order, so any difference is purely the verifier.
+
+Across cameras, 1-vs-3 and 2-vs-4 are **not exact**. You cannot shoot the same physical
+instant with two cameras mounted in one place, so the two datasets are different
+transactions of the same products. To keep that comparison as fair as it can be:
+
+- [ ] **Same day, same lighting.** Don't shoot one at noon and one at night.
+- [ ] **Same products and the same swap pairs**, in the same proportions.
+- [ ] **Same counts** — ~30 genuine + ~30 swap each. Unequal sizes are flagged in the
+      output as not directly comparable.
+- [ ] **Same mount position**, height and angle.
+- [ ] **Same handling style.** Don't get noticeably better at presenting items during the
+      second session — capture them close together to limit that.
+- [ ] **Don't change ESP32 firmware settings** (§5a) between references and dataset.
+
+Treat a **small** cross-camera gap as noise. Only a **large, consistent** gap — the
+webcam better on both backends, or worse on both — is real evidence about the camera.
+
+---
+
+### 6.6 Phase C — run all four tests
+
+One command runs the whole matrix:
+
+```bash
+py -3 run_bakeoff.py --esp32-dataset esp32 --esp32-db embedding_db_esp32.pkl --webcam-dataset webcam --webcam-db embedding_db_webcam.pkl --price-per-m 0.075
+```
+
+It loads each dataset **once** and shares it between that camera's two tests — which is
+what makes 1-vs-2 and 3-vs-4 exact rather than merely similar.
+
+Useful variations:
+
+```bash
+py -3 run_bakeoff.py --esp32-dataset esp32 --esp32-db embedding_db_esp32.pkl
+```
+Only one camera captured so far. Tests 3 and 4 report `SKIPPED — no dataset` rather than
+vanishing from the table.
+
+```bash
+py -3 run_bakeoff.py --esp32-dataset esp32 --esp32-db embedding_db_esp32.pkl --webcam-dataset webcam --webcam-db embedding_db_webcam.pkl --tests 1,3
+```
+Local-only (free, offline, no key) — answers the camera question on its own.
+
+```bash
+py -3 run_bakeoff.py ... --base-url http://localhost:11434/v1 --model minicpm-v4.6:1b
+```
+Point the AI tests at a local Ollama instead of the cloud. No key needed.
+
+```bash
+py -3 run_bakeoff.py ... --verbose
+```
+Print every case as it is scored, with `ok` / `xx` / `!!` marks — use this to find *which*
+transactions are failing.
+
+**To run one cell at a time**, `compare_backends.py` does a single dataset:
+
+```bash
+py -3 compare_backends.py --dataset esp32 --db embedding_db_esp32.pkl --backends local
+```
+
+It prints the full 5×5 confusion matrix and names every failing transaction — more detail
+per cell than the four-way summary. Use `run_bakeoff.py` to decide, this to investigate.
+
+---
+
+### 6.7 Reading the table and making the call
+
+The output has four parts:
+
+**1. The metric table** — every test side by side, safety first.
+
+**2. `BACKEND VERDICT` (exact)** — per camera, does AI beat local on the *same crops*?
+It also reports whether they fail on the **same** cases or **different** ones:
+
+- *Different cases* → a combined design wins: local runs every item, AI is called only to
+  escalate `SUSPECT`. You get AI's catch rate at local's average latency.
+- *Same cases* → escalation adds cost without adding safety. The hard cases are hard for
+  both, and the fix is better references or better lighting, not a bigger model.
+
+**3. `CAMERA VERDICT` (approximate)** — per backend, ESP32 vs webcam. Explicitly labelled
+approximate, for the reasons in 6.5.
+
+**4. `RECOMMENDATION`** — the ranked list and a named winner.
+
+Then decide:
+
+| What the table shows | What to do |
+|---|---|
+| ESP32 FAR is low and close to the webcam's | **Ship the ESP32-CAM.** Wireless mounting is worth real money; don't buy quality you don't need. |
+| Webcam FAR is **much** lower on *both* backends | **Ship the webcam.** The image quality is doing genuine work. Budget a USB port and a cable run. |
+| Local FAR is already near zero on the winning camera | **Don't ship AI at all.** It costs 100–1000× the latency to fix a problem you don't have. |
+| AI clearly beats local, and they fail on *different* cases | Ship local as the fast path, **escalate `SUSPECT` to AI only**. Then fix the frame-loss hole first (§6.9). |
+| AI clearly beats local, and they fail on the *same* cases | The problem is your references or your lighting. Re-shoot (`REFERENCE_SOP.md` §2) before buying anything. |
+| Everything has a high retry rate | Not an accuracy problem. Check `SCANNER_REGION`/`CART_ENTRY_REGION` (§5c) and the `VIS_*` floors — the item is being lost in transit, not misjudged. |
+| FAR is high everywhere | Thresholds, not hardware. `VERIFY_*` in `ml/config.py` are **seeded guesses** that have never been fitted to real data. Raise them and re-run — the dataset is saved, so re-scoring is free and instant. |
+
+> **On dataset size.** Under ~20 cases, one misclassification moves a rate by several
+> points and the tool says so. Treat small runs as directional. Before spending money on
+> hardware, get to ~30 genuine + ~30 swap **per camera**.
+
+---
+
+### 6.8 After the decision — collapse to one camera
+
+Once the winner is clear:
+
+1. Set the default in `ml/config.py` so the live path needs no flags:
+   ```python
+   CAMERA_SOURCE    = "mjpeg"                           # or "webcam"
+   ESP32_STREAM_URL = "http://192.168.4.1:81/stream"    # if mjpeg
+   CAMERA_INDEX     = 0                                 # if webcam
+   ```
+2. Rename the winner's pair to the default names, and delete the loser's:
+   ```bash
+   mv references_webcam references && mv embedding_db_webcam.pkl embedding_db.pkl
+   rm -rf references_esp32 embedding_db_esp32.pkl
+   ```
+3. **Keep the datasets.** `datasets/` is the only ground truth you have. Every future
+   threshold change, model swap or prompt edit can be re-scored against it offline, for
+   free, in seconds — and that is worth far more than the disk it occupies.
+4. Re-run the end-to-end demo on the winner (§6.9).
+
+---
+
+### 6.9 End-to-end smoke test on the chosen camera
+
 ```bash
 python3 verify_demo.py
 ```
+
 Controls: **S** = scan next SKU, **W** = weight change (auto-settles), **R** = reset,
-**Q** = quit. Walk these cases in front of the ESP32-CAM:
+**Q** = quit. Walk these cases in front of the mounted camera:
 
 | Do this | Expect |
 |---|---|
-| Scan A, carry **A** left→right into the cart box, press **W** | **MATCH** |
+| Scan A, carry **A** across into the cart box, press **W** | **MATCH** |
 | Scan A, carry a **different same-weight item** | **SUSPECT** (colour off) or **MISMATCH** (shape off) |
 | Cover the item with your hand mid-transit | **RETRY** (broken custody) |
 | Scan again mid-transit | old txn **RETRY**, new one starts |
-| Delete/rename `embedding_db.pkl`, scan anything | **UNAVAILABLE** (never a silent accept) |
+| Rename `embedding_db.pkl`, scan anything | **UNAVAILABLE** (never a silent accept) |
 
-**Step 5 — measure on the Pi.** The per-verdict latency printed is real *on this Pi*
-now (the laptop figure was a target). If it's too slow or RAM is tight, tune in
-`ml/config.py`: lower `VERIFY_BURST_FRAMES` (fewer crops → less RAM + faster), or adjust
-`VERIFY_PASS_FRACTION`. Re-run Step 4 after changes.
+**Then measure on the Pi.** The per-verdict latency printed is real *on this Pi* now (the
+laptop figure was a target). If it's too slow or RAM is tight, tune in `ml/config.py`:
+lower `VERIFY_BURST_FRAMES` (fewer crops → less RAM + faster), or adjust
+`VERIFY_PASS_FRACTION`.
+
+> **Known hole, must be fixed before this goes live in a real lane.**
+> `ml/frame_source.py` keeps **newest-frame-only**, so frames are silently dropped when
+> the consumer lags, and `ml/item_follower.py` dedupes repeated frames but never *detects
+> gaps*. That contradicts the requirement that the item be tracked scan-to-basket without
+> a frame skip. It does **not** affect the bake-off — §6 replays saved crops offline,
+> where frame timing is irrelevant — but a dropped frame during a real transaction is a
+> custody gap the system cannot currently see. Fix it before trusting a live verdict.
 
 ---
 
@@ -488,12 +907,28 @@ follow, or a bad view never silently adds an item.
 
 ## 9. Quick troubleshooting
 
+**General**
+
 | Symptom | Likely cause / fix |
 |---|---|
-| Demo prints "No reference database" → all `UNAVAILABLE` | `embedding_db.pkl` missing or SKU not in it. Run `build_db.py`; confirm the backend stamp. |
+| Demo prints "No reference database" → all `UNAVAILABLE` | The `.pkl` is missing, or the SKU isn't in it. Run `build_db.py`; confirm the backend stamp. |
 | Load error mentioning backend mismatch | DB stamped for a different model than `EMBEDDING_BACKEND`. Rebuild the DB (§7). |
-| Never reaches `MATCH`; best case is always `SUSPECT` | Colour is disabled. At startup you'll see `[verifier] Colour references are format …` — the DB's colour-format stamp is stale (or predates the colour block). Rebuild with `build_db.py` (§6 Step 3). |
-| "Waiting for camera stream…" forever | ESP32 URL/mode wrong or Pi not on the ESP32's network. Check §5 `curl`. |
-| Genuine matches score low | Domain mismatch — references not shot on the ESP32-CAM. Re-capture on the deployment camera (§6/`REFERENCE_SOP.md`). |
-| Every transit ends `RETRY` (lost/ambiguous) | Regions don't match the mounted view, or lighting makes the follower drop the item. Adjust `SCANNER_REGION`/`CART_ENTRY_REGION`; check `VIS_*` floors. |
+| Never reaches `MATCH`; best case is always `SUSPECT` | Colour is disabled. At startup you'll see `[verifier] Colour references are format …` — the DB's colour stamp is stale. Rebuild with `build_db.py` (§6.3 A2). |
+| "Waiting for camera stream…" forever | ESP32 URL/mode wrong, or the Pi isn't on the ESP32's network. Check the `curl` in §5a. |
+| Webcam opens but every frame is black | Wrong `--index`, or another process holds the device. Try `--index 1`; close other camera apps. |
+| Genuine matches score low | **Domain mismatch** — references weren't shot on *this* camera. Re-capture with the right `--source` (§6.3/§6.4). |
+| Every transit ends `RETRY` (lost/ambiguous) | Regions don't match the mounted view, or lighting makes the follower drop the item. Adjust `SCANNER_REGION`/`CART_ENTRY_REGION` (§5c); check `VIS_*` floors. |
 | Verdict too slow / RAM tight | Using TFLite where ONNX would do (§7), or `VERIFY_BURST_FRAMES` too high. Prefer ONNX; lower the burst. |
+
+**Bake-off specific (§6)**
+
+| Symptom | Likely cause / fix |
+|---|---|
+| A test reports `SKIPPED — no dataset` | You didn't pass that camera's `--<cam>-dataset`, or the directory doesn't exist under `datasets/`. |
+| A test reports `SKIPPED — no API key` | `OPENROUTER_API_KEY` isn't set in *this* shell. Set it and re-run, or point `--base-url` at a local Ollama. |
+| A test reports `SKIPPED — reference DB unusable` | The `--<cam>-db` path is wrong, or the DB was built with a different embedding backend. Rebuild it. This is reported as a **skip**, never as a run of all-failures, so a setup mistake can't masquerade as a bad camera. |
+| One camera looks catastrophically worse than the other | **Check you passed the matching `--<cam>-db`.** Scoring one camera's crops against the other's references measures the domain gap, not the camera — it's the single easiest way to get a confidently wrong answer here. |
+| `FAR or FRR cannot be computed` / `n/a` in the table | That dataset has only one label. You need both **G** and **X** transactions. |
+| Both backends fail on the *same* cases | Not a model problem. Re-shoot references (`REFERENCE_SOP.md` §2) — usually lighting or too few poses. |
+| AI test: every case comes back `RETRY` | Every AI failure path is fail-closed by design. Run `compare_backends.py --backends ai --verbose` — it prints the first real error (bad key, wrong model id, unreachable endpoint). |
+| Numbers swing wildly between runs of the same dataset | You have too few cases. Re-scoring is deterministic for the local backend, so any swing is AI sampling or a tiny dataset. Capture more. |
