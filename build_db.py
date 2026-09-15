@@ -46,23 +46,33 @@ from ml.verifier import colour_hist
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
 
-def build_database() -> dict:
+def build_database(references_dir: str = REFERENCES_DIR,
+                   out_path: str = DATABASE_PATH) -> dict:
     """
-    Scan the references/ directory, compute embeddings for every
-    image, and save the result as a pickle file.
+    Scan a references directory, compute embeddings for every image, and
+    save the result as a pickle file.
+
+    references_dir / out_path are arguments (defaulting to the config
+    constants, so existing callers are unaffected) because the camera
+    bake-off needs ONE DATABASE PER CAMERA.  References shot on an
+    ESP32-CAM and references shot on a webcam are different image
+    domains; scoring one camera's live crops against the other's
+    references measures the domain gap, not the camera.  See
+    DEPLOYMENT.md §6.
 
     Returns the database dict for inspection.
     """
-    if not os.path.isdir(REFERENCES_DIR):
+    REFERENCES = references_dir
+    if not os.path.isdir(REFERENCES):
         print(
-            f"ERROR: References directory not found: {REFERENCES_DIR}\n"
+            f"ERROR: References directory not found: {REFERENCES}\n"
             "Run  python capture_references.py  first to create your reference photos."
         )
         return {}
 
     product_dirs = [
-        d for d in os.listdir(REFERENCES_DIR)
-        if os.path.isdir(os.path.join(REFERENCES_DIR, d))
+        d for d in os.listdir(REFERENCES)
+        if os.path.isdir(os.path.join(REFERENCES, d))
     ]
 
     if not product_dirs:
@@ -83,7 +93,7 @@ def build_database() -> dict:
     total_rejected = 0  # reference photos skipped because they wouldn't crop
 
     for product_name in sorted(product_dirs):
-        product_path = os.path.join(REFERENCES_DIR, product_name)
+        product_path = os.path.join(REFERENCES, product_name)
 
         # Collect all image files in this folder.
         image_files = sorted([
@@ -168,15 +178,25 @@ def build_database() -> dict:
         # disabling colour — MATCH unreachable — until this script is re-run.
         "colour_format": COLOUR_FORMAT_VERSION,
     }
-    with open(DATABASE_PATH, "wb") as f:
+    with open(out_path, "wb") as f:
         pickle.dump(payload, f)
 
     total_emb = sum(len(v) for v in database.values())
     print(f"Saved database: {len(database)} product(s), {total_emb} reference(s) "
           f"kept, {total_rejected} rejected [backend {payload['backend']}, "
-          f"colour v{COLOUR_FORMAT_VERSION}] -> {DATABASE_PATH}")
+          f"colour v{COLOUR_FORMAT_VERSION}] -> {out_path}")
     return database
 
 
 if __name__ == "__main__":
-    build_database()
+    import argparse
+
+    ap = argparse.ArgumentParser(
+        description="Build the appearance + colour reference database.")
+    ap.add_argument("--references", default=REFERENCES_DIR,
+                    help="directory of per-product reference photo folders "
+                         f"(default: {REFERENCES_DIR})")
+    ap.add_argument("--out", default=DATABASE_PATH,
+                    help=f"output .pkl path (default: {DATABASE_PATH})")
+    _args = ap.parse_args()
+    build_database(references_dir=_args.references, out_path=_args.out)

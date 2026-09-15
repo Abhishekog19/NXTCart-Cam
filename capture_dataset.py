@@ -152,7 +152,8 @@ def _wrap(s: str, width: int) -> List[str]:
 
 
 def save_transaction(root: str, sku: str, label: str, txn_id: str,
-                     crops: List[np.ndarray], verdict: str) -> Optional[str]:
+                     crops: List[np.ndarray], verdict: str,
+                     camera: str = "", camera_url: str = "") -> Optional[str]:
     """
     Write one labelled transaction to disk.  Returns its directory, or None
     if there was nothing usable to save.
@@ -174,6 +175,12 @@ def save_transaction(root: str, sku: str, label: str, txn_id: str,
         "txn_id": txn_id,
         "crop_count": len(crops),
         "captured_at": stamp,
+        # WHICH CAMERA SHOT THIS.  Recorded because the bake-off compares an
+        # ESP32-CAM against a webcam, and two datasets are indistinguishable
+        # on disk otherwise — a mislabelled camera would silently invalidate
+        # the comparison months later when nobody remembers the session.
+        "camera": camera,
+        "camera_url": camera_url,
         # The live verdict at capture time, recorded for curiosity only.  The
         # comparison harness RE-RUNS every backend from the images, so this
         # value is never used as a score — it would be circular if it were.
@@ -241,6 +248,23 @@ def main():
     ap.add_argument("--sku", action="append", default=None,
                     help="SKU to cycle with S (repeatable). Defaults to the "
                          "SKUs in the reference database.")
+    # ── camera selection ──────────────────────────────────────────
+    # The bake-off captures one dataset PER CAMERA (ESP32-CAM vs webcam), so
+    # the camera must be selectable here rather than by editing ml/config.py
+    # between runs.  A dataset silently captured on the wrong camera looks
+    # completely normal on disk and invalidates every number downstream.
+    ap.add_argument("--source", default=CAMERA_SOURCE,
+                    choices=["webcam", "mjpeg"],
+                    help=f"frame source (default: {CAMERA_SOURCE})")
+    ap.add_argument("--url", default=None,
+                    help="MJPEG stream URL when --source mjpeg "
+                         "(default: ESP32_STREAM_URL from config)")
+    ap.add_argument("--index", type=int, default=None,
+                    help="webcam device index when --source webcam")
+    ap.add_argument("--db", default=None,
+                    help="reference .pkl for this camera (default: config "
+                         "DATABASE_PATH). Only used to discover SKU names and "
+                         "to run a live verdict; the bake-off re-scores offline.")
     args = ap.parse_args()
 
     root = os.path.join(DATASET_DIR, args.name)
@@ -253,8 +277,10 @@ def main():
     appearance_db: Dict[str, list] = {}
     recog = None
     try:
+        from ml.matcher import load_database
         from ml.recognizer import EmbeddingRecognizer
-        recog = EmbeddingRecognizer()
+        db = load_database(args.db) if args.db else None
+        recog = EmbeddingRecognizer(db=db)
         appearance_db = recog.db
     except Exception as e:
         print(f"[capture] No reference database ({e}).")
@@ -272,13 +298,16 @@ def main():
     detector = BackgroundSubtractorDetector()
     verifier = ProductVerifier(recog if recog is not None else _NullRecognizer(),
                                appearance_db=appearance_db,
-                               colour_db=load_colour_db())
+                               colour_db=load_colour_db(args.db))
 
     try:
-        source = make_frame_source(CAMERA_SOURCE, width=CAM_W, height=CAM_H)
+        source = make_frame_source(args.source, width=CAM_W, height=CAM_H,
+                                   url=args.url, index=args.index)
     except Exception as e:
-        print(f"[capture] ERROR opening camera: {e}")
+        print(f"[capture] ERROR opening camera '{args.source}': {e}")
         return
+    print(f"[capture] Camera source: {args.source}"
+          + (f"  url={args.url}" if args.url else ""))
 
     controller = CustodyController(detector, verifier, barcode, weight,
                                    frame_size=(CAM_W, CAM_H))
@@ -388,7 +417,9 @@ def main():
             if label is not None:
                 path = save_transaction(root, pending["sku"], label,
                                         pending["txn_id"], pending["crops"],
-                                        pending["verdict"])
+                                        pending["verdict"],
+                                        camera=args.source,
+                                        camera_url=args.url or "")
                 if path:
                     counts[label] += 1
                     last_saved = os.path.basename(path)

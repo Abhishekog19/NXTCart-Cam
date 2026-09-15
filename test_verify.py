@@ -952,6 +952,67 @@ def test_comparison_metrics():
           f"far={s3['far']} retry={s3['retry_rate']}")
 
 
+def test_bakeoff_ranking():
+    """
+    The four-way bake-off decides which CAMERA gets bought. Its ranking is
+    therefore the highest-consequence pure function in the repo, and it has
+    already been wrong once: `frr or 1.0` treated a perfect 0.0% false-reject
+    rate as falsy and replaced it with the worst possible score, ranking a
+    flawless configuration last. These checks exist so that cannot recur.
+    """
+    print("\n[bakeoff] ranking policy")
+    from run_bakeoff import Cell, rank_cells
+
+    def cell(no, camera, backend, far, frr, retry=0.0):
+        c = Cell(no, camera, backend, "ds", "db")
+        c.summary = {"far": far, "frr": frr, "retry_rate": retry}
+        return c
+
+    # A PERFECT config must rank first. This is the regression: 0.0 is falsy.
+    perfect = cell(3, "webcam", "local", 0.0, 0.0)
+    same_far_worse_frr = cell(4, "webcam", "ai", 0.0, 0.25)
+    ranked = rank_cells([same_far_worse_frr, perfect])
+    check("a perfect 0.0 FRR is not treated as the worst FRR",
+          ranked[0] is perfect, f"first={ranked[0].label}")
+
+    # FAR outranks FRR: letting a theft through is worse than annoying a
+    # shopper, so a lower FAR wins even with a much worse FRR.
+    safe_but_annoying = cell(1, "esp32", "local", 0.0, 0.50)
+    lax_but_smooth = cell(2, "esp32", "ai", 0.25, 0.0)
+    ranked = rank_cells([lax_but_smooth, safe_but_annoying])
+    check("lower FAR wins even with a far worse FRR",
+          ranked[0] is safe_but_annoying, f"first={ranked[0].label}")
+
+    # Retry only breaks a FAR+FRR tie -- it is friction, not an error.
+    smooth = cell(3, "webcam", "local", 0.0, 0.0, retry=0.05)
+    retrying = cell(1, "esp32", "local", 0.0, 0.0, retry=0.60)
+    ranked = rank_cells([retrying, smooth])
+    check("retry rate breaks a FAR+FRR tie", ranked[0] is smooth,
+          f"first={ranked[0].label}")
+
+    # An exact tie must go to local: identical safety for no latency, no
+    # network dependency and no money.
+    loc = cell(3, "webcam", "local", 0.0, 0.0)
+    ai = cell(4, "webcam", "ai", 0.0, 0.0)
+    check("an exact tie goes to the local backend",
+          rank_cells([ai, loc])[0] is loc)
+
+    # A missing rate must never masquerade as a good one.
+    unknown = cell(4, "webcam", "ai", 0.0, None)
+    known = cell(3, "webcam", "local", 0.0, 0.90)
+    check("an unknown FRR ranks below a known bad one",
+          rank_cells([unknown, known])[0] is known,
+          f"first={rank_cells([unknown, known])[0].label}")
+
+    # Full four-way order, the way it will actually be read.
+    cells = [cell(1, "esp32", "local", 0.50, 0.25),
+             cell(2, "esp32", "ai", 0.25, 0.25),
+             cell(3, "webcam", "local", 0.0, 0.0),
+             cell(4, "webcam", "ai", 0.0, 0.25)]
+    order = [c.test_no for c in rank_cells(cells)]
+    check("four-way ranking is 3,4,2,1", order == [3, 4, 2, 1], str(order))
+
+
 def main():
     print("=" * 60)
     print("  NXTCart-Cam — headless verification branch coverage")
@@ -976,6 +1037,7 @@ def main():
     test_ai_fails_closed()
     test_ai_reply_parsing()
     test_comparison_metrics()
+    test_bakeoff_ranking()
 
     print("\n" + "=" * 60)
     if _failures:
