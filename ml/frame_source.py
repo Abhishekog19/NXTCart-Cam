@@ -267,19 +267,31 @@ def make_frame_source(
     source: str,
     width: Optional[int] = None,
     height: Optional[int] = None,
+    url: Optional[str] = None,
+    index: Optional[int] = None,
 ) -> FrameSource:
     """
     Build the FrameSource named by config.CAMERA_SOURCE.
 
-      "webcam" -> WebcamSource (tonight, laptop)
-      "mjpeg"  -> MJPEGSource  (tomorrow, ESP32-CAM)
+      "webcam" -> WebcamSource (laptop / USB webcam)
+      "mjpeg"  -> MJPEGSource  (ESP32-CAM)
 
     Kept tiny and explicit so switching cameras is a config edit, not a
     code change anywhere downstream.
+
+    `url` and `index` override the config defaults for the chosen source.
+    They exist so a tool can be pointed at a specific camera from the
+    COMMAND LINE: the ESP32-vs-webcam bake-off (DEPLOYMENT §6) runs the same
+    tools four times against different hardware, and requiring a config edit
+    between every run is how you end up with a dataset that was silently
+    captured on the wrong camera.  Both default to None = use config.
     """
     s = (source or "webcam").lower()
     if s == "mjpeg":
-        return MJPEGSource()
+        return MJPEGSource(url=url) if url else MJPEGSource()
     if s == "webcam":
-        return WebcamSource(width=width, height=height)
+        kwargs = {"width": width, "height": height}
+        if index is not None:
+            kwargs["index"] = index
+        return WebcamSource(**kwargs)
     raise ValueError(f"Unknown CAMERA_SOURCE {source!r} (expected 'webcam' or 'mjpeg').")
