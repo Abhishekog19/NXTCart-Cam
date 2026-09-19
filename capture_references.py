@@ -17,13 +17,26 @@
 # path applies, so references and live crops share one framing domain — and a
 # frame the cropper cannot resolve confidently cannot be saved at all.
 #
-# WHICH CAMERA
+# WHICH CAMERA  (this decides more than it looks)
 # ─────────────
 # Capture runs through the SAME frame source the verifier uses
-# (ml/frame_source.make_frame_source), selected by config.CAMERA_SOURCE.  So
-# setting CAMERA_SOURCE="mjpeg" captures references THROUGH the ESP32-CAM in
-# its mounted position — the whole point of acceptance rule 0 (shoot on the
-# deployment camera so reference and live image domains match).
+# (ml/frame_source.make_frame_source), selected by --source.
+#
+# A reference photo does not just record a product — it records that product
+# AS SEEN BY ONE CAMERA.  Sensor noise, white balance, lens softness and JPEG
+# quality are all baked in.  So references shot on the ESP32-CAM and live crops
+# from a webcam (or vice versa) sit in two different image domains, and genuine
+# items score low for a reason that has nothing to do with the product.
+#
+# Hence acceptance rule 0: shoot on the camera you will deploy, in its mounted
+# position.  And hence, while the ESP32-vs-webcam bake-off is running, ONE
+# REFERENCE SET PER CAMERA:
+#
+#   py -3 capture_references.py --source mjpeg  --out references_esp32
+#   py -3 capture_references.py --source webcam --out references_webcam
+#
+# Photos are saved where build_db.py expects them, under whichever --out you
+# give:  <out>/<product_name>/001.jpg, 002.jpg, …
 #
 # WHY POSES MATTER (acceptance rule 4)
 # ─────────────────────────────────────
@@ -35,9 +48,10 @@
 #
 # HOW TO RUN
 # ──────────
-#   python capture_references.py
+#   py -3 capture_references.py --source webcam --out references_webcam
 # ---------------------------------------------------------------
 
+import argparse
 import os
 import sys
 
@@ -92,8 +106,9 @@ def _draw_guide(display, product_name, pose_label, pose_hint, saved,
                 cv2.FONT_HERSHEY_SIMPLEX, 0.55, (180, 180, 180), 1)
 
 
-def capture_for_product(product_name: str, source) -> int:
-    save_dir = os.path.join(REFERENCES_DIR, product_name)
+def capture_for_product(product_name: str, source,
+                        references_dir: str = REFERENCES_DIR) -> int:
+    save_dir = os.path.join(references_dir, product_name)
     os.makedirs(save_dir, exist_ok=True)
 
     existing = [f for f in os.listdir(save_dir) if f.endswith(".jpg")]
@@ -152,7 +167,7 @@ def capture_for_product(product_name: str, source) -> int:
         key = cv2.waitKey(1) & 0xFF
         if key == ord(" "):
             if not can_save:
-                print(f"  Skipped save — {status_text}. "
+                print(f"  Skipped save - {status_text}. "
                       f"Adjust framing/lighting and try again.")
                 continue
             filename = os.path.join(save_dir, f"{counter:03d}.jpg")
@@ -168,7 +183,7 @@ def capture_for_product(product_name: str, source) -> int:
             pose_idx = (pose_idx + 1) % len(POSES)
         elif key in (ord("q"), ord("Q")):
             if saved < MIN_PHOTOS:
-                print(f"  Only {saved} photo(s) — need at least {MIN_PHOTOS}. "
+                print(f"  Only {saved} photo(s) - need at least {MIN_PHOTOS}. "
                       f"Keep going (or press Q again to force-finish).")
                 # Require a second Q to override, so an accidental Q doesn't
                 # leave a thin reference set.
@@ -183,19 +198,47 @@ def capture_for_product(product_name: str, source) -> int:
 
 
 def main():
+    ap = argparse.ArgumentParser(
+        description="Guided reference-photo capture (see REFERENCE_SOP.md).")
+    # ── which camera, and where its references go ─────────────────
+    # These two flags exist for one reason: THE REFERENCE SET IS
+    # CAMERA-SPECIFIC.  A reference photo encodes the image domain of the
+    # camera that shot it, so the ESP32-CAM and the webcam each need their own
+    # set and their own database.  Selecting the camera by editing ml/config.py
+    # between runs is how you end up with a reference set that is half ESP32
+    # and half webcam - which looks completely normal on disk and quietly
+    # wrecks every accuracy number that follows.  See DEPLOYMENT.md section 6.
+    ap.add_argument("--source", default=CAMERA_SOURCE,
+                    choices=["webcam", "mjpeg"],
+                    help=f"frame source: webcam (USB) or mjpeg (ESP32-CAM). "
+                         f"Default: {CAMERA_SOURCE}")
+    ap.add_argument("--url", default=None,
+                    help="MJPEG stream URL when --source mjpeg "
+                         "(default: ESP32_STREAM_URL from ml/config.py)")
+    ap.add_argument("--index", type=int, default=None,
+                    help="webcam device index when --source webcam")
+    ap.add_argument("--out", default=REFERENCES_DIR,
+                    help=f"directory to save reference photos into. Use a "
+                         f"per-camera directory, e.g. references_esp32/ or "
+                         f"references_webcam/. Default: {REFERENCES_DIR}")
+    args = ap.parse_args()
+
+    references_dir = args.out
+    os.makedirs(references_dir, exist_ok=True)
+
     try:
-        source = make_frame_source(CAMERA_SOURCE)
+        source = make_frame_source(args.source, url=args.url, index=args.index)
     except Exception as e:
-        print(f"ERROR: Cannot open camera source '{CAMERA_SOURCE}': {e}\n"
-              f"Check CAMERA_SOURCE / CAMERA_INDEX / ESP32_STREAM_URL in "
-              f"ml/config.py.")
+        print(f"ERROR: Cannot open camera source '{args.source}': {e}\n"
+              f"For a webcam, try --index 1. For the ESP32-CAM, check the "
+              f"stream URL opens in a browser first.")
         sys.exit(1)
 
     print("=" * 60)
-    print("  NXTCart-Cam — Guided Reference Capture")
+    print("  NXTCart-Cam - Guided Reference Capture")
     print("=" * 60)
-    print(f"  Camera source: {CAMERA_SOURCE}")
-    print(f"  Save location: {REFERENCES_DIR}")
+    print(f"  Camera source: {args.source}")
+    print(f"  Save location: {references_dir}")
     print(f"  Poses/product: {[p[0] for p in POSES]}")
     print(f"  Min photos   : {MIN_PHOTOS}")
     print("  Saved photos are CROPPED to the product (same crop as the live")
@@ -218,7 +261,7 @@ def main():
             if safe_name != name:
                 print(f"[capture] Using folder name: '{safe_name}'")
 
-            saved = capture_for_product(safe_name, source)
+            saved = capture_for_product(safe_name, source, references_dir)
             total_products += 1
             total_photos += saved
     finally:
@@ -227,8 +270,9 @@ def main():
 
     print(f"\n[capture] Summary: {total_products} product(s), "
           f"{total_photos} photo(s).")
-    print("[capture] Next step: run   python build_db.py   to compute "
-          "embeddings + colour references.")
+    print(f"[capture] Next step - build the database FOR THIS CAMERA:")
+    print(f"    py -3 build_db.py --references {references_dir} "
+          f"--out embedding_db_<camera>.pkl")
 
 
 if __name__ == "__main__":

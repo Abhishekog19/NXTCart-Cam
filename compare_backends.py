@@ -339,6 +339,33 @@ def print_report(runs: List[BackendRun], cases: List[Case],
     print("=" * 72 + "\n")
 
 
+def build_local_backend(db_path: Optional[str] = None, name: str = "local"):
+    """
+    Build the local MobileNet + HSV backend against a specific reference DB.
+
+    `db_path` matters more than it looks: the reference database encodes the
+    IMAGE DOMAIN of whichever camera shot the reference photos.  Scoring
+    ESP32-CAM crops against webcam-built references (or vice versa) measures
+    the domain gap between two cameras, not the accuracy of either — so the
+    camera bake-off passes an explicit per-camera DB here rather than relying
+    on the single config default.  See DEPLOYMENT.md §6.
+
+    Raises if the database is missing or was built with a different embedding
+    backend; the caller reports that as "backend unavailable" rather than
+    scoring every case as a failure, which would look like a bad camera.
+    """
+    from ml.backends import LocalBackend
+    from ml.matcher import load_database
+    from ml.recognizer import EmbeddingRecognizer
+    from ml.verifier import ProductVerifier, load_colour_db
+
+    db = load_database(db_path) if db_path else None
+    recog = EmbeddingRecognizer(db=db)
+    verifier = ProductVerifier(recog, appearance_db=recog.db,
+                               colour_db=load_colour_db(db_path))
+    return LocalBackend(verifier, name=name)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Compare verification backends on a labelled dataset.")
@@ -354,6 +381,10 @@ def main():
     ap.add_argument("--price-per-m", type=float, default=None,
                     help="input $/million tokens, to estimate cost per "
                          "verification (e.g. 0.075)")
+    ap.add_argument("--db", default=None,
+                    help="reference .pkl to score the local backend against. "
+                         "MUST be the database built from THIS camera's "
+                         "reference photos (default: config DATABASE_PATH)")
     ap.add_argument("--verbose", action="store_true",
                     help="print every case as it is scored")
     args = ap.parse_args()
@@ -374,13 +405,8 @@ def main():
     if "local" in wanted:
         print("\n[compare] Running LOCAL backend (MobileNet + HSV)...")
         try:
-            from ml.backends import LocalBackend
-            from ml.recognizer import EmbeddingRecognizer
-            from ml.verifier import ProductVerifier, load_colour_db
-            recog = EmbeddingRecognizer()
-            verifier = ProductVerifier(recog, appearance_db=recog.db,
-                                       colour_db=load_colour_db())
-            runs.append(run_backend(LocalBackend(verifier), cases, args.verbose))
+            runs.append(run_backend(build_local_backend(args.db), cases,
+                                    args.verbose))
         except Exception as e:
             print(f"[compare] LOCAL backend unavailable: {e}")
             print("[compare] It needs the reference database - run build_db.py.")

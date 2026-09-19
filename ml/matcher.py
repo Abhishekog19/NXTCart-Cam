@@ -27,6 +27,7 @@
 # positions.
 # ---------------------------------------------------------------
 
+import os
 import pickle
 from typing import Optional
 
@@ -66,8 +67,16 @@ EmbeddingDB = dict[str, list[np.ndarray]]
 _PRODUCTS_KEY = "products"
 _BACKEND_KEY = "backend"
 
-# Module-level cache — load the DB only once per process.
-_db_cache: Optional[EmbeddingDB] = None
+# Module-level cache — load each DB only once per process.
+#
+# Keyed BY PATH, deliberately.  A single-slot cache was fine while there was
+# exactly one database, but the camera bake-off (DEPLOYMENT §6) loads an
+# ESP32-CAM database and a webcam database in the same process; a path-blind
+# cache would hand back the first one for both and silently score one camera's
+# crops against the other camera's references.  That would not crash — it would
+# just quietly produce a wrong answer to the question the bake-off exists to
+# answer, which is far worse.
+_db_cache: dict = {}
 
 
 def _rebuild_error(path: str, detail: str) -> FileNotFoundError:
@@ -95,8 +104,9 @@ def load_database(path: str = DATABASE_PATH) -> EmbeddingDB:
     """
     global _db_cache
 
-    if _db_cache is not None:
-        return _db_cache
+    key = os.path.abspath(path)
+    if key in _db_cache:
+        return _db_cache[key]
 
     try:
         with open(path, "rb") as f:
@@ -135,13 +145,13 @@ def load_database(path: str = DATABASE_PATH) -> EmbeddingDB:
     if not isinstance(db, dict) or not db:
         raise _rebuild_error(path, "Embedding database contains no products.")
 
-    _db_cache = db
+    _db_cache[key] = db
     n_products = len(db)
     n_refs = sum(len(v) for v in db.values())
     print(f"[matcher] Database loaded: {n_products} products, "
           f"{n_refs} reference embeddings "
-          f"(backend {raw.get(_BACKEND_KEY, '?')}).")
-    return _db_cache
+          f"(backend {raw.get(_BACKEND_KEY, '?')}) from {os.path.basename(path)}.")
+    return db
 
 
 def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
