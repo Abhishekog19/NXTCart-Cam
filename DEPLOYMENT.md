@@ -439,7 +439,7 @@ same day, in the same light** (see 6.5).
 py -3 test_verify.py
 ```
 
-Expect **`ALL CHECKS PASSED`** (132 checks). This runs fully offline — no camera, no
+Expect **`ALL CHECKS PASSED`** (131 checks at time of writing). This runs fully offline — no camera, no
 model, no API key, no network. If it fails, **stop**: nothing below will mean anything.
 
 ---
@@ -668,8 +668,10 @@ Once the winner is clear:
 ### 6.9 End-to-end smoke test on the chosen camera
 
 ```bash
-python3 verify_demo.py
+py -3 verify_demo.py
 ```
+
+*(On the Pi: `python3 verify_demo.py`.)*
 
 Controls: **S** = scan next SKU, **W** = weight change (auto-settles), **R** = reset,
 **Q** = quit. Walk these cases in front of the mounted camera:
@@ -715,8 +717,8 @@ several seconds per verdict = unusable for a live cart.
 **Recommendation:**
 
 - **Default to ONNX.** It's the fast path, needs no extra package (runs on the OpenCV
-  you already installed), and **your current `embedding_db.pkl` is already stamped for
-  it** — nothing to rebuild. Keep `ml/mobilenet_v2.onnx`; you may **delete
+  you already installed), and **any DB you build with the default config is already
+  stamped for it** — nothing to rebuild. Keep `ml/mobilenet_v2.onnx`; you may **delete
   `ml/mobilenet_v2_quant.tflite`** and drop `ai-edge-litert` from `requirements.txt`.
   For safety pin it explicitly:
   ```python
@@ -726,13 +728,20 @@ several seconds per verdict = unusable for a live cart.
   enough there. If you do:
   1. keep `ml/mobilenet_v2_quant.tflite` and `ai-edge-litert`,
   2. set `EMBEDDING_BACKEND = "tflite"`,
-  3. **rebuild the DB** — `python3 build_db.py` — so it's re-stamped
+  3. **rebuild the DB** — `py -3 build_db.py` — so it's re-stamped
      `tflite-mbv2quant-1280`. The matcher **refuses a mismatched-backend DB** (the two
      models produce numerically incompatible vectors), so skipping this makes the demo
      error out on load. That guard is intentional.
 
 > The DB stamp is the safety interlock: it guarantees you never score live crops from
 > one model against references embedded by the other.
+
+> **Do this decision AFTER §6, not during it.** Switching the embedding backend
+> mid-bake-off invalidates every number you've collected, because tests 1 and 3 would
+> then be scored by two different models. Settle on one backend, rebuild **both**
+> camera databases with it (`--references references_esp32 --out embedding_db_esp32.pkl`
+> and the webcam pair), and only then run the comparison. From §6.8 onward there is one
+> camera and one plain `embedding_db.pkl`, which is what §8 below assumes.
 
 ---
 
@@ -814,6 +823,12 @@ class ArduinoWeightSource:
 > time).
 
 ### 8b. The per-frame loop (this is the entire integration surface)
+
+> This is the **post-bake-off** shape: one camera, named once in `CAMERA_SOURCE`, and
+> one plain `embedding_db.pkl` — the winner's DB, renamed in §6.8. The `--source` /
+> `--db` flags exist only for §6, where two cameras are live at once; production code
+> reads config, not flags.
+
 ```python
 from ml.config import CAMERA_SOURCE
 from ml.frame_source import make_frame_source
