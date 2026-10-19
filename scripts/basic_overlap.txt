@@ -1,0 +1,20 @@
+# ---------------------------------------------------------------
+# basic_overlap.txt  --  THE SCENARIO THE REBUILD EXISTS FOR
+#
+# One item is placed, then a second item is placed ON TOP of it.  The
+# covered item must keep its identity and stay in the cart.  Then the
+# covering item is taken away, and finally the first one.
+#
+# FORMAT
+#   action label  |  expected cart after the action  |  scene after the action
+#
+# The scene column is used by --mode synthetic / oracle only (it is ignored
+# in --mode live, where you perform the action yourself).  Objects are drawn
+# left to right, so the LAST one listed is ON TOP.
+#   name@x,y,w,h        expected: name:qty, name:qty        empty cart: -
+# ---------------------------------------------------------------
+
+add chawal                  | chawal:1             | chawal@130,150,160,170
+add shampoo covering chawal | chawal:1, shampoo:1  | chawal@130,150,160,170 shampoo@175,120,150,215
+remove shampoo              | chawal:1             | chawal@130,150,160,170
+remove chawal               | -                    |

@@ -730,3 +730,42 @@ AI_BACKEND_MAX_SIDE    = 512
 # resizes at scoring time anyway (ml/recognizer.py), so keeping the originals
 # costs only disk and preserves every option.
 DATASET_DIR = "datasets"
+
+# ── Cart ledger + running bill (ml/cart.py) ───────────────────────
+# The camera module used to end at a single per-transaction verdict; the cart
+# itself lived in "your backend".  ml/cart.py adds the missing piece so the
+# flow is complete end to end: a MATCH adds a unit, a weight drop removes one,
+# and a running {sku: qty} + subtotal is maintained.  Your real backend can
+# still own pricing — these are only used when no backend overrides them.
+#
+# PRICES_PATH   optional JSON mapping {sku: price} loaded at startup so the demo
+#               can show a real subtotal.  Missing file => quantities only
+#               (prices shown as n/a); this never raises.
+# CART_CURRENCY display-only prefix for money.  Kept ASCII on purpose: this is
+#               printed to a Windows console (cp1252) where a non-ASCII glyph
+#               such as the rupee sign raises UnicodeEncodeError.
+PRICES_PATH   = os.path.join(os.path.dirname(os.path.dirname(__file__)), "prices.json")
+CART_CURRENCY = "Rs "
+
+# ── Weight-driven item removal (ml/lane.py) ───────────────────────
+# Removal is AUTO, triggered by the scale LOSING mass (no re-scan).  Because
+# nothing was scanned, weight is the primary signal and the camera is the
+# DISAMBIGUATOR: the drop is matched against the recorded weight of each unit
+# currently in the cart, and only when two cart lines share that weight does
+# the camera decide which one left — flagging rather than guessing when unsure.
+# This is weaker than a scanned removal (an un-scanned removal is easier to
+# game); DEPLOYMENT.md documents the trade-off.
+#
+# REMOVAL_MIN_DROP_G      ignore negative weight noise below this many grams; a
+#                         real item leaving is well above it, scale jitter is not.
+# REMOVAL_WEIGHT_TOL_G    a cart unit "matches" the drop when the recorded unit
+#                         weight is within this many grams of the mass lost.
+# REMOVAL_CLASSIFY_MARGIN appearance top1-minus-top2 the camera must clear to
+#                         call which of several same-weight lines left; below it
+#                         the removal is AMBIGUOUS and flagged, never guessed.
+# REMOVAL_BURST_FRAMES    bounded rolling buffer of the leaving item's crops
+#                         (downscaled to IMAGE_SIZE), so peak RAM stays tiny.
+REMOVAL_MIN_DROP_G      = 20.0
+REMOVAL_WEIGHT_TOL_G    = 25.0
+REMOVAL_CLASSIFY_MARGIN = 0.06
+REMOVAL_BURST_FRAMES    = 8

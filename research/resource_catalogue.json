@@ -1,0 +1,5840 @@
+[
+  {
+    "title": "Intelligent Shopping Cart Product Recognition System Based on Computer Vision and Multi-Sensor Fusion",
+    "year": 2025,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/icctit68197.2025.11406732",
+    "ieee_id": "11406732",
+    "url": "https://ieeexplore.ieee.org/document/11406732/",
+    "reason": "Closest supplied multimodal cart baseline: RGB-D vision, weight and RFID. Compare its recognition objective with expected-SKU verification; audit its bibliography before following citations.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icctit68197.2025.11406732",
+    "evidence": "Supplied full text reviewed; DOI/title also verified in publisher metadata",
+    "access": "Already supplied locally",
+    "authors": [
+      {
+        "given": "Jipeng",
+        "family": "Zhang",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Dalian Polytechnic University,The School of Mechanical Engineering and Automation,Dalian,China,116034"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Zihan",
+        "family": "Xu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Dalian Polytechnic University,School of Foreign Languages,Dalian,China,116034"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ce",
+        "family": "Liang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Hebei Agricultural University,College of Mechanical and Electrical Engineering,Baoding,China,071001"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Yitian",
+        "family": "Zhu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Dalian Polytechnic University,The School of Mechanical Engineering and Automation,Dalian,China,116034"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2025 5th International Conference on Communication Technology and Information Technology (ICCTIT)",
+    "already_have": "C:\\Users\\ADMIN\\Downloads\\RP1.pdf",
+    "alternate_url": "",
+    "ref": "R01",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "A Weight-Reconciliation Algorithm for Fraud Detection in Smart Shopping Carts",
+    "year": 2026,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/ickecs70176.2026.11527873",
+    "ieee_id": "11527873",
+    "url": "https://ieeexplore.ieee.org/document/11527873/",
+    "reason": "Directly relevant 2026 weight-reconciliation prior art. Download to check its reconciliation rules, fraud scenarios, tolerances and evaluation before making novelty claims.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/ickecs70176.2026.11527873",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Mahendra",
+        "family": "Desai",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "RNS Institute of Technology,Dept. of Electronics and Communication,Bengaluru,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Bharath N.",
+        "family": "K.",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "RNS Institute of Technology,Dept. of Electronics and Communication,Bengaluru,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Manoj",
+        "family": "Shirol",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "RNS Institute of Technology,Dept. of Electronics and Communication,Bengaluru,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "K. A.",
+        "family": "Varun",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "RNS Institute of Technology,Dept. of Electronics and Communication,Bengaluru,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chethana",
+        "family": "J.",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "RNS Institute of Technology,Dept. of Electronics and Communication,Bengaluru,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2026 4th International Conference on Knowledge Engineering and Communication Systems (ICKECS)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R02",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "TAV-Cart: Transaction Assistance and Validation Cart System for Effortless Shopping and Checkout",
+    "year": 2024,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/icaccm61117.2024.11059075",
+    "ieee_id": "11059075",
+    "url": "https://ieeexplore.ieee.org/document/11059075/",
+    "reason": "Transaction assistance and validation are close to the project framing. Metadata verified; inspect the full paper to establish its actual sensors, workflow and contribution.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icaccm61117.2024.11059075",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Akshit",
+        "family": "Naithani",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "NMIMS University,Dept. of Computer Engineering,Mumbai,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tanish Singh",
+        "family": "Rajpal",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "NMIMS University,Dept. of Computer Engineering,Mumbai,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Vansh",
+        "family": "Mistry",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "NMIMS University,Dept. of Computer Engineering,Mumbai,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2024 International Conference on Advances in Computing, Communication and Materials (ICACCM)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R03",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Deep Learning based Automated Billing Cart",
+    "year": 2019,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/iccsp.2019.8697995",
+    "ieee_id": "8697995",
+    "url": "https://ieeexplore.ieee.org/document/8697995/",
+    "reason": "Camera-plus-load-cell cart baseline, particularly for produce. Compare physical weighing arrangement, product classes and bill generation with NXTCart.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/iccsp.2019.8697995",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "N.",
+        "family": "Ragesh",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "B.",
+        "family": "Giridhar",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "D.",
+        "family": "Lingeshwaran",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "P.",
+        "family": "Siddharth",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "K. P.",
+        "family": "Peeyush",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2019 International Conference on Communication and Signal Processing (ICCSP)",
+    "already_have": "",
+    "alternate_url": "https://www.amrita.edu/publication/deep-learning-based-automated-billing-cart/",
+    "ref": "R04",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Smart Shopping Cart With Machine Learning, Navigation, and Weighing Technologies",
+    "year": 2024,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/isaect64333.2024.10799859",
+    "ieee_id": "10799859",
+    "url": "https://ieeexplore.ieee.org/document/10799859/",
+    "reason": "Whole-cart integration combining camera recognition, weighing and user interface. Distinguish produce pricing by weight from packaged-SKU weight verification.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/isaect64333.2024.10799859",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Turki Waleed",
+        "family": "Alessa",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Prince Mohammad University,Dept. of Electrical Engineering,Al-Khobar,Saudi Arabia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Fahad",
+        "family": "Ahmed Alfarhan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Prince Mohammad University,Dept. of Electrical Engineering,Al-Khobar,Saudi Arabia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Faris Kamal",
+        "family": "Bugis",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Prince Mohammad University,Dept. of Electrical Engineering,Al-Khobar,Saudi Arabia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ali",
+        "family": "Abdulhadi Aldawood",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Prince Mohammad University,Dept. of Electrical Engineering,Al-Khobar,Saudi Arabia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Sadiq Ali",
+        "family": "Alhuwaidi",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Prince Mohammad University,Dept. of Electrical Engineering,Al-Khobar,Saudi Arabia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ahmed",
+        "family": "Abul Hussain",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Prince Mohammad University,Dept. of Electrical Engineering,Al-Khobar,Saudi Arabia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2024 6th International Symposium on Advanced Electrical and Communication Technologies (ISAECT)",
+    "already_have": "",
+    "alternate_url": "https://faculty.pmu.edu.sa/pmufaculties/Details/salhuwaidi",
+    "ref": "R05",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "IoT Applications on Secure Smart Shopping System",
+    "year": 2017,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/jiot.2017.2706698",
+    "ieee_id": "7932080",
+    "url": "https://ieeexplore.ieee.org/document/7932080/",
+    "reason": "Secure shopping-system architecture and communication protocol prior art. Useful for system requirements and the security discussion; do not assume RFID solves product substitution.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/jiot.2017.2706698",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0003-4452-0502",
+        "authenticated-orcid": false,
+        "given": "Ruinian",
+        "family": "Li",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tianyi",
+        "family": "Song",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Nicholas",
+        "family": "Capurso",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-6451-1158",
+        "authenticated-orcid": false,
+        "given": "Jiguo",
+        "family": "Yu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jason",
+        "family": "Couture",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-5912-4647",
+        "authenticated-orcid": false,
+        "given": "Xiuzhen",
+        "family": "Cheng",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Internet of Things Journal",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R06",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "A Few-Shot Learning Pipeline for Retail Product Recognition Using Object Detection and Metric Embeddings",
+    "year": 2025,
+    "priority": "P1",
+    "group": "Retail vision",
+    "doi": "10.1109/icoiact67584.2025.11344991",
+    "ieee_id": "11344991",
+    "url": "https://ieeexplore.ieee.org/document/11344991/",
+    "reason": "Very close methodological comparator: detection followed by embedding similarity for a changing product catalogue. Assess catalogue growth, reference count and evaluation splits.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icoiact67584.2025.11344991",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Zahri",
+        "family": "Al Adzani Hidayat",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Politeknik Negeri Bandung,Computer Engineering and Informatics Department,Bandung,Indonesia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Hanri Fajar",
+        "family": "Ramadhan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Politeknik Negeri Bandung,Computer Engineering and Informatics Department,Bandung,Indonesia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Priyanto",
+        "family": "Hidayatullah",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Politeknik Negeri Bandung,Computer Engineering and Informatics Department,Bandung,Indonesia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Nurjannah",
+        "family": "Syakrani",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Politeknik Negeri Bandung,Computer Engineering and Informatics Department,Bandung,Indonesia"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2025 8th International Conference on Information and Communications Technology (ICOIACT)",
+    "already_have": "",
+    "alternate_url": "https://ieeexplore.ieee.org/abstract/document/11344991",
+    "ref": "R07",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "A Retail Object Classification Method Using Multiple Cameras for Vision-Based Unmanned Kiosks",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Retail vision",
+    "doi": "10.1109/jsen.2022.3210699",
+    "ieee_id": "9912319",
+    "url": "https://ieeexplore.ieee.org/document/9912319/",
+    "reason": "Multi-camera retail recognition and view-dependent appearance. Useful for camera placement and lookalike/occlusion discussion; its kiosk environment differs from a moving cart.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/jsen.2022.3210699",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-1617-7949",
+        "authenticated-orcid": false,
+        "given": "Ji-Ye",
+        "family": "Jeon",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Electrical and Computer Engineering Department, Seoul National University, Seoul, South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-7404-6154",
+        "authenticated-orcid": false,
+        "given": "Shin-Woo",
+        "family": "Kang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Electrical and Computer Engineering Department, Seoul National University, Seoul, South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-6811-9647",
+        "authenticated-orcid": false,
+        "given": "Hyuk-Jae",
+        "family": "Lee",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Electrical and Computer Engineering Department, Seoul National University, Seoul, South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-9839-4762",
+        "authenticated-orcid": false,
+        "given": "Jin-Sung",
+        "family": "Kim",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Electrical Engineering Department, Sun Moon University, Asan, South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Sensors Journal",
+    "already_have": "",
+    "alternate_url": "https://ieee-sensorsalert.org/articles/a-retail-object-classification-method-using-multiple-cameras-for-vision-based-unmanned-kiosks/",
+    "ref": "R08",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Smart Shopping Carts Based on Mobile Computing and Deep Learning Cloud Services",
+    "year": 2020,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/wcnc45663.2020.9120574",
+    "ieee_id": "9120574",
+    "url": "https://ieeexplore.ieee.org/document/9120574/",
+    "reason": "iCart supplies an edge/cloud shopping-event baseline. Compare event handling, network dependency and placement of inference with the Pi-to-PC runtime.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/wcnc45663.2020.9120574",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Muhammad Atif",
+        "family": "Sarwar",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yousef-Awwad",
+        "family": "Daraghmi",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Kuan-Wen",
+        "family": "Liu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hong-Chuan",
+        "family": "Chi",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tsi -Ui",
+        "family": "Ik",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yih-Lang",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2020 IEEE Wireless Communications and Networking Conference (WCNC)",
+    "already_have": "",
+    "alternate_url": "https://scholar.nycu.edu.tw/en/publications/smart-shopping-carts-based-on-mobile-computing-and-deep-learning-/",
+    "ref": "R09",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "IoT-Based Smart Shopping Cart Using Radio Frequency Identification",
+    "year": 2020,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/access.2020.2986681",
+    "ieee_id": "9060814",
+    "url": "https://ieeexplore.ieee.org/document/9060814/",
+    "reason": "Widely relevant RFID/Arduino/mobile billing baseline; cited in both supplied 2022 papers. Compare tag requirements and shopper workflow with barcode-first verification.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/access.2020.2986681",
+    "evidence": "Publisher metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Mobeen",
+        "family": "Shahroz",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-1922-6205",
+        "authenticated-orcid": false,
+        "given": "Muhammad Faheem",
+        "family": "Mushtaq",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Maqsood",
+        "family": "Ahmad",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3747-1263",
+        "authenticated-orcid": false,
+        "given": "Saleem",
+        "family": "Ullah",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-5822-4005",
+        "authenticated-orcid": false,
+        "given": "Arif",
+        "family": "Mehmood",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-0854-768X",
+        "authenticated-orcid": false,
+        "given": "Gyu Sang",
+        "family": "Choi",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Access",
+    "already_have": "",
+    "alternate_url": "https://doi.org/10.1109/ACCESS.2020.2986681",
+    "ref": "R10",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Design and Development of a Smart Shopping Cart System",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/icicict54557.2022.9917860",
+    "ieee_id": "9917860",
+    "url": "https://ieeexplore.ieee.org/document/9917860/",
+    "reason": "Supplied RP2: RFID cart with adding/removing items, display and ZigBee/IoT billing. Use for historical cart-system comparison.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icicict54557.2022.9917860",
+    "evidence": "Supplied full text reviewed; DOI/title also verified in publisher metadata",
+    "access": "Already supplied locally",
+    "authors": [
+      {
+        "given": "P.Aruna",
+        "family": "Jeyanthy",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Kalasalingam Academy of Research and Education,Electrical and Electronics Engineering Department,KrishnanKoil,India"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "S.Raja",
+        "family": "Mohamed",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Univeristy of Bahrain,Departmet of Electrical and Electronics Engineering,Isatown,Kingdom of Bahrain"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Mohammed",
+        "family": "Alarfaj",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "King Faisal University,Department of Electrical Engineering,Al-Ahsa,Saudi Arabia,31982"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Singam Sandeep",
+        "family": "Reddy",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Kalasalingam Academy of Research and Education,Electrical and Electronics Engineering Department,KrishnanKoil,India"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "K. S.",
+        "family": "Jenin",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Kalasalingam Academy of Research and Education,Electrical and Electronics Engineering Department,KrishnanKoil,India"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2022 Third International Conference on Intelligent Computing Instrumentation and Control Technologies (ICICICT)",
+    "already_have": "C:\\Users\\ADMIN\\Downloads\\RP2.pdf",
+    "alternate_url": "",
+    "ref": "R11",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "AIoT-based Smart Cart System",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/icstsn53084.2022.9761346",
+    "ieee_id": "9761346",
+    "url": "https://ieeexplore.ieee.org/document/9761346/",
+    "reason": "Supplied RP3: image processing/YOLO with RFID-assisted billing. Check exactly how its proposed counting and identification are tested before quoting effectiveness.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icstsn53084.2022.9761346",
+    "evidence": "Supplied full text reviewed; DOI/title also verified in publisher metadata",
+    "access": "Already supplied locally",
+    "authors": [
+      {
+        "given": "Sakthivel",
+        "family": "S",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Amrita Vishwa Vidyapeetham,Department of Electronics Communication and Engineering,Chennai,India,601103"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Akash Ram R.",
+        "family": "K",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Amrita Vishwa Vidyapeetham,Department of Electronics Communication and Engineering,Chennai,India,601103"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Sidarth",
+        "family": "Sai B",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Amrita Vishwa Vidyapeetham,Department of Electronics Communication and Engineering,Chennai,India,601103"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Vijaya Kesavan K.",
+        "family": "M",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Amrita Vishwa Vidyapeetham,Department of Electronics Communication and Engineering,Chennai,India,601103"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ganesh",
+        "family": "Kumar C",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Amrita Vishwa Vidyapeetham,Chennai,India,601103"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2022 International Conference on Smart Technologies and Systems for Next Generation Computing (ICSTSN)",
+    "already_have": "C:\\Users\\ADMIN\\Downloads\\RP3.pdf",
+    "alternate_url": "",
+    "ref": "R12",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Fast and Low-Cost, Wireless Controlled Smart Shopping Cart with Raspberry Pi and RFID Technology",
+    "year": 2022,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/iisec56263.2022.9998221",
+    "ieee_id": "9998221",
+    "url": "https://ieeexplore.ieee.org/document/9998221/",
+    "reason": "Raspberry Pi/RFID cart comparator. Download to check its weight-based theft control, cost assumptions and communication arrangement.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/iisec56263.2022.9998221",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Zeeshan",
+        "family": "Ali",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "University of Engineering &#x0026; Technology Lahore, Faisalabad Campus,dept. of Electrical and Electronics Engineering,Faisalabad,Pakistan"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Mudasser",
+        "family": "Waqas",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "University of Engineering &#x0026; Technology Lahore, Faisalabad, Campus,dept. of Mechatronics and Manufacturing Engineering,Faisalabad,Pakistan"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Muzzamil",
+        "family": "Waqas",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Government College University Faisalabad,dept. of Electrical Engineering,Faisalabad,Pakistan"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ahsan",
+        "family": "Shahzad",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "University of South Asia Lahore,dept. of Electrical Engineering,Lahore,Pakistan"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2022 3rd International Informatics and Software Engineering Conference (IISEC)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R13",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Advanced Smart Shopping Cart with Integration of AI and IoT",
+    "year": 2023,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/icecaa58104.2023.10212323",
+    "ieee_id": "10212323",
+    "url": "https://ieeexplore.ieee.org/document/10212323/",
+    "reason": "Additional AI/IoT integration baseline. Only metadata/title verified in this pass; extract actual hardware and measured results after download.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icecaa58104.2023.10212323",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "P Pramod",
+        "family": "Kumar",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "SR University,Department of Computer Science and Artificial Intelligence,Warangal,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "K. Sridhar",
+        "family": "Sai",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "SR University,Department of CSE,Warangal,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "B.",
+        "family": "Soniya",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "SR University,Department of CSE,Warangal,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "U.",
+        "family": "Koutil",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "SR University,Department of CSE,Warangal,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Afreen",
+        "family": "Sania",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "SR University,Department of CSE,Warangal,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "K",
+        "family": "Sagar",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sreyas Institute of Engineering and Technology,Department of CSE,Hyderabad,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2023 2nd International Conference on Edge Computing and Applications (ICECAA)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R14",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "RFID based Smart Trolley Billing System using IoT",
+    "year": 2025,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/iciccs65191.2025.10984823",
+    "ieee_id": "10984823",
+    "url": "https://ieeexplore.ieee.org/document/10984823/",
+    "reason": "RFID plus load-cell monitoring and billing. Compare independent checks and failure handling rather than treating a component list as equivalent performance.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/iciccs65191.2025.10984823",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Manikandan",
+        "family": "S",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Karpagam College of Engineering,Department of ETE,Coimbatore,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Harish Murugan",
+        "family": "A",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Karpagam College of Engineering,Department of ETE,Coimbatore,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Kamal",
+        "family": "S",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Karpagam College of Engineering,Department of ETE,Coimbatore,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Udhayakumar",
+        "family": "S",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Karpagam College of Engineering,Department of ETE,Coimbatore,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yokesh",
+        "family": "D",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Karpagam College of Engineering,Department of ETE,Coimbatore,India"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2025 International Conference on Intelligent Computing and Control Systems (ICICCS)",
+    "already_have": "",
+    "alternate_url": "https://ieeexplore.ieee.org/document/10984823/",
+    "ref": "R15",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "RFID-Powered Intelligent Shopping Cart: Streamlined Checkout and Automated Billing",
+    "year": 2024,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/icwite59797.2024.10503373",
+    "ieee_id": "10503373",
+    "url": "https://ieeexplore.ieee.org/document/10503373/",
+    "reason": "Recent RFID/cloud billing design; useful for system-level literature comparison and product-data flow.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icwite59797.2024.10503373",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "M. Ramya",
+        "family": "Krishna",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Vishnu Institute of Technology,Basic Science Department,Bhimavaram,India"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Mohammad",
+        "family": "Alifa Firdhos Farheen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Vishnu Institute of Technology,Basic Science Department,Bhimavaram,India"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Himakiran",
+        "family": "Killamsetti",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Vishnu Institute of Technology,Department of ECE,Bhimavaram,India"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2024 IEEE International Conference for Women in Innovation, Technology &amp;amp; Entrepreneurship (ICWITE)",
+    "already_have": "",
+    "alternate_url": "https://doi.org/10.1109/ICWITE59797.2024.10503373",
+    "ref": "R16",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Development of e-shopping cart with theft control mechanism: No queue",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/icett.2016.7873753",
+    "ieee_id": "7873753",
+    "url": "https://ieeexplore.ieee.org/document/7873753/",
+    "reason": "Early theft-control cart comparator. Metadata verified; inspect the attack model and validation mechanism before characterizing security coverage.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icett.2016.7873753",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Bhasha",
+        "family": "Chaure",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Preet",
+        "family": "Jain",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2016 International Conference on Emerging Technological Trends (ICETT)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R17",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Smart shopping cart with automatic billing system through RFID and ZigBee",
+    "year": 2014,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/icices.2014.7033996",
+    "ieee_id": "7033996",
+    "url": "https://ieeexplore.ieee.org/document/7033996/",
+    "reason": "Historical RFID/ZigBee automated billing baseline. Helps establish that wireless cart billing predates the proposed project.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icices.2014.7033996",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "P.",
+        "family": "Chandrasekar",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "T.",
+        "family": "Sangeetha",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "International Conference on Information Communication and Embedded Systems (ICICES2014)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R18",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Auto-checkout system for retails using Radio Frequency Identification (RFID) technology",
+    "year": 2011,
+    "priority": "P3",
+    "group": "Cart systems",
+    "doi": "10.1109/icsgrc.2011.5991855",
+    "ieee_id": "5991855",
+    "url": "https://ieeexplore.ieee.org/document/5991855/",
+    "reason": "Early multi-tag RFID auto-checkout. Useful background on automatic identification; lower priority than direct camera/weight cart comparisons.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icsgrc.2011.5991855",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "M. F. M.",
+        "family": "Busu",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "I.",
+        "family": "Ismail",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "M. F.",
+        "family": "Saaid",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "S. M.",
+        "family": "Norzeli",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2011 IEEE Control and System Graduate Research Colloquium",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R19",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "3S-cart: A Lightweight, Interactive Sensor-Based Cart for Smart Shopping in Supermarkets",
+    "year": 2016,
+    "priority": "P3",
+    "group": "Cart systems",
+    "doi": "10.1109/jsen.2016.2586101",
+    "ieee_id": "7501897",
+    "url": "https://ieeexplore.ieee.org/document/7501897/",
+    "reason": "3S-cart covers modular sensing and shopper interaction. Its promotion/navigation focus is peripheral to billing integrity.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/jsen.2016.2586101",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-5655-8383",
+        "authenticated-orcid": false,
+        "given": "You-Chiun",
+        "family": "Wang",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chang-Chen",
+        "family": "Yang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Sensors Journal",
+    "already_have": "",
+    "alternate_url": "https://people.cs.nycu.edu.tw/~wangyc/publications/journals/j028-sensors16-3Scart.pdf",
+    "ref": "R20",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "AI-Driven Smart Shopping Carts With Real-Time Tracking and Inventory Forecasting for Enhanced Retail Efficiency",
+    "year": 2025,
+    "priority": "P3",
+    "group": "Cart systems",
+    "doi": "10.1109/access.2025.3553854",
+    "ieee_id": "10937485",
+    "url": "https://ieeexplore.ieee.org/document/10937485/",
+    "reason": "Broader AI cart context including navigation and forecasting. Include only if the paper discusses those adjacent capabilities; they are outside the current core scope.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/access.2025.3553854",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-9027-6913",
+        "authenticated-orcid": false,
+        "given": "Muhammad Imran",
+        "family": "Zulfiqar",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "School of Computer Science and Engineering, Nanjing University of Science and Technology, Nanjing, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0009-0003-2129-0334",
+        "authenticated-orcid": false,
+        "given": "Ayesha",
+        "family": "Khalid",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Computer Science and Information Technology, University of Jhang, Jhang, Pakistan"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-4464-6538",
+        "authenticated-orcid": false,
+        "given": "Abubakr",
+        "family": "Siddig",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "School of Computer Science, Technological University Dublin, Dublin 7, Ireland"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Muhammad Junaid",
+        "family": "Nawaz",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Physical and Numerical Sciences, Qurtuba University of Science and Information Technology, Dera Ismail Khan, Pakistan"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-7859-7076",
+        "authenticated-orcid": false,
+        "given": "Salim",
+        "family": "Saay",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Computer Science and Information Systems, University of Limerick, Limerick, Ireland"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Access",
+    "already_have": "",
+    "alternate_url": "https://ieeexplore.ieee.org/abstract/document/10937485",
+    "ref": "R21",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Next Buy Navigator: Smart Shopping Cart with Item Prediction",
+    "year": 2025,
+    "priority": "P3",
+    "group": "Cart systems",
+    "doi": "10.1109/icce-asia67487.2025.11263715",
+    "ieee_id": "11263715",
+    "url": "https://ieeexplore.ieee.org/document/11263715/",
+    "reason": "ROS 2 cart integration example using shopper-intent prediction. Useful systems context, but prediction/navigation should not be added to NXTCart claims.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icce-asia67487.2025.11263715",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Jonathan Simon D.",
+        "family": "Bernardo",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Ateneo de Manila University,Department of Electronics, Computer and Communication Engineering,Quezon City,Philippines"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Gena",
+        "family": "Lyn L. Tusi",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Ateneo de Manila University,Department of Electronics, Computer and Communication Engineering,Quezon City,Philippines"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "I Elizabeth",
+        "family": "Cha",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Chung Yuan Christian University,Undergraduate Program in Intelligent Computing and Big Data,Taoyuan,Taiwan R.O.C."
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Yong-Xiang",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Chung Yuan Christian University,Undergraduate Program in Intelligent Computing and Big Data,Taoyuan,Taiwan R.O.C."
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Jan Kevin A.",
+        "family": "Galicia",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Ateneo de Manila University,Department of Electronics, Computer and Communication Engineering,Quezon City,Philippines"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2025 IEEE/IEIE International Conference on Consumer Electronics-Asia (ICCE-Asia)",
+    "already_have": "",
+    "alternate_url": "https://doi.org/10.1109/ICCE-Asia67487.2025.11263715",
+    "ref": "R22",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Radar Self-Following Shopping Cart Based on Multi-Sensor Fusion",
+    "year": 2023,
+    "priority": "P3",
+    "group": "Cart systems",
+    "doi": "10.1109/access.2023.3297889",
+    "ieee_id": "10189849",
+    "url": "https://ieeexplore.ieee.org/document/10189849/",
+    "reason": "Radar/sensor-fusion self-following cart. Background on adjacent cart research; its mobility problem differs from product verification.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/access.2023.3297889",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Lei",
+        "family": "Yao",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering, University of Shanghai for Science and Technology, Yangpu, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0009-0003-5606-6906",
+        "authenticated-orcid": false,
+        "given": "Tianhao",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering, University of Shanghai for Science and Technology, Yangpu, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-4140-4813",
+        "authenticated-orcid": false,
+        "given": "Rui",
+        "family": "Tong",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering, University of Shanghai for Science and Technology, Yangpu, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0009-0006-7693-1807",
+        "authenticated-orcid": false,
+        "given": "Kai",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering, University of Shanghai for Science and Technology, Yangpu, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Lingxiang",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Department of Electrical Engineering, University of Shanghai for Science and Technology, Yangpu, China"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Access",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R23",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "RFID-Cloud smart cart system",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/icacci.2016.7732405",
+    "ieee_id": "7732405",
+    "url": "https://ieeexplore.ieee.org/document/7732405/",
+    "reason": "RFID/cloud cart, web interface and anti-theft gates. Useful for separating on-cart billing, store services and exit checks.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icacci.2016.7732405",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Yerlan",
+        "family": "Berdaliyev",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Alex Pappachen",
+        "family": "James",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2016 International Conference on Advances in Computing, Communications and Informatics (ICACCI)",
+    "already_have": "",
+    "alternate_url": "https://research.nu.edu.kz/en/publications/rfid-cloud-smart-cart-system/",
+    "ref": "R24",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "The Smart Cart with Automatic Billing and Anti-Theft",
+    "year": 2026,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1109/iceece71300.2026.11709931",
+    "ieee_id": "11709931",
+    "url": "https://ieeexplore.ieee.org/document/11709931/",
+    "reason": "Recent 2026 billing/anti-theft paper. Metadata verified only; download before citing its technical approach or results.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/iceece71300.2026.11709931",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "M. H.",
+        "family": "Walid",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Universiti Malaysia Perlis",
+            "place": [
+              "Perlis, Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "family": "S.J.Rosli",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Universiti Malaysia Perlis Centre of Excellence for Advanced Computing Engineering (ACE)",
+            "place": [
+              "Perlis, Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "family": "N.Omar",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Universiti Malaysia Perlis Centre of Excellence for Advanced Computing (AdvComp)",
+            "place": [
+              "Perlis, Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "family": "W.N.S.F.W.Arifin",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Universiti Malaysia Perlis",
+            "place": [
+              "Perlis, Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "family": "N.B.M.Hashim",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Universiti Malaysia Perlis Centre of Excellence for Advanced Communication Engineering (ACE)",
+            "place": [
+              "Perlis, Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "family": "W.F.Hoon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Universiti Malaysia Perlis Centre of Excellence for Advanced Computing Engineering (ACE)",
+            "place": [
+              "Perlis, Malaysia"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2026 IEEE International Conference on Electrical, Electronic and Computer Engineering (ICEECE)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R25",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Multi-Modal Product Recognition and In-Store Navigation using an Intelligent Shopping Cart",
+    "year": 2026,
+    "priority": "P1",
+    "group": "Cart systems",
+    "doi": "10.1109/iccbi68589.2026.11619726",
+    "ieee_id": "11619726",
+    "url": "https://ieeexplore.ieee.org/document/11619726/",
+    "reason": "Very recent multimodal cart prior art. Metadata verified only; download to check the apparent barcode/weight/vision overlap and any real evaluation.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/iccbi68589.2026.11619726",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Aadhith",
+        "family": "Prabhath",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Manipal Academy of Higher Education",
+            "place": [
+              "Dubai, UAE"
+            ],
+            "department": [
+              "School of Engineering and IT Department of Mechatronics Engineering"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Athul",
+        "family": "Anoop",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Manipal Academy of Higher Education",
+            "place": [
+              "Dubai, UAE"
+            ],
+            "department": [
+              "School of Engineering and IT Department of Mechatronics Engineering"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Vyshak",
+        "family": "Sureshkumar",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "United Arab Emirates University",
+            "place": [
+              "Dubai, UAE"
+            ],
+            "department": [
+              "School of Engineering and IT Department of Mechanical and Aerospace Engineering"
+            ]
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2026 5th International Conference on Computer Networks, Big Data and IoT (ICCBI)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R26",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "DeepACO: A Robust Deep Learning-based Automatic Checkout System",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Retail vision",
+    "doi": "10.1109/cvprw56347.2022.00350",
+    "ieee_id": "9857462",
+    "url": "https://ieeexplore.ieee.org/document/9857462/",
+    "reason": "DeepACO combines detection, tracking and counting for checkout video. Useful for temporal-event baselines; conveyor conditions differ from cart insertion.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvprw56347.2022.00350",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Open CVF author PDF/page available; Xplore access not tested",
+    "authors": [
+      {
+        "given": "Long Hoang",
+        "family": "Pham",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Duong",
+        "family": "Nguyen-Ngoc Tran",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Huy-Hung",
+        "family": "Nguyen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Tai Huu-Phuong",
+        "family": "Tran",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Hyung-Joon",
+        "family": "Jeon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Hyung-Min",
+        "family": "Jeon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Jae Wook",
+        "family": "Jeon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)",
+    "already_have": "",
+    "alternate_url": "https://openaccess.thecvf.com/content/CVPR2022W/AICity/papers/Pham_DeepACO_A_Robust_Deep_Learning-Based_Automatic_Checkout_System_CVPRW_2022_paper.pdf",
+    "ref": "R27",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Improving Deep Learning-based Automatic Checkout System Using Image Enhancement Techniques",
+    "year": 2023,
+    "priority": "P2",
+    "group": "Retail vision",
+    "doi": "10.1109/cvprw59228.2023.00562",
+    "ieee_id": "10208503",
+    "url": "https://ieeexplore.ieee.org/document/10208503/",
+    "reason": "Checkout-video detection/tracking with image enhancement and synthetic training data. Useful for blur, counting and augmentation comparisons.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvprw59228.2023.00562",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Open CVF author PDF/page available; Xplore access not tested",
+    "authors": [
+      {
+        "given": "Long Hoang",
+        "family": "Pham",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Duong Nguyen-Ngoc",
+        "family": "Tran",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Huy-Hung",
+        "family": "Nguyen",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hyung-Joon",
+        "family": "Jeon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tai Huu-Phuong",
+        "family": "Tran",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hyung-Min",
+        "family": "Jeon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jae Wook",
+        "family": "Jeon",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sungkyunkwan University,Department of Electrical and Computer Engineering,South Korea"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2023 IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)",
+    "already_have": "",
+    "alternate_url": "https://openaccess.thecvf.com/content/CVPR2023W/AICity/html/Pham_Improving_Deep_Learning-Based_Automatic_Checkout_System_Using_Image_Enhancement_Techniques_CVPRW_2023_paper.html",
+    "ref": "R28",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Iterative Knowledge Distillation for Automatic Check-Out",
+    "year": 2021,
+    "priority": "P2",
+    "group": "Retail vision",
+    "doi": "10.1109/tmm.2020.3037502",
+    "ieee_id": "9257112",
+    "url": "https://ieeexplore.ieee.org/document/9257112/",
+    "reason": "Automatic-checkout domain adaptation/distillation comparator. Relevant to the mismatch between clean reference photos and cluttered live views.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/tmm.2020.3037502",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-8450-0958",
+        "authenticated-orcid": false,
+        "given": "Libo",
+        "family": "Zhang",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-9404-524X",
+        "authenticated-orcid": false,
+        "given": "Dawei",
+        "family": "Du",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Congcong",
+        "family": "Li",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yanjun",
+        "family": "Wu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tiejian",
+        "family": "Luo",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "IEEE Transactions on Multimedia",
+    "already_have": "",
+    "alternate_url": "https://isrc.iscas.ac.cn/zhanglibo/pdfs/2020/IEEE_Transactions_on_Multimedia.pdf",
+    "ref": "R29",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Context-aware hybrid classification system for fine-grained retail product recognition",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Retail vision",
+    "doi": "10.1109/ivmspw.2016.7528213",
+    "ieee_id": "7528213",
+    "url": "https://ieeexplore.ieee.org/document/7528213/",
+    "reason": "Fine-grained retail recognition using visual/context information. Useful context for why near-identical SKUs remain difficult.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/ivmspw.2016.7528213",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Ipek",
+        "family": "Baz",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Erdem",
+        "family": "Yoruk",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Mujdat",
+        "family": "Cetin",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "2016 IEEE 12th Image, Video, and Multidimensional Signal Processing Workshop (IVMSP)",
+    "already_have": "",
+    "alternate_url": "https://research.sabanciuniv.edu/id/eprint/30357/",
+    "ref": "R30",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "MobileNetV2: Inverted Residuals and Linear Bottlenecks",
+    "year": 2018,
+    "priority": "P1",
+    "group": "Methods and tracking",
+    "doi": "10.1109/cvpr.2018.00474",
+    "ieee_id": "8578572",
+    "url": "https://ieeexplore.ieee.org/document/8578572/",
+    "reason": "MobileNetV2 is the local feature extractor in the current code. Cite the original architecture and report pretrained weights, preprocessing and embedding extraction separately.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvpr.2018.00474",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Mark",
+        "family": "Sandler",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Andrew",
+        "family": "Howard",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Menglong",
+        "family": "Zhu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Andrey",
+        "family": "Zhmoginov",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Liang-Chieh",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2018 IEEE/CVF Conference on Computer Vision and Pattern Recognition",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R31",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Searching for MobileNetV3",
+    "year": 2019,
+    "priority": "P3",
+    "group": "Methods and tracking",
+    "doi": "10.1109/iccv.2019.00140",
+    "ieee_id": "9008835",
+    "url": "https://ieeexplore.ieee.org/document/9008835/",
+    "reason": "Optional lightweight backbone alternative for an accuracy/latency comparison. Cite only if evaluated or substantively discussed.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/iccv.2019.00140",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Andrew",
+        "family": "Howard",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Mark",
+        "family": "Sandler",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Bo",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Weijun",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Liang-Chieh",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Mingxing",
+        "family": "Tan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Grace",
+        "family": "Chu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Vijay",
+        "family": "Vasudevan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yukun",
+        "family": "Zhu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ruoming",
+        "family": "Pang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hartwig",
+        "family": "Adam",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Quoc",
+        "family": "Le",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2019 IEEE/CVF International Conference on Computer Vision (ICCV)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R32",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Deep Residual Learning for Image Recognition",
+    "year": 2016,
+    "priority": "P3",
+    "group": "Methods and tracking",
+    "doi": "10.1109/cvpr.2016.90",
+    "ieee_id": "7780459",
+    "url": "https://ieeexplore.ieee.org/document/7780459/",
+    "reason": "ResNet is a standard feature-extractor baseline. It is not evidence that the current project uses a ResNet model.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvpr.2016.90",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Kaiming",
+        "family": "He",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Xiangyu",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Shaoqing",
+        "family": "Ren",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jian",
+        "family": "Sun",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R33",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "You Only Look Once: Unified, Real-Time Object Detection",
+    "year": 2016,
+    "priority": "P3",
+    "group": "Methods and tracking",
+    "doi": "10.1109/cvpr.2016.91",
+    "ieee_id": "7780460",
+    "url": "https://ieeexplore.ieee.org/document/7780460/",
+    "reason": "Original YOLO architecture paper, useful background when comparing detector-based cart literature. It does not document YOLOv8 or prove its use in NXTCart.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvpr.2016.91",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Joseph",
+        "family": "Redmon",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Santosh",
+        "family": "Divvala",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ross",
+        "family": "Girshick",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ali",
+        "family": "Farhadi",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R34",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Simple online and realtime tracking",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Methods and tracking",
+    "doi": "10.1109/icip.2016.7533003",
+    "ieee_id": "7533003",
+    "url": "https://ieeexplore.ieee.org/document/7533003/",
+    "reason": "SORT supplies a lightweight temporal association baseline. Evaluate scanned-object continuity and identity switches, rather than assuming general tracking equals custody proof.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icip.2016.7533003",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Alex",
+        "family": "Bewley",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zongyuan",
+        "family": "Ge",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Lionel",
+        "family": "Ott",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Fabio",
+        "family": "Ramos",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ben",
+        "family": "Upcroft",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2016 IEEE International Conference on Image Processing (ICIP)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R35",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Simple online and realtime tracking with a deep association metric",
+    "year": 2017,
+    "priority": "P2",
+    "group": "Methods and tracking",
+    "doi": "10.1109/icip.2017.8296962",
+    "ieee_id": "8296962",
+    "url": "https://ieeexplore.ieee.org/document/8296962/",
+    "reason": "Deep SORT adds appearance-based association through occlusion. Its pretrained person association metric needs adaptation/evaluation for retail items.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/icip.2017.8296962",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Nicolai",
+        "family": "Wojke",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Alex",
+        "family": "Bewley",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Dietrich",
+        "family": "Paulus",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2017 IEEE International Conference on Image Processing (ICIP)",
+    "already_have": "",
+    "alternate_url": "https://ieeexplore.ieee.org/abstract/document/8296962/authors",
+    "ref": "R36",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "An introduction to multisensor data fusion",
+    "year": 1997,
+    "priority": "P2",
+    "group": "Sensor fusion and reliability",
+    "doi": "10.1109/5.554205",
+    "ieee_id": "554205",
+    "url": "https://ieeexplore.ieee.org/document/554205/",
+    "reason": "Foundational sensor-fusion tutorial for describing evidence combination and uncertainty. General fusion theory does not establish independence of the cart sensors.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/5.554205",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "D.L.",
+        "family": "Hall",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "J.",
+        "family": "Llinas",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Proceedings of the IEEE",
+    "already_have": "",
+    "alternate_url": "https://researchconnect.buffalo.edu/en/publications/an-introduction-to-multisensor-data-fusion/",
+    "ref": "R37",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Precise Detection in Densely Packed Scenes",
+    "year": 2019,
+    "priority": "P2",
+    "group": "Datasets",
+    "doi": "10.1109/cvpr.2019.00537",
+    "ieee_id": "8953496",
+    "url": "https://ieeexplore.ieee.org/document/8953496/",
+    "reason": "SKU-110K supports dense product detection/counting. It is class-agnostic product detection, not a benchmark for verifying a specific retail SKU.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvpr.2019.00537",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Eran",
+        "family": "Goldman",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Bar Ilan Univ."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Roei",
+        "family": "Herzig",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Tel Aviv Univ."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Aviv",
+        "family": "Eisenschtat",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Trax"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jacob",
+        "family": "Goldberger",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "BIU"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tal",
+        "family": "Hassner",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Open Univ. of Israel"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2019 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
+    "already_have": "",
+    "alternate_url": "https://openaccess.thecvf.com/content_CVPR_2019/html/Goldman_Precise_Detection_in_Densely_Packed_Scenes_CVPR_2019_paper.html",
+    "ref": "R38",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "A Hierarchical Grocery Store Image Dataset With Visual and Semantic Labels",
+    "year": 2019,
+    "priority": "P2",
+    "group": "Datasets",
+    "doi": "10.1109/wacv.2019.00058",
+    "ieee_id": "8658240",
+    "url": "https://ieeexplore.ieee.org/document/8658240/",
+    "reason": "Hierarchical grocery dataset with natural images and semantic information. Useful for visual generalization; category recognition does not establish packaged-SKU substitution detection.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/wacv.2019.00058",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Marcus",
+        "family": "Klasson",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Cheng",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hedvig",
+        "family": "Kjellstrom",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2019 IEEE Winter Conference on Applications of Computer Vision (WACV)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R39",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Recognizing Groceries in situ Using in vitro Training Data",
+    "year": 2007,
+    "priority": "P2",
+    "group": "Datasets",
+    "doi": "10.1109/cvpr.2007.383486",
+    "ieee_id": "4270484",
+    "url": "https://ieeexplore.ieee.org/document/4270484/",
+    "reason": "GroZi-120 studies clean-training to in-store recognition. Useful historical support for the reference-to-live domain gap.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvpr.2007.383486",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Michele",
+        "family": "Merler",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Carolina",
+        "family": "Galleguillos",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Serge",
+        "family": "Belongie",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2007 IEEE Conference on Computer Vision and Pattern Recognition",
+    "already_have": "",
+    "alternate_url": "https://escholarship.org/uc/item/7w80w06s",
+    "ref": "R40",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "M5Product: Self-harmonized Contrastive Learning for E-commercial Multi-modal Pretraining",
+    "year": 2022,
+    "priority": "P3",
+    "group": "Datasets",
+    "doi": "10.1109/cvpr52688.2022.02057",
+    "ieee_id": "9878412",
+    "url": "https://ieeexplore.ieee.org/document/9878412/",
+    "reason": "Large e-commerce multimodal pretraining resource. Useful background for reference embeddings; web product images differ from cart camera crops.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1109/cvpr52688.2022.02057",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Xiao",
+        "family": "Dong",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Sun Yat-sen University"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Xunlin",
+        "family": "Zhan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sun Yat-sen University"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yangxin",
+        "family": "Wu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sun Yat-sen University"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yunchao",
+        "family": "Wei",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Beijing Jiaotong University"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Michael C.",
+        "family": "Kampffmeyer",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "UiT The Arctic University of Norway"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Xiaoyong",
+        "family": "Wei",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "PengCheng Laboratory"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Minlong",
+        "family": "Lu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Alibaba Group"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yaowei",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "PengCheng Laboratory"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Xiaodan",
+        "family": "Liang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Sun Yat-sen University"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "2022 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R41",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "RPC: a large-scale and fine-grained retail product checkout dataset",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Datasets",
+    "doi": "10.1007/s11432-022-3513-y",
+    "ieee_id": "",
+    "url": "https://link.springer.com/10.1007/s11432-022-3513-y",
+    "reason": "RPC is a core fine-grained checkout benchmark. Use its official splits and shopping-list metrics for recognition/counting baselines; add real cart sensor data separately.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1007/s11432-022-3513-y",
+    "evidence": "Publisher metadata and official dataset page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Xiu-Shen",
+        "family": "Wei",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Quan",
+        "family": "Cui",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Lei",
+        "family": "Yang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Peng",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Lingqiao",
+        "family": "Liu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Jian",
+        "family": "Yang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Science China Information Sciences",
+    "already_have": "",
+    "alternate_url": "https://rpc-dataset.github.io/",
+    "ref": "R42",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "MVTec D2S: Densely Segmented Supermarket Dataset",
+    "year": 2018,
+    "priority": "P2",
+    "group": "Datasets",
+    "doi": "10.1007/978-3-030-01249-6_35",
+    "ieee_id": "",
+    "url": "https://link.springer.com/10.1007/978-3-030-01249-6_35",
+    "reason": "D2S provides instance masks and controlled visual variation for grocery checkout. Useful for occlusion/segmentation analysis, not event timing or weight validation.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1007/978-3-030-01249-6_35",
+    "evidence": "Publisher metadata and official dataset page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-5400-2384",
+        "authenticated-orcid": false,
+        "given": "Patrick",
+        "family": "Follmann",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-5404-8662",
+        "authenticated-orcid": false,
+        "given": "Tobias",
+        "family": "Böttger",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-7093-6280",
+        "authenticated-orcid": false,
+        "given": "Philipp",
+        "family": "Härtinger",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-4169-6759",
+        "authenticated-orcid": false,
+        "given": "Rebecca",
+        "family": "König",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0001-8457-5554",
+        "authenticated-orcid": false,
+        "given": "Markus",
+        "family": "Ulrich",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Lecture Notes in Computer Science; Computer Vision – ECCV 2018",
+    "already_have": "",
+    "alternate_url": "https://www.mvtec.com/research-teaching/datasets/mvtec-d2s",
+    "ref": "R43",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "MEP-3M: A large-scale multi-modal E-commerce product dataset",
+    "year": 2023,
+    "priority": "P3",
+    "group": "Datasets",
+    "doi": "10.1016/j.patcog.2023.109519",
+    "ieee_id": "",
+    "url": "https://linkinghub.elsevier.com/retrieve/pii/S0031320323002194",
+    "reason": "MEP-3M is a large image-text e-commerce dataset with fine-grained subsets. Confirm the particular checkout subset and task rather than assuming all samples are cart data.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1016/j.patcog.2023.109519",
+    "evidence": "Publisher metadata and author dataset page checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-8746-9845",
+        "authenticated-orcid": false,
+        "given": "Fan",
+        "family": "Liu",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Delong",
+        "family": "Chen",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Xiaoyu",
+        "family": "Du",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Ruizhuo",
+        "family": "Gao",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "given": "Feng",
+        "family": "Xu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "Pattern Recognition",
+    "already_have": "",
+    "alternate_url": "https://github.com/ChenDelong1999/MEP-3M",
+    "ref": "R44",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "FAIM: Vision and Weight Sensing Fusion Framework for Autonomous Inventory Monitoring in Convenience Stores",
+    "year": 2020,
+    "priority": "P1",
+    "group": "Sensor fusion and reliability",
+    "doi": "10.3389/fbuil.2020.568372",
+    "ieee_id": "",
+    "url": "https://www.frontiersin.org/articles/10.3389/fbuil.2020.568372/full",
+    "reason": "FAIM is strong open prior art on combining vision, weight and location in retail inventory. Compare fusion assumptions and failure cases, noting shelf monitoring differs from a cart.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.3389/fbuil.2020.568372",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Open access publisher article",
+    "authors": [
+      {
+        "given": "João",
+        "family": "Falcão",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Carlos",
+        "family": "Ruiz",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Shijia",
+        "family": "Pan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hae Young",
+        "family": "Noh",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Pei",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Frontiers in Built Environment",
+    "already_have": "",
+    "alternate_url": "https://www.frontiersin.org/journals/built-environment/articles/10.3389/fbuil.2020.568372/full",
+    "ref": "R45",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "AIM3S: Autonomous Inventory Monitoring through Multi-Modal Sensing for Cashier-Less Convenience Stores",
+    "year": 2019,
+    "priority": "P1",
+    "group": "Sensor fusion and reliability",
+    "doi": "10.1145/3360322.3360834",
+    "ieee_id": "",
+    "url": "https://dl.acm.org/doi/10.1145/3360322.3360834",
+    "reason": "Full AIM3S research paper on multimodal retail sensing. Use this DOI for the 135-144 page paper, not the separate two-page demonstration DOI.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1145/3360322.3360834",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Carlos",
+        "family": "Ruiz",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Carnegie Mellon University, Electrical &amp; Computer Eng., Moffett Field, California"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Joao",
+        "family": "Falcao",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Carnegie Mellon University, Electrical &amp; Computer Eng., Moffett Field, California"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Shijia",
+        "family": "Pan",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "University of California Merced, Computer Science &amp; Engineering, Merced, California"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Hae Young",
+        "family": "Noh",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Carnegie Mellon University, Civil &amp; Environmental Eng., Pittsburgh, Pennsylvania"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Pei",
+        "family": "Zhang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Carnegie Mellon University, Electrical &amp; Computer Eng., Moffett Field, California"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Proceedings of the 6th ACM International Conference on Systems for Energy-Efficient Buildings, Cities, and Transportation",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R46",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Design and Development of Weight Sensors Based Smart Shopping Cart and Rack System for Shopping Malls",
+    "year": 2018,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1016/j.matpr.2017.12.367",
+    "ieee_id": "",
+    "url": "https://linkinghub.elsevier.com/retrieve/pii/S2214785317333734",
+    "reason": "Weight-sensor cart and rack system comparator. Inspect mechanical mounting, calibration and mass tolerance experiments for the hardware section.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1016/j.matpr.2017.12.367",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "B.K.",
+        "family": "Rajithkumar",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "G.M.",
+        "family": "Deepak",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "B.V.",
+        "family": "Uma",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Basavaraj N.",
+        "family": "Hadimani",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "A.R.",
+        "family": "Darshan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chetan R.",
+        "family": "Kamble",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Materials Today: Proceedings",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R47",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Smart Cart with Automatic Billing, Product Information, Product Recommendation Using RFID & Zigbee with Anti-Theft",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Cart systems",
+    "doi": "10.1016/j.procs.2016.03.107",
+    "ieee_id": "",
+    "url": "https://linkinghub.elsevier.com/retrieve/pii/S1877050916002386",
+    "reason": "Open RFID/ZigBee billing and anti-theft baseline also cited by supplied papers. Separate design promises from measured validation.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1016/j.procs.2016.03.107",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Ankush",
+        "family": "Yewatkar",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Faiz",
+        "family": "Inamdar",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Raj",
+        "family": "Singh",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "family": "Ayushya",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Amol",
+        "family": "Bandal",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Procedia Computer Science",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R48",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "A comprehensive survey on computer vision based approaches for automatic identification of products in retail store",
+    "year": 2019,
+    "priority": "P1",
+    "group": "Surveys",
+    "doi": "10.1016/j.imavis.2019.03.005",
+    "ieee_id": "",
+    "url": "https://linkinghub.elsevier.com/retrieve/pii/S0262885619300277",
+    "reason": "Major retail-vision survey with a taxonomy and many references. Use it to structure related work and discover further original sources.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1016/j.imavis.2019.03.005",
+    "evidence": "Publisher metadata verified; author/publisher abstract checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Bikash",
+        "family": "Santra",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Dipti Prasad",
+        "family": "Mukherjee",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Image and Vision Computing",
+    "already_have": "",
+    "alternate_url": "https://home.iitj.ac.in/~bikash/pdfs/Product%20Detection%20Survey%20Paper%20IVC%20PP.pdf",
+    "ref": "R49",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Deep Learning for Retail Product Recognition: Challenges and Techniques",
+    "year": 2020,
+    "priority": "P1",
+    "group": "Surveys",
+    "doi": "10.1155/2020/8875910",
+    "ieee_id": "",
+    "url": "https://www.hindawi.com/journals/cin/2020/8875910/",
+    "reason": "Open survey of retail deep-learning challenges and techniques. Read alongside newer sources so the literature review is not limited to pre-2021 methods.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1155/2020/8875910",
+    "evidence": "Publisher metadata verified; primary abstract/landing page checked",
+    "access": "Open access publisher article; PMC full-text copy",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-7840-5065",
+        "authenticated-orcid": true,
+        "given": "Yuchen",
+        "family": "Wei",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Discipline of ICT, School of TED, University of Tasmania, Launceston, Tasmania, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-5912-293X",
+        "authenticated-orcid": true,
+        "given": "Son",
+        "family": "Tran",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Discipline of ICT, School of TED, University of Tasmania, Launceston, Tasmania, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-0597-7040",
+        "authenticated-orcid": true,
+        "given": "Shuxiang",
+        "family": "Xu",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Discipline of ICT, School of TED, University of Tasmania, Launceston, Tasmania, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3476-8838",
+        "authenticated-orcid": true,
+        "given": "Byeong",
+        "family": "Kang",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Discipline of ICT, School of TED, University of Tasmania, Launceston, Tasmania, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3017-2893",
+        "authenticated-orcid": true,
+        "given": "Matthew",
+        "family": "Springer",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Discipline of ICT, School of TED, University of Tasmania, Launceston, Tasmania, Australia"
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Computational Intelligence and Neuroscience",
+    "already_have": "",
+    "alternate_url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7676964/",
+    "ref": "R50",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Product verification using OCR classification and Mondrian conformal prediction",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Sensor fusion and reliability",
+    "doi": "10.1016/j.eswa.2021.115942",
+    "ieee_id": "",
+    "url": "https://linkinghub.elsevier.com/retrieve/pii/S0957417421012963",
+    "reason": "Direct expected-product verification prior art using OCR, classification and conformal prediction; addresses barcode switching and missed scans. Especially useful for defining the verification task.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1016/j.eswa.2021.115942",
+    "evidence": "Publisher metadata verified; publisher abstract checked",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0001-9996-9759",
+        "authenticated-orcid": false,
+        "given": "Rachid",
+        "family": "Oucheikh",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tobias",
+        "family": "Pettersson",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Tuwe",
+        "family": "Löfström",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Expert Systems with Applications",
+    "already_have": "",
+    "alternate_url": "https://his.diva-portal.org/smash/get/diva2%3A1606938/FULLTEXT01.pdf",
+    "ref": "R51",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Centre‐loss—A preferred class verification approach over sample‐to‐sample in self‐checkout products datasets",
+    "year": 2024,
+    "priority": "P1",
+    "group": "Retail vision",
+    "doi": "10.1049/cvi2.12302",
+    "ieee_id": "",
+    "url": "https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/cvi2.12302",
+    "reason": "Direct class-verification comparator for self-checkout. Compare centre-based verification with multiple reference-image comparisons and report inference cost.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1049/cvi2.12302",
+    "evidence": "Publisher metadata verified; publisher abstract checked",
+    "access": "Open access publisher article",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-7156-5995",
+        "authenticated-orcid": false,
+        "given": "Bernardas",
+        "family": "Ciapas",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Institute of Data Science and Digital Technologies Vilnius University  Vilnius Lithuania"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-6608-5508",
+        "authenticated-orcid": false,
+        "given": "Povilas",
+        "family": "Treigys",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Institute of Data Science and Digital Technologies Vilnius University  Vilnius Lithuania"
+          }
+        ],
+        "role": [
+          {
+            "role": "author",
+            "vocabulary": "crossref"
+          }
+        ]
+      }
+    ],
+    "venue": "IET Computer Vision",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R52",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Multisensor data fusion: A review of the state-of-the-art",
+    "year": 2013,
+    "priority": "P2",
+    "group": "Sensor fusion and reliability",
+    "doi": "10.1016/j.inffus.2011.08.001",
+    "ieee_id": "",
+    "url": "https://linkinghub.elsevier.com/retrieve/pii/S1566253511000558",
+    "reason": "Broad multisensor-fusion review. Use to justify the selected fusion level and discuss uncertain, missing or conflicting evidence.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1016/j.inffus.2011.08.001",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Bahador",
+        "family": "Khaleghi",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Alaa",
+        "family": "Khamis",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Fakhreddine O.",
+        "family": "Karray",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Saiedeh N.",
+        "family": "Razavi",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Information Fusion",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R53",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Robot Operating System 2: Design, architecture, and uses in the wild",
+    "year": 2022,
+    "priority": "P1",
+    "group": "Systems",
+    "doi": "10.1126/scirobotics.abm6074",
+    "ieee_id": "",
+    "url": "https://www.science.org/doi/10.1126/scirobotics.abm6074",
+    "reason": "ROS 2 design and architecture paper. Supports the distributed implementation section; record actual middleware, QoS and network settings in your experiments.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1126/scirobotics.abm6074",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0003-1090-7733",
+        "authenticated-orcid": true,
+        "given": "Steven",
+        "family": "Macenski",
+        "sequence": "first",
+        "affiliation": [
+          {
+            "name": "Samsung Research America, Mountain View, CA 94043, USA."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0002-7022-6801",
+        "authenticated-orcid": true,
+        "given": "Tully",
+        "family": "Foote",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Open Robotics, Mountain View, CA 94041, USA."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Brian",
+        "family": "Gerkey",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Open Robotics, Mountain View, CA 94041, USA."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Chris",
+        "family": "Lalancette",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Open Robotics, Mountain View, CA 94041, USA."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "ORCID": "https://orcid.org/0000-0003-3690-9497",
+        "authenticated-orcid": true,
+        "given": "William",
+        "family": "Woodall",
+        "sequence": "additional",
+        "affiliation": [
+          {
+            "name": "Open Robotics, Mountain View, CA 94041, USA."
+          }
+        ],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Science Robotics",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R54",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "ByteTrack: Multi-object Tracking by Associating Every Detection Box",
+    "year": 2022,
+    "priority": "P2",
+    "group": "Methods and tracking",
+    "doi": "10.1007/978-3-031-20047-2_1",
+    "ieee_id": "",
+    "url": "https://link.springer.com/10.1007/978-3-031-20047-2_1",
+    "reason": "ByteTrack is an additional association baseline. Useful when evaluating detection dropouts; accepting weak detections must not silently certify an uncertain product journey.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1007/978-3-031-20047-2_1",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "given": "Yifu",
+        "family": "Zhang",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Peize",
+        "family": "Sun",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Yi",
+        "family": "Jiang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Dongdong",
+        "family": "Yu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Fucheng",
+        "family": "Weng",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Zehuan",
+        "family": "Yuan",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Ping",
+        "family": "Luo",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Wenyu",
+        "family": "Liu",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Xinggang",
+        "family": "Wang",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "Lecture Notes in Computer Science; Computer Vision – ECCV 2022",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R55",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "HOTA: A Higher Order Metric for Evaluating Multi-object Tracking",
+    "year": 2021,
+    "priority": "P2",
+    "group": "Methods and tracking",
+    "doi": "10.1007/s11263-020-01375-2",
+    "ieee_id": "",
+    "url": "https://link.springer.com/10.1007/s11263-020-01375-2",
+    "reason": "HOTA separates detection and association quality. Supplement with cart-specific event correctness, substitution acceptance and duplicate-billing metrics.",
+    "kind": "paper",
+    "metadata_source": "https://api.crossref.org/works/10.1007/s11263-020-01375-2",
+    "evidence": "Publisher-deposited metadata verified; full text pending",
+    "access": "Check publisher/institutional access; PDF access not tested",
+    "authors": [
+      {
+        "ORCID": "https://orcid.org/0000-0002-4133-7764",
+        "authenticated-orcid": false,
+        "given": "Jonathon",
+        "family": "Luiten",
+        "sequence": "first",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Aljos̆a",
+        "family": "Os̆ep",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Patrick",
+        "family": "Dendorfer",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Philip",
+        "family": "Torr",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Andreas",
+        "family": "Geiger",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Laura",
+        "family": "Leal-Taixé",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      },
+      {
+        "given": "Bastian",
+        "family": "Leibe",
+        "sequence": "additional",
+        "affiliation": [],
+        "role": [
+          {
+            "vocabulary": "crossref",
+            "role": "author"
+          }
+        ]
+      }
+    ],
+    "venue": "International Journal of Computer Vision",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R56",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks",
+    "year": 2019,
+    "priority": "P3",
+    "group": "Methods and tracking",
+    "reason": "Optional accuracy/compute backbone baseline. Record input resolution and runtime if evaluated.",
+    "url": "https://proceedings.mlr.press/v97/tan19a.html",
+    "authors": [
+      {
+        "given": "Mingxing",
+        "family": "Tan"
+      },
+      {
+        "given": "Quoc V.",
+        "family": "Le"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "PMLR 97:6105-6114",
+    "access": "Open landing page; check download terms",
+    "venue": "Proceedings of the 36th International Conference on Machine Learning",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://proceedings.mlr.press/v97/tan19a.html",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R57",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Learning Transferable Visual Models From Natural Language Supervision",
+    "year": 2021,
+    "priority": "P2",
+    "group": "Methods and tracking",
+    "reason": "CLIP foundation for image-text embeddings and a possible alternative to the local embedding backend. Its generic zero-shot performance does not prove SKU-level verification.",
+    "url": "https://proceedings.mlr.press/v139/radford21a.html",
+    "authors": [
+      {
+        "given": "Alec",
+        "family": "Radford"
+      },
+      {
+        "given": "Jong Wook",
+        "family": "Kim"
+      },
+      {
+        "given": "Chris",
+        "family": "Hallacy"
+      },
+      {
+        "given": "Aditya",
+        "family": "Ramesh"
+      },
+      {
+        "given": "Gabriel",
+        "family": "Goh"
+      },
+      {
+        "given": "Sandhini",
+        "family": "Agarwal"
+      },
+      {
+        "given": "Girish",
+        "family": "Sastry"
+      },
+      {
+        "given": "Amanda",
+        "family": "Askell"
+      },
+      {
+        "given": "Pamela",
+        "family": "Mishkin"
+      },
+      {
+        "given": "Jack",
+        "family": "Clark"
+      },
+      {
+        "given": "Gretchen",
+        "family": "Krueger"
+      },
+      {
+        "given": "Ilya",
+        "family": "Sutskever"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "PMLR 139:8748-8763",
+    "access": "Open landing page; check download terms",
+    "venue": "Proceedings of the 38th International Conference on Machine Learning",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://proceedings.mlr.press/v139/radford21a.html",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R58",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "DINOv2: Learning Robust Visual Features without Supervision",
+    "year": 2023,
+    "priority": "P2",
+    "group": "Methods and tracking",
+    "reason": "Alternative general-purpose visual embeddings for a controlled backend comparison. This entry identifies the arXiv version, not a verified final proceedings version.",
+    "url": "https://arxiv.org/abs/2304.07193",
+    "authors": [
+      {
+        "given": "Maxime",
+        "family": "Oquab"
+      },
+      {
+        "literal": "others"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "arXiv:2304.07193",
+    "access": "Open landing page; check download terms",
+    "venue": "arXiv preprint",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://arxiv.org/abs/2304.07193",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R59",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "On Calibration of Modern Neural Networks",
+    "year": 2017,
+    "priority": "P1",
+    "group": "Sensor fusion and reliability",
+    "reason": "Explains why model confidence needs calibration. A cosine similarity or model-generated confidence score is not automatically a probability of correct verification.",
+    "url": "https://proceedings.mlr.press/v70/guo17a.html",
+    "authors": [
+      {
+        "given": "Chuan",
+        "family": "Guo"
+      },
+      {
+        "given": "Geoff",
+        "family": "Pleiss"
+      },
+      {
+        "given": "Yu",
+        "family": "Sun"
+      },
+      {
+        "given": "Kilian Q.",
+        "family": "Weinberger"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "PMLR 70:1321-1330",
+    "access": "Open landing page; check download terms",
+    "venue": "Proceedings of the 34th International Conference on Machine Learning",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://proceedings.mlr.press/v70/guo17a.html",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R60",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Selective Classification for Deep Neural Networks",
+    "year": 2017,
+    "priority": "P1",
+    "group": "Sensor fusion and reliability",
+    "reason": "Theory for rejecting uncertain predictions and reporting risk against coverage. Useful for MATCH versus RETRY behavior; cart-specific guarantees still require suitable assumptions and measurements.",
+    "url": "https://arxiv.org/abs/1705.08500",
+    "authors": [
+      {
+        "given": "Yonatan",
+        "family": "Geifman"
+      },
+      {
+        "given": "Ran",
+        "family": "El-Yaniv"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "arXiv:1705.08500; NeurIPS 2017",
+    "access": "Open landing page; check download terms",
+    "venue": "Advances in Neural Information Processing Systems 30",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://arxiv.org/abs/1705.08500",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R61",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "What Matters for Grocery Product Retrieval with Open Source Vision Language Models",
+    "year": 2026,
+    "priority": "P1",
+    "group": "Retail vision",
+    "reason": "Current SKU-level retrieval comparison directly relevant to an AI-versus-local-backend study. Use the verified May 2026 arXiv version; do not cite a future-dated proceedings record.",
+    "url": "https://arxiv.org/abs/2605.18029",
+    "authors": [
+      {
+        "given": "Emmanuel G.",
+        "family": "Maminta"
+      },
+      {
+        "given": "Rowel O.",
+        "family": "Atienza"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "arXiv:2605.18029",
+    "access": "Open landing page; check download terms",
+    "venue": "arXiv preprint",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://arxiv.org/abs/2605.18029",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R62",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Training with Product Digital Twins for AutoRetail Checkout",
+    "year": 2023,
+    "priority": "P2",
+    "group": "Datasets",
+    "reason": "Synthetic retail training data and user-viewpoint bias. Useful for future data generation; distinguish synthetic results from real-cart validation.",
+    "url": "https://arxiv.org/abs/2308.09708",
+    "authors": [
+      {
+        "given": "Yue",
+        "family": "Yao"
+      },
+      {
+        "given": "Xinyu",
+        "family": "Tian"
+      },
+      {
+        "given": "Zheng",
+        "family": "Tang"
+      },
+      {
+        "given": "Sujit",
+        "family": "Biswas"
+      },
+      {
+        "given": "Huan",
+        "family": "Lei"
+      },
+      {
+        "given": "Tom",
+        "family": "Gedeon"
+      },
+      {
+        "given": "Liang",
+        "family": "Zheng"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "arXiv:2308.09708",
+    "access": "Open landing page; check download terms",
+    "venue": "arXiv preprint",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://arxiv.org/abs/2308.09708",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R63",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "The Freiburg Groceries Dataset",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Datasets",
+    "reason": "Real grocery images across viewpoints, lighting and clutter. Broad food categories do not test discrimination between visually similar branded SKUs.",
+    "url": "https://arxiv.org/abs/1611.05799",
+    "authors": [
+      {
+        "given": "Philipp",
+        "family": "Jund"
+      },
+      {
+        "given": "Nichola",
+        "family": "Abdo"
+      },
+      {
+        "given": "Andreas",
+        "family": "Eitel"
+      },
+      {
+        "given": "Wolfram",
+        "family": "Burgard"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "arXiv:1611.05799",
+    "access": "Open landing page; check download terms",
+    "venue": "arXiv preprint",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://arxiv.org/abs/1611.05799",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R64",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "AI City Challenge 2023: Track 4 data and evaluation",
+    "year": 2023,
+    "priority": "P2",
+    "group": "Datasets",
+    "reason": "Multi-class product counting and recognition in checkout video. Review event definitions and data licenses before reuse.",
+    "url": "https://www.aicitychallenge.org/2023-data-and-evaluation/",
+    "authors": [
+      {
+        "literal": "AI City Challenge"
+      }
+    ],
+    "kind": "dataset documentation",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "AI City Challenge 2023 Track 4",
+    "access": "Dataset request/license may be required",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://www.aicitychallenge.org/2023-data-and-evaluation/",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R65",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Computer Vision: Algorithms and Applications",
+    "year": 2022,
+    "priority": "P2",
+    "group": "Books",
+    "reason": "Reference for imaging, feature matching, tracking and camera setup. Cite the specific method/chapter actually used.",
+    "url": "https://szeliski.org/Book/",
+    "authors": [
+      {
+        "given": "Richard",
+        "family": "Szeliski"
+      }
+    ],
+    "kind": "book",
+    "ieee_id": "",
+    "doi": "10.1007/978-3-030-34372-9",
+    "identifier": "2nd edition; ISBN 9783030343712; DOI 10.1007/978-3-030-34372-9",
+    "access": "Author offers a personal-use PDF through a form",
+    "venue": "Springer",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://szeliski.org/Book/",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R66",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Deep Learning",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Books",
+    "reason": "Background on CNNs, representation learning and regularization. Prefer original method papers for MobileNet and experiment-specific claims.",
+    "url": "https://www.deeplearningbook.org/",
+    "authors": [
+      {
+        "given": "Ian",
+        "family": "Goodfellow"
+      },
+      {
+        "given": "Yoshua",
+        "family": "Bengio"
+      },
+      {
+        "given": "Aaron",
+        "family": "Courville"
+      }
+    ],
+    "kind": "book",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "ISBN 9780262035613",
+    "access": "Free official online reading",
+    "venue": "MIT Press",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://www.deeplearningbook.org/",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R67",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Pattern Recognition and Machine Learning",
+    "year": 2006,
+    "priority": "P2",
+    "group": "Books",
+    "reason": "Background on Bayesian reasoning, classification and probabilistic inference. Useful for a principled uncertainty discussion.",
+    "url": "https://link.springer.com/book/9780387310732",
+    "authors": [
+      {
+        "given": "Christopher M.",
+        "family": "Bishop"
+      }
+    ],
+    "kind": "book",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "ISBN 9780387310732",
+    "access": "Check publisher/library access",
+    "venue": "Springer",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://link.springer.com/book/9780387310732",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R68",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "RFID Handbook: Fundamentals and Applications in Contactless Smart Cards, Radio Frequency Identification and Near-Field Communication",
+    "year": 2010,
+    "priority": "P3",
+    "group": "Books",
+    "reason": "Technical background on RFID limitations and infrastructure costs when comparing tagged-item alternatives.",
+    "url": "https://onlinelibrary.wiley.com/doi/book/10.1002/9780470665121",
+    "authors": [
+      {
+        "given": "Klaus",
+        "family": "Finkenzeller"
+      }
+    ],
+    "kind": "book",
+    "ieee_id": "",
+    "doi": "10.1002/9780470665121",
+    "identifier": "3rd edition; ISBN 9780470695067; DOI 10.1002/9780470665121",
+    "access": "Check publisher/library access",
+    "venue": "Wiley",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://onlinelibrary.wiley.com/doi/book/10.1002/9780470665121",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R69",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Handbook of Multisensor Data Fusion: Theory and Practice",
+    "year": 2009,
+    "priority": "P2",
+    "group": "Books",
+    "reason": "Reference on fusion architectures, uncertainty and association. Editors are Martin E. Liggins II, David L. Hall and James Llinas.",
+    "url": "https://www.routledge.com/Handbook-of-Multisensor-Data-Fusion-Theory-and-Practice-Second-Edition/Liggins-II-Hall-Llinas/p/book/9781315219486",
+    "authors": [],
+    "kind": "book",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "2nd edition; print ISBN 9781420053081",
+    "access": "Check publisher/library access",
+    "venue": "CRC Press",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://www.routledge.com/Handbook-of-Multisensor-Data-Fusion-Theory-and-Practice-Second-Edition/Liggins-II-Hall-Llinas/p/book/9781315219486",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R70",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Introduction to Embedded Systems: A Cyber-Physical Systems Approach",
+    "year": 2016,
+    "priority": "P2",
+    "group": "Books",
+    "reason": "Models of state, timing, concurrency and physical interaction for the Pi/Arduino/sensor system.",
+    "url": "https://mitpress.mit.edu/9780262533812/introduction-to-embedded-systems/",
+    "authors": [
+      {
+        "given": "Edward Ashford",
+        "family": "Lee"
+      },
+      {
+        "given": "Sanjit Arunkumar",
+        "family": "Seshia"
+      }
+    ],
+    "kind": "book",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "2nd edition; ISBN 9780262533812",
+    "access": "Publisher page; check available formats",
+    "venue": "MIT Press",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://mitpress.mit.edu/9780262533812/introduction-to-embedded-systems/",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R71",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "ROS 2 Jazzy: About Quality of Service settings",
+    "year": "living",
+    "priority": "P1",
+    "group": "Engineering documentation",
+    "reason": "Primary reference for image-stream delivery, reliability, deadlines and stale-evidence handling. Official docs URL encountered an automated access block; an indexed ROS documentation mirror was inspected.",
+    "url": "https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html",
+    "authors": [
+      {
+        "literal": "Open Robotics"
+      }
+    ],
+    "kind": "documentation",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "ROS 2 Jazzy",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Official URL identified; indexed ROS documentation checked",
+    "metadata_source": "https://docs.ros.org/en/jazzy/Concepts/Intermediate/About-Quality-of-Service-Settings.html",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R72",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "ROS 2 Jazzy: Setting up security",
+    "year": "living",
+    "priority": "P2",
+    "group": "Engineering documentation",
+    "reason": "DDS-Security setup for deployment discussion. Security mechanisms must be configured and tested; ordinary ROS messaging alone does not establish authenticated communications.",
+    "url": "https://docs.ros.org/en/jazzy/Tutorials/Advanced/Security/Introducing-ros2-security.html",
+    "authors": [
+      {
+        "literal": "Open Robotics"
+      }
+    ],
+    "kind": "documentation",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "ROS 2 Jazzy / sros2",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Official URL identified; indexed ROS documentation checked",
+    "metadata_source": "https://docs.ros.org/en/jazzy/Tutorials/Advanced/Security/Introducing-ros2-security.html",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R73",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "HX711: 24-Bit Analog-to-Digital Converter for Weigh Scales",
+    "year": "undated",
+    "priority": "P1",
+    "group": "Engineering documentation",
+    "reason": "Manufacturer datasheet for gain, sample-rate options and electrical behavior. ADC bit depth is not the accuracy of the completed weighing mechanism.",
+    "url": "https://cdn.sparkfun.com/assets/b/f/5/a/e/hx711F_EN.pdf",
+    "authors": [
+      {
+        "literal": "Avia Semiconductor"
+      }
+    ],
+    "kind": "datasheet",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "HX711",
+    "access": "Public manufacturer datasheet hosted by SparkFun",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://cdn.sparkfun.com/assets/b/f/5/a/e/hx711F_EN.pdf",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R74",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "HX711 Arduino library",
+    "year": "living",
+    "priority": "P1",
+    "group": "Engineering documentation",
+    "reason": "Actual scale library named by the setup guide; documents calibration, tare, gain and acquisition behavior. Pin the library version/commit used in experiments.",
+    "url": "https://github.com/bogde/HX711",
+    "authors": [
+      {
+        "literal": "Bogdan Necula"
+      },
+      {
+        "literal": "contributors"
+      }
+    ],
+    "kind": "software",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "bogde/HX711",
+    "access": "Public source repository",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://github.com/bogde/HX711",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R75",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "GS1 General Specifications",
+    "year": "2026",
+    "priority": "P1",
+    "group": "Engineering documentation",
+    "reason": "Authoritative barcode/identifier specification for product-catalog mapping. A valid GTIN identifies the declared product; it does not prove the physical item matches.",
+    "url": "https://www.gs1ie.org/standards/resources/general-specifications/",
+    "authors": [
+      {
+        "literal": "GS1"
+      }
+    ],
+    "kind": "standard",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "Release 26, ratified January 2026",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://www.gs1ie.org/standards/resources/general-specifications/",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R76",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "OpenCV: Deep Learning in OpenCV",
+    "year": "living",
+    "priority": "P1",
+    "group": "Engineering documentation",
+    "reason": "Implementation reference for the ONNX/OpenCV DNN inference path in this code. Record the actual OpenCV version, backend and target.",
+    "url": "https://github.com/opencv/opencv/wiki/Deep-Learning-in-OpenCV",
+    "authors": [
+      {
+        "literal": "OpenCV"
+      }
+    ],
+    "kind": "documentation",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "OpenCV DNN",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://github.com/opencv/opencv/wiki/Deep-Learning-in-OpenCV",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R77",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "pyzbar: barcode and QR decoding",
+    "year": "living",
+    "priority": "P1",
+    "group": "Engineering documentation",
+    "reason": "Actual Python barcode/QR decoding dependency. Record pyzbar and native ZBar versions and test lighting, motion and duplicate scans.",
+    "url": "https://github.com/NaturalHistoryMuseum/pyzbar",
+    "authors": [
+      {
+        "literal": "Natural History Museum"
+      },
+      {
+        "literal": "contributors"
+      }
+    ],
+    "kind": "software",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "NaturalHistoryMuseum/pyzbar",
+    "access": "Public source repository",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://github.com/NaturalHistoryMuseum/pyzbar",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R78",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Arduino: A guide to EEPROM",
+    "year": "living",
+    "priority": "P2",
+    "group": "Engineering documentation",
+    "reason": "Implementation reference for persistent scale calibration. Verify behavior on the actual Arduino board and core.",
+    "url": "https://github.com/arduino/docs-content/blob/main/content/learn/03.programming/07.eeprom-guide/eeprom-guide.md",
+    "authors": [
+      {
+        "literal": "Arduino"
+      }
+    ],
+    "kind": "documentation",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "Arduino EEPROM guide",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://github.com/arduino/docs-content/blob/main/content/learn/03.programming/07.eeprom-guide/eeprom-guide.md",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R79",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "NPCI: UPI Frequently Asked Questions",
+    "year": "living",
+    "priority": "P2",
+    "group": "Engineering documentation",
+    "reason": "Payment-system context for the UPI QR interface. The cart must distinguish displaying a payment request from verified payment completion.",
+    "url": "https://www.npci.org.in/what-we-do/upi/faqs",
+    "authors": [
+      {
+        "literal": "National Payments Corporation of India"
+      }
+    ],
+    "kind": "documentation",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "UPI FAQ",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://www.npci.org.in/what-we-do/upi/faqs",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R80",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Caper Carts: official product overview",
+    "year": "living",
+    "priority": "P3",
+    "group": "Industry context",
+    "reason": "Commercial context for cart vision and weight verification. Treat vendor descriptions as product claims, not peer-reviewed evidence of accuracy or loss reduction.",
+    "url": "https://company.instacart.com/enterprise-platform/connected-stores/caper-carts",
+    "authors": [
+      {
+        "literal": "Instacart"
+      }
+    ],
+    "kind": "industry page",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "Caper Carts",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://company.instacart.com/enterprise-platform/connected-stores/caper-carts",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R81",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Amazon: 5 ways the newest Dash Cart can save time and money",
+    "year": 2026,
+    "priority": "P3",
+    "group": "Industry context",
+    "reason": "January 2026 commercial context for camera/weight/sensor-fusion carts. Do not use vendor claims as an independent experimental baseline.",
+    "url": "https://www.aboutamazon.com/news/retail/amazon-redesigned-dash-cart-whole-foods-market",
+    "authors": [
+      {
+        "literal": "Amazon"
+      }
+    ],
+    "kind": "industry page",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "Amazon Dash Cart; 2026-01-07",
+    "access": "Open landing page; check download terms",
+    "venue": "",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://www.aboutamazon.com/news/retail/amazon-redesigned-dash-cart-whole-foods-market",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R82",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "An IOT Based Smart Shopping Cart for Smart Shopping",
+    "year": 2018,
+    "priority": "P1",
+    "group": "Cart systems",
+    "reason": "RP3 reference [1]. Important historical cart comparator. The publisher added two authors in a 2021 correction; use the corrected five-author citation.",
+    "url": "https://link.springer.com/chapter/10.1007/978-981-10-9059-2_33",
+    "authors": [
+      {
+        "given": "Srinidhi",
+        "family": "Karjol"
+      },
+      {
+        "given": "Anusha K.",
+        "family": "Holla"
+      },
+      {
+        "given": "C. B.",
+        "family": "Abhilash"
+      },
+      {
+        "given": "P. V.",
+        "family": "Amrutha"
+      },
+      {
+        "given": "Y. V.",
+        "family": "Manohar"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "10.1007/978-981-10-9059-2_33",
+    "identifier": "DOI 10.1007/978-981-10-9059-2_33; CCIP 2017 proceedings published 2018",
+    "access": "Check Springer institutional access",
+    "venue": "Cognitive Computing and Information Processing; Communications in Computer and Information Science 801",
+    "evidence": "Publisher metadata verified; publisher abstract and citation checked",
+    "metadata_source": "https://api.crossref.org/works/10.1007/978-981-10-9059-2_33",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R83",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "An IoT-Based Smart Shopping Cart Using the Contemporary Barcode Scanner",
+    "year": 2018,
+    "priority": "P1",
+    "group": "Cart systems",
+    "reason": "Especially close earlier barcode-first design combining weight, product images and cloud inventory. Read before presenting the barcode/weight/camera combination as novel.",
+    "url": "https://link.springer.com/chapter/10.1007/978-981-10-8575-8_6",
+    "authors": [
+      {
+        "given": "V. N.",
+        "family": "Prithvish"
+      },
+      {
+        "given": "Shraddha",
+        "family": "Agrawal"
+      },
+      {
+        "given": "John Sahaya Rani",
+        "family": "Alex"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "10.1007/978-981-10-8575-8_6",
+    "identifier": "DOI 10.1007/978-981-10-8575-8_6; pages 45-58",
+    "access": "Check Springer institutional access",
+    "venue": "Intelligent Embedded Systems; Lecture Notes in Electrical Engineering 492",
+    "evidence": "Publisher metadata verified; publisher abstract and citation checked",
+    "metadata_source": "https://api.crossref.org/works/10.1007/978-981-10-8575-8_6",
+    "already_have": "",
+    "alternate_url": "",
+    "ref": "R84",
+    "checked_date": "2026-10-12"
+  },
+  {
+    "title": "Smart Shopping Cart for Automated Billing Purpose using Wireless Sensor Networks",
+    "year": 2013,
+    "priority": "P1",
+    "group": "Cart systems",
+    "reason": "Early directly relevant cart system with load-cell and image-comparison verification. Its actual venue is IARIA SENSORCOMM, despite some later bibliographies mislabeling it IEEE.",
+    "url": "https://personales.upv.es/thinkmind/SENSORCOMM/SENSORCOMM_2013/sensorcomm_2013_7_30_10155.html",
+    "authors": [
+      {
+        "given": "Udita",
+        "family": "Gangwal"
+      },
+      {
+        "given": "Sanchita",
+        "family": "Roy"
+      },
+      {
+        "given": "Jyotsna",
+        "family": "Bapat"
+      }
+    ],
+    "kind": "paper",
+    "ieee_id": "",
+    "doi": "",
+    "identifier": "SENSORCOMM 2013; pages 168-172; ISBN 9781612082967",
+    "access": "Public conference paper; publisher PDF also linked in source notes",
+    "venue": "SENSORCOMM 2013, IARIA",
+    "evidence": "Primary abstract/landing page checked",
+    "metadata_source": "https://personales.upv.es/thinkmind/SENSORCOMM/SENSORCOMM_2013/sensorcomm_2013_7_30_10155.html",
+    "already_have": "",
+    "alternate_url": "https://personales.upv.es/thinkmind/dl/conferences/sensorcomm/sensorcomm_2013/sensorcomm_2013_7_30_10155.pdf",
+    "ref": "R85",
+    "checked_date": "2026-10-12"
+  }
+]

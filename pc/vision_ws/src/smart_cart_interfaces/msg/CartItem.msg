@@ -1,0 +1,11 @@
+string barcode
+string name
+float32 weight
+float32 price
+uint32 quantity
+string txn_id
+string sku
+string weight_status
+string camera_status
+string status
+string reason

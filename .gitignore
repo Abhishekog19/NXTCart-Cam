@@ -165,3 +165,7 @@ embedding_db.pkl
 
 # Reference photos (large binary files; keep locally, don't commit)
 references/
+pc/vision_ws/install/
+pc/vision_ws/log/
+*.db-wal
+*.db-shm

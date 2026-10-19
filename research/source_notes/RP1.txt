@@ -1,0 +1,526 @@
+Intelligent Shopping Cart Product Recognition
+System Based on Computer Vision and Multi-Sensor
+Fusion
+Jipeng Zhang*
+The School of Mechanical
+Engineering and Automation,
+Dalian Polytechnic University
+Dalian, 116034, China
+*dpu_jipengzhang@163.com
+Zihan Xu
+School of Foreign Languages,
+Dalian Polytechnic University
+Dalian, 116034, China
+xuzihan_sunny@163.com
+Ce Liang
+College of Mechanical and
+Electrical Engineering, Hebei
+Agricultural University
+Baoding, 071001, China
+1187118367@qq.com
+Yitian Zhu
+The School of Mechanical
+Engineering and Automation,
+Dalian Polytechnic University
+Dalian, 116034, China
+2274731680@qq.com
+Abstract—To address low checkout efficiency and manual
+errors in traditional supermarkets, this paper proposes an
+intelligent shopping cart product recognition system that fuses
+computer vision with multi-sensor information. The system is built
+around an embedded edge terminal integrating an RGB-D camera,
+a w e i g h t s e n s o r a n d a n R F I D r e a d e r . A Y O L O v 8 - b a s e d o b j e c t
+detection module extracts product appearance features and
+produces an initial recognition result, which is then refined by a
+multimodal fusion decision model that combines visual confidence
+scores, measured weight and RFID tag IDs. The framework
+reduces ambiguity in single-modality recognition, particularly
+under occlusion, similar-looking packaging and tag occlusion.
+Experiments are conducted on a dataset containing 1000 common
+supermarket products with variations in packaging, viewpoint and
+occlusion. We compare the proposed system with a vision-only
+baseline and an RFID-only checkout baseline in terms of
+recognition accuracy, misidentification rate and per-item
+inference latency. Results show that the proposed fusion system
+achieves a recognition accuracy of 98.7%, representing a 5.2%
+relative improvement over the visual baseline and a 3.8%
+improvement over RFID-only recognition. The average processing
+time per product is 0.3 s with a misidentification rate of only 0.8%,
+meeting real-time checkout requirements on embedded hardware.
+The system supports automatic product recognition, smart billing
+and shopping-list generation, effectively shortening checkout time
+and reducing operating costs, and can serve as a practical
+reference for intelligent retail upgrades.
+Keywords—smart shopping cart, YOLOv8, RGB-D vision, RFID,
+multimodal fusion
+I. I NTRODUCTION
+In the past few years, digital transformation has changed
+how people buy groceries and everyday goods. Large and small
+retailers are experimenting with self-checkout lanes, mobile
+payment and AI-assisted services to reduce queues and improve
+in-store experience [1]. Global surveys on self-checkout
+indicate that retailers adopt these systems to cut labor costs and
+increase throughput, but they also face challenges such as
+shrinkage, user errors and system downtime [2]. At the same
+time, customers have become more tolerant of technology in the
+store, yet they still expect the checkout process to be fast,
+predictable and transparent.
+Radio-frequency identification (RFID) is one of the most
+widely discussed technologies for automatic checkout. Industry
+reports show that retailers increasingly tag items with RFID to
+support real-time inventory, loss prevention and rapid stock
+counting [3]. In supermarket and department-store settings,
+RFID-based self-checkout systems allow customers to place
+tagged products into a read zone and complete payment without
+scanning each barcode [4]. Recent reviews of RFID-enabled
+shopping carts summarize their potential benefits but also point
+out practical issues, including tag cost, read collisions and
+interference from liquid or metallic packaging [5]. In practice,
+tag failures, misreads and missing tags limit the reliability of an
+RFID-only solution, especially in crowded carts.
+In parallel, deep learning has made computer vision a strong
+candidate for product recognition in retail environments.
+Pietrini et al. developed a deep learning-based shelf monitoring
+system to automatically verify on-shelf availability and
+planogram compliance, showing that convolutional networks
+can handle cluttered shelves with many small items [6]. Depth
+cameras and RGB-D setups have also been explored for on-
+shelf availability estimation and anomaly detection, for
+example using depth cues to distinguish fronts from background
+[7]. Sun et al. proposed a deep learning-based product
+recognition system for intelligent retail environments, which
+integrates visual detection with store-specific metadata [8]. On
+the data side, large-scale multi-modal e-commerce datasets
+such as MEP-3M and its automatic checkout subset provide
+millions of product images and attributes, enabling more robust
+representation learning for retail scenarios [9].
+Automatic checkout is increasingly treated as a multimodal
+problem rather than a purely visual one. Recent work on edge-
+embedded multi-feature fusion networks for automatic
+checkout combines visual features with auxiliary signals such
+as shelf location or historical transaction patterns to improve
+robustness on resource-constrained devices [10]. Transformer-
+based multimodal fusion models have been proposed to jointly
+encode product images, textual attributes and structural
+2025 5th International Conference on Communication Technology and Information Technology (ICCTIT)
+979-8-3315-5587-0/25/$31.00 ©2025 IEEE
+249
+2025 5th International Conference on Communication Technology and Information Technology (ICCTIT) | 979-8-3315-5587-0/25/$31.00 ©2025 IEEE | DOI: 10.1109/ICCTIT68197.2025.11406732
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:24:04 UTC from IEEE Xplore.  Restrictions apply. 
+information, and then perform joint inference for retail product
+recognition and checkout tasks [11]. These studies suggest that
+combining complementary signals can help resolve ambiguous
+cases, but most existing designs focus either on shelf-level
+monitoring or on fixed checkout counters, rather than on mobile
+shopping carts.
+Object detection itself has evolved rapidly. YOLOv8
+provides an efficient, one-stage detection family with improved
+backbone, feature fusion and anchor-free heads, achieving a
+good balance between speed and accuracy for many domains
+[12]. Variants such as DC-YOLOv8 further optimize the
+architecture for detecting small objects by modifying the feature
+pyramid and attention mechanisms [13]. Other work explores
+transfer learning and fine-tuning strategies to adapt YOLOv8 to
+specific application domains, showing that even relatively small
+models can reach strong performance when trained carefully on
+domain data [14]. For embedded devices like an intelligent cart,
+these compact detectors are attractive because they can still run
+in real time while leaving resources for other tasks, such as
+sensor fusion and user interface.
+Smart shopping carts aim to bring these technologies closer
+to the customer. Liang et al. presented a full self-service smart
+shopping cart that integrates sensors, displays and networking
+to support autonomous checkout and shopping assistance [15].
+Earlier prototypes and concept systems based on RFID-enabled
+carts also illustrate how carts can track items and communicate
+with back-end systems. However, many of these designs rely on
+a single dominant modality—often RFID or barcodes—with
+other sensors used only as auxiliary checks. When the main
+modality fails because of occlusion, tag problems or confusing
+packaging, the system typically falls back to manual
+intervention, which reduces the perceived value of automation
+and can be frustrating for users. Findings from self-checkout
+studies also suggest that inconsistent behavior and frequent
+exceptions are major sources of user dissatisfaction [2].
+Given this context, there is a need for shopping cart systems
+that combine computer vision, RFID and physical sensing in
+a more balanced way. A cart-mounted RGB-D camera can
+capture rich visual information about products placed into the
+basket, while a weight sensor provides a simple physical
+constraint based on the change in mass. RFID tags, when
+available, supply a unique identifier that ties the product to the
+store’s inventory system [3], [4], [15]. By fusing these three
+modalities on an embedded processor using a modern object
+detector such as YOLOv8 [11]–[13], it should be possible to
+reach higher recognition accuracy than any single modality can
+provide alone, while still meeting real-time requirements and
+respecting store cost constraints.
+In this paper, we propose an intelligent shopping cart
+product recognition system that follows this multimodal design
+philosophy. The cart is instrumented with an RGB-D camera, a
+weight sensor and an RFID reader, all connected to an
+embedded edge processor. On top of this hardware, we adopt a
+YOLOv8-based detector as the visual backbone [11]–[13], and
+we design a decision-level fusion module that combines visual
+confidence scores with weight-based candidates and RFID-
+based identity cues, inspired by recent multimodal and edge-
+centric automatic checkout frameworks [8]–[10]. The overall
+system is evaluated in a realistic supermarket-like setting with
+1000 common products, under varying viewpoints, lighting and
+occlusion. Our results show that the proposed fusion design can
+significantly improve recognition accuracy and reduce
+misidentification, compared to vision-only and RFID-only
+baselines, while keeping the average per-item latency around
+0.3 s.
+The remainder of this paper is organized as follows. Section
+II details the hardware architecture, data acquisition pipeline
+and multimodal fusion methodology. Section III presents the
+dataset, experimental setup and quantitative results. Section IV
+discusses design trade-offs, limitations and deployment
+considerations in the context of current smart retail practices.
+Section V concludes the paper and outlines future research
+directions in multimodal product recognition and intelligent
+cart design.
+II. M ETHODOLOGY
+A. System Overview
+The proposed system is organized as a pipeline that maps
+sensor data from a single cart to product-level decisions. The
+cart is equipped with an RGB-D camera, a weight sensor (load
+cell) under the basket and an RFID reader with antennas
+covering the basket area. All sensors connect to an embedded
+processor that runs Linux and the recognition software stack.
+We model each cart event as a tuple
+݁௞=(ܫ௞ݓ௞,ℛ ௞),
+whereܫ௞is an RGB-D image (or a short image sequence)
+captured around the time of the event,ݓ௞is the measured
+change in basket weight, and ℛ௞i s t h e s e t o f R F I D t a g s t h a t
+newly appear (for item addition) or disappear (for item removal)
+in that time window. The system’s goal is to assign to each
+event݁௞a product class labelܿ௞ࣝwhereࣝis the set of SKUs
+in the store catalog.
+Fig. 1 shows the overall hardware/software architecture of
+the intelligent shopping cart, including the RGB-D camera,
+weight sensor, RFID reader and the three-layer embedded
+processing stack (perception, fusion and application). Fig. 1
+also summarizes the event-level processing flow from item
+placement to final billing, highlighting how sensor triggers,
+detection, fusion and user confirmation are orchestrated on the
+cart.
+Figure 1 Intelligent shopping cart product recognition system architecture.
+250
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:24:04 UTC from IEEE Xplore.  Restrictions apply. 
+B. Data Acquisition and Synchronization
+The RGB-D camera operates at 15–30 fps, but to reduce
+computation we only trigger full detection when the weight
+sensor reports a significant change in measured weight. The
+weight sensor output is low-pass filtered; when the signal
+stabilizes and the change exceeds a threshold߬௪, we record the
+net changeݓ௞. In parallel, the RFID reader performs periodic
+inventory cycles. When a candidate event is detected by the
+weight sensor, the reader is instructed to run an additional scan;
+the difference between the new and previous tag sets givesℛ௞.
+All sensor streams are timestamped using the embedded
+processor’s clock. For each event݁௞, we extract a small
+temporal window of frames{ܫ௞,௧}around the event time and pick
+key frames for detection and tracking. This synchronized tuple
+(ܫ௞ݓ௞,ℛ ௞)serves as input to the fusion model.
+C. Product Detection with YOLOv8
+The visual backbone uses YOLOv8-s, chosen for its balance
+between accuracy and runtime on the embedded platform.
+During training, the network is optimized with a composite loss
+function of the form
+ℒ=ߣboxℒbox +ߣobjℒobj +ߣclsℒcls,
+where ℒboxmeasures bounding-box regression error (e.g., CIoU
+or GIoU loss), ℒobjmeasures objectness confidence error, and
+ℒcls is the classification loss over product classes. The
+coefficientsߣbox,ߣobjandߣclsare tuned on the validation set.
+At inference time, for each key frame we obtain a set of
+detections
+ܦ{(ܾ௜,ܿ௜,ݏ௜)}௜ୀଵ
+ே ,
+whereܾ௜is the bounding box,ܿ௜is the predicted class andݏ௜is
+the confidence score. We use simple IoU-based tracking over a
+short temporal window to associate detections and focus on the
+region where the new object appears. For the event݁௞, we select
+the detection with the highest confidence in that region and
+denote its class and score as (̂௩,௞,ݏ௩,௞).
+To meet real-time constraints, the trained YOLOv8-s model
+is quantized to 8-bit and deployed via a hardware-accelerated
+runtime on the SoC. In practice, this yields an average per-
+frame inference time on the order of tens of milliseconds,
+leaving headroom for fusion and UI processing.
+D. Weight and RFID Evidence Modeling
+Each product classࣝhas an associated nominal weight
+ݓ௖and tolerance߳௖stored in the catalog. Given the measured net
+weight changeݓ௞, we define a weight-consistent candidate
+set
+ࣱ௞={ࣝ  |  ݓ௞ݓ௖߳௖}.
+For fusion, it is useful to convert this into a soft
+compatibility score. One simple choice is a Gaussian-like
+function:
+ݏ௪(ݓ௞) = exp  ⁣ݓ௞ݓ௖)ଶ
+2ߪ௖ଶ
+),
+whereߪ௖controls how quickly the score decays as Δݓ௞deviates
+fromݓ௖. Classes far from the observed weight receive scores
+close to zero.
+For RFID, the reader returns a set of newly observed tag IDs
+ℛ௞. Using a mapping function݂tagfrom tag ID to product class
+(maintained by the store backend), we obtain an RFID-based
+support set
+ℛ௞
+(௖) ={∣∃  ∈ℛ ௞, ݂tag(ݎ=)ܿ }.
+We then define an RFID support score
+ݏ௥(∣ℛ ௞)={ 1, if∈ℛ ௞
+(௖),
+0, otherwise.
+The visual modality provides a normalized confidence score
+ݏ௩(ܫ௞), which is simply the YOLOv8 softmax (or sigmoid)
+output for classܿin the selected detection, with all other classes
+set to zero.
+E. Multimodal Fusion and Decision Rule
+Conceptually, we want to approximate the posterior
+probability
+ܲ(ܫ௞ݓ௞,ℛ ௞ܲ( ܫ௞ܿ)ఈݓ௞ܿ)ఉℛ(ܲ௞ܿ)ఊ,
+where the exponentsߙ,ߚ ,ߛ control the relative influence of
+each modality. In practice, we work with scores instead of
+explicit probabilities and define a fused score for each candidate
+classܿin the union of all candidates
+࣯௞={̂௩,௞ࣱ௞∪ℛ ௞
+(௖).
+For every࣯௞, the fused score is
+ܵ௞(ܿ=)ߙ  ݏ௩(ܫ௞)+ߚ ݏ௪(ݓ௞)+ߛ ݏ௥(∣ℛ ௞),
+whereߙ,ߚ ,≥0 andߙ+ߚ +ߛ =1 . These coefficients ar
+tuned on the validation set to maximize recognition accuracy
+under the latency constraint.
+The final decision for event݁௞is then
+̂௞= arg max
+࣯ೖ
+ܵ௞(ܿ.)
+If the maximum scoreܵ௞(̂௞)is below a thresholdߠor if the
+margin between the top two scores is small, the system marks
+the event as low-confidence and asks the user to confirm the
+item on the cart display. This mechanism reduces silent
+mislabeling in difficult cases such as heavy occlusion or
+simultaneous insertion of multiple products.
+In addition to the score-based fusion, we also apply simple
+hard constraints. For example, if YOLOv8 predicts a large,
+heavy bottle but the measured Δݓ௞is only a few grams, the
+visual score is down-weighted even before fusion. Similarly, if
+RFID suggests a product category that is incompatible with the
+cart’s current context (e.g., a non-grocery item in a grocery-only
+store), the correspondingݏ௥is reduced.
+F. Application Layer and Cart State Management
+The application layer maintains a cart-level state ℬ, which
+records the list of recognized products and their quantities. For
+each confirmed event (݁௞,̂௞), the state is updated according to
+the sign of Δݓ௞: a positive weight change typically adds one
+251
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:24:04 UTC from IEEE Xplore.  Restrictions apply. 
+unit of̂௞, while a negative change removes one unit, subject to
+plausibility checks.
+The cart display shows the current basket contents, unit
+prices and total cost in real time. Low-confidence events trigger
+a small dialog where the user can either confirm the system’s
+guess or select the correct item from a short candidate list
+derived from࣯௞. At checkout, the cart sends the final basket
+ℬ to the payment terminal or store backend, allowing the
+customer to pay without re-scanning each item.
+III. E XPERIMENTS
+A. Dataset and Collection Protocol
+We collected a dataset of 1000 supermarket products drawn
+from typical grocery categories: beverages, snacks, dry goods,
+fresh produce in pre-packed trays, personal care items and
+household goods. For each SKU, we captured RGB-D images
+in a cart-like setting under:
+Three lighting conditions (bright, normal, slightly dim),
+Three camera heights and angles, and
+Multiple degrees of occlusion (no occlusion, partial
+occlusion, strong occlusion).
+Each capture sequence includes the moment when the
+product is placed into the basket, handled by a human subject in
+natural motion. In total, the dataset contains approximately
+75,000 labeled frames and 80,000 event instances (product
+additions and removals). For each event, we store the image
+crop, weight change and RFID tag ID corresponding to the
+product, along with ground truth SKU labels.
+The dataset is split into 70% training, 10% validation and
+2 0 % t e s t a t t h e S K U l e v e l t o a v o i d l e a k a g e . F o r t h e v i s i o n
+baseline, only the RGB images and labels are used; for the
+RFID baseline, only tag IDs and labels; and for the fusion
+system, all three modalities.
+B. Baseline Methods and Implementation Details
+We compare the proposed system to two baselines:
+Vision-only YOLOv8. This baseline uses the same
+YOLOv8-s detector as our system but treats the highest-
+confidence detection per event as the final decision without
+weight or RFID information.
+RFID-only recognition. This baseline assumes that each
+SKU has a unique RFID tag ID and uses tag reads to infer which
+product has been added or removed. If multiple new tags appear
+simultaneously, a simple heuristic is used based on historical
+co-occurrence patterns.
+All methods run on the same embedded hardware platform.
+We measure:
+Top-1 recognition accuracy at the event level,
+Misidentification rate (fraction of events with incorrect
+SKU),
+Average per-event latency (from weight change to final
+prediction), and
+False-positive event rate, where the system reports a
+spurious addition or removal.
+YOLOv8-s is trained for 200 epochs with cosine learning
+rate scheduling, using pre-trained COCO weights as
+initialization. The loss combines bounding box regression,
+objectness and classification components. For the fusion model,
+the coefficientsߙ,ߚ ,ߛ and decision thresholds are tuned on the
+validation set to maximize accuracy under a latency constraint.
+C. Overall Performance
+Table I summarizes the overall performance of the three
+methods on the test set.
+TABLE I OVERALL PERFORMANCE COMPARISON ON THE TEST SET
+Method
+Top-1
+Accuracy
+(%)
+Misidentification
+Rate (%)
+Avg. Latency
+per Item (s)
+Vision-only
+(YOLOv8-s) 93.5 2.0 0.25
+RFID-only 95.0 1.6 0.22
+Proposed Fusion
+(RGB-D + Weight +
+RFID)
+98.7 0.8 0.30
+The proposed fusion system achieves 98.7% accuracy,
+surpassing both baselines, while keeping per-item latency at 0.3
+s, which is acceptable for real-time checkout. Misidentification
+rate is reduced to 0.8%, less than half of the vision-only baseline.
+Fig. 2 visualizes the accuracy and misidentification rate for
+the three methods using a bar chart.
+Figure 2. Performance comparison of vision-only, RFID-only and proposed
+fusion method
+D. Ablation on Fusion Components
+To understand the contribution of each modality, we
+evaluate several ablated versions of the fusion model:
+F1: Vision-only (V) – YOLOv8-s without additional
+sensors.
+F2: Vision + Weight (V+W) – fusion between visual
+prediction and weight-based candidate set.
+252
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:24:04 UTC from IEEE Xplore.  Restrictions apply. 
+F3: Vision + RFID (V+R) – fusion between visual
+prediction and tag-based candidate set.
+F4: Full Fusion (V+W+R) – the proposed system.
+TABLE II ABLATION STUDY ON FUSION COMPONENTS
+Variant Modalities Used Top-1 Accuracy (%) Misidentification Rate (%)
+F1 V 93.5 2.0
+F2 V + W 96.1 1.4
+F3 V + R 97.3 1.1
+F4 V + W + R 98.7 0.8
+The results of Table II show that both weight and RFID
+information improve performance when combined with vision,
+and the full fusion model yields the best accuracy and lowest
+error rate.
+E. Robustness Under Occlusion and Similar Packaging
+We further analyze performance under specific challenging
+conditions:
+Heavy occlusion, where more than 40% of the product area
+is occluded by other items or the cart wall;
+Visually similar items, such as different flavors of the same
+brand of beverage in identical bottles; and
+Tag conflict, where multiple new RFID tags are detected
+simultaneously.
+On heavily occluded events, vision-only accuracy drops to
+86.2%, while the fusion model maintains 95.6% accuracy by
+leveraging weight and tag information. For visually similar
+items with identical bottle shapes, the fusion model resolves a
+large fraction of confusion by relying on distinct weights and
+tag IDs. In tag-conflict scenarios, the fusion model falls back to
+visual confidence and weight consistency to select the correct
+SKU.
+IV. C ONCLUSION
+This paper presented an intelligent shopping cart product
+recognition system that fuses computer vision and multi-sensor
+information to deliver accurate, real-time checkout in
+supermarket environments. Starting from the practical pain
+points of traditional cashier lanes—long queues, manual
+scanning errors and limited visibility into cart contents—we
+designed a cart-mounted embedded platform that combines an
+RGB-D camera, a weight sensor and an RFID reader under a
+unified decision framework. On top of this hardware, we built a
+perception stack centered on YOLOv8-s for product detection,
+complemented by weight-based candidate filtering and RFID-
+based identity cues. The core of the solution is a multimodal
+fusion module that integrates the strengths of each modality
+while providing clear handling of conflicts and uncertainty.
+Using a dataset of 1000 common supermarket products
+captured under realistic cart conditions, we evaluated the fusion
+system against a vision-only YOLOv8 baseline and an RFID-
+only baseline. The proposed system achieved 98.7% event-level
+recognition accuracy with a misidentification rate of 0.8% and
+an average per-item latency of 0.3 s on an embedded SoC.
+These results demonstrate that the combination of RGB-D
+vision, weight sensing and RFID can surpass single-modality
+systems in both accuracy and robustness while meeting real-
+time constraints. Ablation studies confirmed that each modality
+contributes meaningfully to performance, and that the full
+fusion configuration offers the best trade-off between reliability
+and computational cost.
+ACKNOWLEDGMENT
+This work was supported by the 2025 National College
+Student Innovation and Entrepreneurship Training Program
+(No. 202510152023).
+REFERENCES
+[1] R. Mostaghel, P. Oghazi, V. Parida, and V. Sohrabpour, “Digitalization
+Driven Retail Business Model Innovation: Evaluation of past and avenues
+for future research trends.” Journal of Business Research, vol. 146, Jul.,
+pp. 134–145, 2022.
+[2] S. Sunetra, A. Sharma, A. Kumar, “Factors that influence retail store
+preference and impact of in-store digitization.” International Journal of
+Recent Technology and Engineering (IJRTE), vol. 8, no. 4, Nov., pp.
+8715–8722, 2019.
+[3] Y. Wei, S. Tran, S. Xu, B. Kang, and M. Springer, “Deep Learning for
+Retail Product Recognition: Challenges & Techniques”, Computational
+Intelligence and Neuroscience, vol. 2020, Nov., pp. 1-23, 2020.
+[4] B. Santra, and D. P. Mukherjee, “A comprehensive survey on computer
+vision based approaches for automatic identification of products in retail
+store”, Image and Vision Computing, vol. 86, Mar., pp. 45-63, 2019
+[5] I.H. Sarker, “AI-based modeling: Techniques, applications and research
+issues towards automation, intelligent and Smart Systems.” SN Computer
+Science, vol. 3, no. 2, Feb., 2022.
+[6] I.H. Sarker, “Machine learning: Algorithms, real-world applications and
+Research Directions.” SN Computer Science, vol. 2, no. 3, Mar., 2021. [7]
+R. Brečić, D. Sinčić Ćorić, A. Lučić, M. Goorton, and J. Filipović, “Local
+food sales and point of sale priming: Evidence from a supermarket field
+experiment.” European Journal of Marketing, vol. 55, no. 13, Apr., pp.
+41–62, 2021.
+[7] H. Liu, Y. Li, and D. Liu, “Object detection and recognition system based
+on Computer Vision Analysis.” Journal of Physics: Conference Series, vol.
+1976, no. 1, Jul., p. 012024, 2021.
+[8] ]J.R. Terven and D.M. Cordova-Esparza, “A comprehensive review of
+YOLO: From YOLOv1 and beyond”, Machine Learning and Knowledge
+Extraction, vol. 5, no. 4, Nov., pp. 1680-1716, 2023.
+[9] F.K. Konstantinidis, V. Balaska, S. Symeonidis, D. Tsilis, S.G.
+Mouroutsos, L. Bampis, A. Psomoulis, and A. Gasteratos, “Automating
+dairy production lines with the yoghurt cups recognition and detection
+process in the industry 4.0 era.” Procedia Computer Science, vol. 217, pp.
+918–927, 2023
+[10] G. Jocher, “YOLOv5 by Ultralytics”, Ultralytics/YOLOv5, [Online].
+Available: https://github.com/ultralytics/yolov5 [Accessed March 12,
+2024].
+[11] S.C. Kamireddi, “Comparison of object detection models – to detect
+recycle logos on tetra pack.”, BSc Thesis, Blekinge Institution
+Techonology, Karlskrona, 2022
+[12] T. Mahendrakar, “Performance study of yolov5 and faster R-CNN for
+autonomous navigation around non-cooperative targets.” 2022 IEEE
+Aerospace Conference (AERO), Mar., 2022.
+[13] D. Li, and J. Huang, “A Learning-based Approach towards Automated
+Tuning of SSD Configuations,” arXiv:2110.08685v1 [cs.AR], Oct., pp. 1-
+15, 2021
+[14] K . H e , G . G k i o x a r i , P . D o l l a r , a n d R . G i r s h i c k , “ M a s k R - C N N , ”
+arXiv:1703.06870v3 [cs.CV], Jan., pp. 1-12, 2018
+253
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:24:04 UTC from IEEE Xplore.  Restrictions apply. 

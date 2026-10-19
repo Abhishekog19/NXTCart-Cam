@@ -111,8 +111,17 @@ def capture_for_product(product_name: str, source,
     save_dir = os.path.join(references_dir, product_name)
     os.makedirs(save_dir, exist_ok=True)
 
-    existing = [f for f in os.listdir(save_dir) if f.endswith(".jpg")]
-    counter = len(existing) + 1
+    # Number new photos from one past the HIGHEST existing number, not from
+    # len(files)+1: with a gap in the sequence (any photo deleted for being
+    # blurry — which the SOP actively encourages) a count-based name collides
+    # with a file that is still there and silently overwrites a good reference.
+    existing = [f for f in os.listdir(save_dir) if f.lower().endswith(".jpg")]
+    highest = 0
+    for f in existing:
+        stem = os.path.splitext(f)[0]
+        if stem.isdigit():
+            highest = max(highest, int(stem))
+    counter = highest + 1
 
     print(f"\n[capture] Product: '{product_name}'")
     print(f"[capture] Saving to: {save_dir}")

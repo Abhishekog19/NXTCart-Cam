@@ -1,0 +1,68 @@
+- generic [ref=f7e1]:
+  - generic [ref=f7e2]:
+    - banner [ref=f7e3]:
+      - link "Overleaf" [ref=f7e4] [cursor=pointer]:
+        - /url: /
+    - main [ref=f7e7]:
+      - heading "Log in" [level=1] [ref=f7e8]
+      - generic [ref=f7e9]:
+        - generic:
+          - alert
+        - generic [ref=f7e10]:
+          - link "Log in with Google" [ref=f7e12] [cursor=pointer]:
+            - /url: /auth/google?intent=sign_in
+          - link "Log in with ORCID" [ref=f7e16] [cursor=pointer]:
+            - /url: /auth/orcid?intent=sign_in
+          - link "Log in with IEEE" [ref=f7e20] [cursor=pointer]:
+            - /url: /org/ieee/saml/init?
+        - paragraph [ref=f7e23]: OR
+        - generic [ref=f7e24]:
+          - generic [ref=f7e25]: Email
+          - textbox "Email" [active] [ref=f7e26]
+        - generic [ref=f7e27]:
+          - generic [ref=f7e28]: Password
+          - generic [ref=f7e31]:
+            - textbox "Password" [ref=f7e32]
+            - button "Turn on password visibility" [ref=f7e33] [cursor=pointer]
+        - button "Log in" [ref=f7e37] [cursor=pointer]
+        - paragraph [ref=f7e40]:
+          - link "Forgot password?" [ref=f7e41] [cursor=pointer]:
+            - /url: /user/password/reset
+        - paragraph [ref=f7e42]: OR
+        - generic [ref=f7e43]:
+          - paragraph [ref=f7e44]: Work/university single sign-on
+          - link "Log in with SSO" [ref=f7e45] [cursor=pointer]:
+            - /url: /sso-login
+        - paragraph [ref=f7e49]:
+          - text: Don’t have an account?
+          - link "Register" [ref=f7e50] [cursor=pointer]:
+            - /url: /register
+      - paragraph [ref=f7e52]: The site is protected by reCAPTCHA.
+      - generic [ref=f7e53]:
+        - separator [ref=f7e54]
+        - link [ref=f7e56] [cursor=pointer]:
+          - /url: https://www.digital-science.com/
+          - img "Digital Science — home" [ref=f7e57]
+        - paragraph [ref=f7e58]:
+          - text: Advancing research with
+          - link "Overleaf" [ref=f7e59] [cursor=pointer]:
+            - /url: https://www.overleaf.com/
+          - text: ","
+          - link "ReadCube" [ref=f7e60] [cursor=pointer]:
+            - /url: https://www.readcube.com/
+          - text: ", and more."
+    - contentinfo [ref=f7e61]:
+      - generic [ref=f7e62]:
+        - link "Privacy" [ref=f7e63] [cursor=pointer]:
+          - /url: https://www.overleaf.com/legal#Privacy
+        - link "Terms" [ref=f7e64] [cursor=pointer]:
+          - /url: https://www.overleaf.com/legal#Terms
+  - region "Cookie banner" [ref=f7e65]:
+    - generic [ref=f7e66]:
+      - text: We use cookies to improve your experience on our site, for analytics, and to support marketing, which may involve the sharing of data. You can find out more in our
+      - link "cookie policy" [ref=f7e67] [cursor=pointer]:
+        - /url: /legal#Cookies
+      - text: .
+    - generic [ref=f7e68]:
+      - button "Essential cookies only" [ref=f7e69] [cursor=pointer]
+      - button "Accept all cookies" [ref=f7e70] [cursor=pointer]

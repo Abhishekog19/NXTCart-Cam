@@ -1,10 +1,43 @@
-# NXTCart-Cam — Product Recognition System
+# NXTCart-Cam — Product Verification System
 
-Camera module backend for the NXTcart smart shopping cart project.
+**Integrated dual-webcam cart runtime (2026-10-09):** Start with
+[`SYSTEM_SETUP.md`](SYSTEM_SETUP.md). This folder supplies the **PC-only** camera
+verification service in `pc/`; the Raspberry Pi, Arduino, scale, catalogue,
+display and cart authority live in the separate `../Cart-RestCode/` folder.
+Scans appear immediately. Weight and camera update independently. Shopping
+continues through red items; checkout requires every unit to pass both gates.
+Choose `backend:=local` or `backend:=ai` on the PC without changing the Pi.
 
-Identifies products from a live webcam by comparing image embeddings
-(MobileNetV2 TFLite, no training required) against a reference database
-you build yourself.
+The standalone demos and older integration/deployment notes below are retained
+for reference. They do **not** define the new runtime or its billing policy.
+The current integration tests are `python -m unittest discover -s tests -v`.
+
+Camera module for the NXTcart smart shopping cart.
+
+Given that the barcode says "SKU X", it answers one question — **is the item that
+just entered the cart actually X?** — by comparing image embeddings
+(MobileNetV2, no training required) plus a colour fingerprint against a reference
+database you build yourself. It exists to catch the one attack weight cannot see:
+**scan a cheap item, insert an expensive one of the same weight.**
+
+### Start here
+
+| I want to… | Read |
+|---|---|
+| **Set up, mount the camera, photograph products, and test today** | [`SETUP_AND_TEST.md`](SETUP_AND_TEST.md) |
+| Compare local ML with DeepSeek vision AI, references, frame selection and accuracy | [`ML_VS_AI_TEST_GUIDE.md`](ML_VS_AI_TEST_GUIDE.md) |
+| Join this to the ROS 2 cart (`smart_cart_ws`) | [`CART_INTEGRATION.md`](CART_INTEGRATION.md) |
+| Deploy to the Pi / choose a camera by measurement | [`DEPLOYMENT.md`](DEPLOYMENT.md) |
+| Shoot reference photos properly | [`REFERENCE_SOP.md`](REFERENCE_SOP.md) |
+| Understand why it is built this way | [`ARCHITECTURE.md`](ARCHITECTURE.md) |
+
+```bash
+py -3 test_verify.py        # camera logic      (no camera/model needed)
+py -3 test_cart_logic.py    # cart billing + anti-swap
+py -3 cart_sim.py --index 1 # test on real products with a webcam
+```
+
+> On Windows use `py -3`, not `python`.
 
 ---
 
@@ -17,14 +50,25 @@ NXTCart-Cam/
 │       ├── 001.jpg
 │       └── ...
 ├── ml/
-│   ├── __init__.py            ← makes ml/ a Python package
 │   ├── config.py              ← ALL tunable thresholds in one place
-│   ├── embedding_extractor.py ← MobileNetV2 TFLite feature extractor
-│   ├── matcher.py             ← cosine similarity + confidence logic
-│   └── multi_frame_vote.py   ← burst-capture majority voting
-├── capture_references.py      ← step 1: build your reference photo set
-├── build_db.py                ← step 2: compute & save embeddings
-├── demo.py                    ← step 3: run on demo day
+│   ├── frame_source.py        ← webcam / ESP32-CAM, seq+ts stamped frames
+│   ├── detector.py            ← motion blob detector
+│   ├── item_follower.py       ← locks and follows ONE item scanner→cart
+│   ├── visibility.py          ← "is this view judgeable?"
+│   ├── product_crop.py        ← one crop definition for refs AND live
+│   ├── verifier.py            ← MATCH/SUSPECT/MISMATCH/RETRY/UNAVAILABLE
+│   ├── custody.py             ← one scan, one transaction, two proofs
+│   ├── cart.py                ← running cart + bill (standalone)
+│   ├── lane.py                ← the whole module as ONE object
+│   ├── events.py              ← barcode + weight seams (mock and real)
+│   ├── embedding_extractor.py ← MobileNetV2 feature extractor
+│   └── matcher.py             ← cosine similarity + backend-stamp guard
+├── capture_references.py      ← step 1: shoot your reference photos
+├── build_db.py                ← step 2: compute & save embeddings + colour
+├── cart_sim.py                ← step 3: test on real products (webcam)
+├── verify_demo.py             ← minimal single-verdict demo
+├── test_verify.py             ← camera logic suite
+├── test_cart_logic.py         ← cart billing / anti-swap suite
 └── requirements.txt
 ```
 

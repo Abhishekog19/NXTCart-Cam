@@ -1,0 +1,374 @@
+Design and Development of a Smart Shopping Cart System 
+ P.Aruna Jeyanthy  
+Electrical and Electronics Engineering 
+Department 
+Kalasalingam Academy of Research 
+and Education 
+KrishnanKoil, India 
+p.arunajeyanthy@klu.ac.in
+Singam Sandeep Reddy 
+Electrical and Electronics Engineering 
+Department 
+Kalasalingam Academy of Research 
+and Education 
+KrishnanKoil, India 
+991700601@klu.ac.in 
+S.Raja Mohamed  
+Departmet of Electrical and Electronics 
+Engineering  
+Univeristy of Bahrain 
+Isatown, Kingdom of Bahrain 
+rsumsudeen@uob.edu.bh 
+ K.S.Jenin 
+Electrical and Electronics Engineering 
+Department 
+Kalasalingam Academy of Research 
+and Education 
+KrishnanKoil, India 
+991700600@klu.ac.in 
+Mohammed Alarfaj 
+Department of Electrical  Engineering 
+King Faisal University 
+Al-Ahsa,31982, Saudi Arabia 
+mkalarfaj@kfu.edu.sa 
+Abstract— In big shopping malls to purchase things in the 
+shop there will be a huge crowd in holidays and the crowd will 
+be more during offers and discounts period. People buy more 
+things on those days. After finishing purchasing, he/she should 
+go for bill counter for billing purpose. The biller will bill the 
+things b y using barcodes and it is a time taking process. If it 
+continuous it will lead to make long queues in the billing area. 
+This research work is used to avoid this problem. To overcome 
+this problem the product should have RFID tags and the 
+shopping troll ey s hould have LCD screen and RFID reader. 
+When customer puts some product in the troll ey means it 
+automatically detects the product, product name and the 
+amount will be shown on the LCD screen. If you don’t want the 
+product then you will take away from the tr olley, and it will 
+automatically remove amount of the product from billing. The 
+trolleys (Cart) first detect whether the mode of shopping is 
+online or offline. And the total amount will go to the billing 
+system by Zigbee module and IOT so that it can save more time 
+and avoid crowding and queues. Online shopping means it 
+requires network.  
+Keywords—smart shopping cart, Radio Frequency 
+Identification (RFID), Internet of things (IoT), Zigbee module 
+I. INTRODUCTION 
+The proposed smart shopping cart is more useful, comfort 
+and efficient in purchasing the goods. In this work a unique 
+trolley with automatic billing system using RFID is designed. 
+The main objective is to avoid crowd and to provide 
+comfortable shopping for customers. The smart shopping cart 
+will reduce the time of billing process. The cart having RFID 
+system used to deal with the billing system. The data will be 
+transferred using wireless by ZigBee Module. Every single 
+trolley will have separate RFID device to check the RFID tags 
+and separate trolley address. The customer will automatically 
+scan the product and can see the total product amount on LCD 
+Screen. This will be more useful for the malls and big 
+shopping complexes, and it gives a nice and comfortable 
+experience for the people, and it will lead to attract people to 
+the shop again and again. 
+Smart/Innovative shopping cart proposed by author 
+designed a smart trolley for shops. The device is fixed in the 
+trolley. In that the product and the product name and amount 
+will be displayed in the LCD screen and the total amount also 
+will be automatically calculated and will display in the LCD 
+Screen. Billing system is done by transferring the data by IOT 
+[1-2]. But in this they can’t add or remove the product. Hence 
+the author designs a system of which each trolley should have, 
+and it creates a best way of shopping. It consists of RFID 
+reader and the product has RFID tags by which the product 
+details will be known. The details will transfer to the billing 
+counter by ZigBee module, but the main disadvantage is it will 
+operate for the short distances only [3-4]. 
+Smart trolley using Arduino: The device consists of, 
+display, switch, power supply and RFID reader. The 
+purchasing of the items is done by transferring the data which 
+is scanned by the RFID system using ba rcodes. But in this 
+printing of bill is hardcopy [5-6]. 
+RFID based advanced shopping trolley for supermarket: 
+In this paper the author designed a system consist of RFID and 
+using the GSM module they will transfer the billing data. 
+Also, it will show the weight of the product also if the weight 
+is less, it will automatically the beep sound will come, and it 
+indicates that the product is not good to buy. [7-8] 
+Human guided smart trolley Using Arduino and RFID:  In 
+this paper the author invented a trolley which is completely 
+guided by human with some smart systems. It shortly we can 
+call that as mini robot for shopping purposes. 
+II. PROBLEM FORMULATION
+A.Problem Defination 
+Now a days most people prefer to live in cities and are free 
+to visit Malls, Markets, Sho pping complexes to secure more 
+items. They face lots of difficulties and problems in shopping. 
+When the customer has not brought money enough for 
+purchasing, takes lots of disappointing moment to take away 
+the product. And some shopkeepers will not give an y 
+discounts provided in the product and that also want to be 
+rectified. Also, for the billing it takes much time and leads to 
+standing in a long queue in the crowd perhaps, it is not safe to 
+standing in crowd in this pandemic situation. To solve these 
+problems using this solution is identified using Universal 
+Product Code (UPI) and Radio Frequency Identification 
+(RFID). 
+B.Problem Solution 
+A buyer goes into the supermarket and takes the trolley for 
+buying things. Each trolley is fixed with RFID reader device. 
+2022 Third International Conference on Intelligent Computing, Instrumentation and Control Technologies (ICICICT)
+978-1-6654-1005-2/22/$31.00 ©2022 IEEE
+184
+2022 Third International Conference on Intelligent Computing Instrumentation and Control Technologies (ICICICT) | 978-1-6654-1005-2/22/$31.00 ©2022 IEEE | DOI: 10.1109/ICICICT54557.2022.9917860
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:26:27 UTC from IEEE Xplore.  Restrictions apply. 
+The mode of purchase is checked with the Arduino online or 
+offline. If the customer brings the RFID tag near to the RFID 
+reader means it will automatically read and give the identical 
+number which gives the details of the product to the Arduino. 
+The data received by the Arduino will be displayed in the LCD 
+screen and the LCD will show the product name and amount 
+and overall cost. It will satisfy the customer to not cross the 
+limit. If the Arduino detects that the shopping mode is online 
+the final amount will be calculated and displayed on the screen 
+the customer can pay the bill before packing. 
+III. METHODOLOGY
+The black diagram of the proposed work is represented in 
+Fig.1. A 12V power supply (Lead Acid Battery) is fed to the 
+circuit. It is given to the bridge rectifier, filter capacitor filter 
+and to the 7805 regulator 5V power supply unit. Using 
+Arduino nano and 16x2 LCD display. An alarm is used to 
+indicate a buzzer sound. EM -18 Module (9600 baud rate) 
+125kHz frequency and will read the RFID Tags. EM -18 
+Module is used whenever the item is added. Whatever are 
+added a tag of data is send to the Arduino. In that tag, a 12digit 
+number and gagged are combine with the product and we are 
+going for addition and subtraction. 
+Fig.1. Proposed system black diagram 
+A. Materials and Protocols: 
+TABLE 1:  PROJECT COMPONENTS 
+Name of the components Specifications 
+Arduino Nano 5V, 7-12V 
+Lead acid Battery  12V, 1.2Ah 
+RFID reader and tag 860 – 960 MHz 
+Zigbee Module Freq Band- 2.4GHz 
+ESP8266 3.3V, 7-12V, C.S-80MHz 
+LCD display 4.2V, 16x2 
+Arduino: Arduino UNO (Fig.2) is nothing but it’s a type of 
+micro controller which has set of digital and analog. 
+(Input/Output). It has 14 digital pins and 6 analog pins. It is 
+capable of 7 and 20 volts. 
+Fig.2 Arduino UNO 
+Flash memory:  Used in the process of storing. It’s a 
+permanent application storage if once you unplug the 
+Arduino, you know need to upload the application again. 
+SRAM memory:  Used in the process of storing. When it is 
+running also. 
+EEPROM memory:  It is also like a flash memory once the 
+data is stored the power may be down or up and the Arduino 
+data also will be saved. 
+ESP8266: The ESP-01 WIFI module is used to get connected 
+to a Wi-Fi network for internet access. The ESP01 is based on 
+the ESP8266 chip is shown in Fig.3. On the GISMO board, 
+the ESP-01is used as a WIFI adapter to give wireless internet 
+access to the microcontroller. The hardware interface between 
+the microcontroller and the ESP -01 is a serial interface. The 
+Rx and TX pins of ESP -01 are connected to 9 and 8 pins of 
+Arduino. These pins are not hardware, so the serial library pins 
+are used to create a port. 
+Fig.3 ESP Pin details 
+RFID Reader: Radio Frequency Identification has become 
+a hot topic around the world. RFID system delivers what bar 
+codes cannot: real time information on the precise location and 
+status of goods in a process flow. It does it through wireless 
+transfer of data between the RFID reader and the RFID tags. 
+The purpose of RFID system is to enable data to be transmitted 
+by a po rtable device called a tag, which is read by an RFID 
+reader and processed according to the needs of a particular 
+application. It’s nothing but a type of numerical values 
+presents in the tags to be scanned by the RFID reader. 
+Zigbee: Zigbee (Fig.4) is a mod ule used for high level 
+communication. And it is a wireless network. Most compact 
+and when compared to Wi -Fi data transfer speed is less in 
+ZigBee module. Because of less cost we are taking the ZigBee 
+module. 
+Fig.4 Zigbee 
+2022 Third International Conference on Intelligent Computing, Instrumentation and Control Technologies (ICICICT)
+978-1-6654-1005-2/22/$31.00 ©2022 IEEE
+185
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:26:27 UTC from IEEE Xplore.  Restrictions apply. 
+LCD Display: Liquid Crystal Display (LCD)  (Fig.5) is the 
+combination of Liquid and Crystal properties. They are having 
+temperature range. It contains two glass panels and in between 
+it has liquid crystal material sand. Transparent electrodes are 
+coated on the surface of the glass plates. On the outside of the 
+glass panels polarizers are pasted. They are used to polarize 
+the light rays to definite angle. Mostly LCD’s will consume 
+less power, less weight, and thickness is only millimeters and 
+it can be easily powered for long duration. In our project it is 
+used to display the product, product name, and the amount of 
+the product by receiving the data from the Arduino. 
+Fig.5 LCD Display  
+Power Supply: The power supply given to the system should 
+be +5volts. And for better and convenient display the voltage 
+pin should be attached to the pin 3. The ground terminal 
+should be fixed properly I mean should be isolated properly 
+by this no voltage is induced. The module should be separated 
+from the other circuits or isolated from the other  circuits by 
+that we can see no voltage is induced. And the module should 
+be separated to avoid of display flickering. 
+Wheelchair: It’s a manual type of trolley. Weight carrying 
+capability: 50-80kg.Height of the trolley: 80cm, Width of the 
+trolley: 40cm, depth of the trolley: 50cm. 
+IV. MODELLING AND SIMULATION
+      In this simulation part, by pressing play button the entire 
+simulation part starts to run. At the stage of starting, it 
+indicates in the display that “SMART SHOPPING CART 
+USING IOT”. After pressing play button, the virtual terminal 
+box would appear in that we want to type ESP2866 If we 
+typed this code means it will detect as online mode otherwise 
+it will automatically detect offline mode within seconds. In 
+the virtual terminal we want to type ESP2866  means it will 
+detect that the shopping mode is Online. In this we are going 
+to use codes instead of RFID Tags but only in simulation part. 
+By using INCREMENT, DECREMENT, MOVE Buttons we 
+can change or fix our budget limit, and press ENTER Button 
+to start t he shopping. Copy the tag codes and paste it in the 
+virtual terminal and in the display, it automatically shows the 
+item name, grams, and amounts. in offline mode the bill will 
+sent to the bill counter by IOT by ZEROS and ONES. Like 
+showing in the virtual terminal tab in the above image. what 
+are the procedures we did in the offline shopping; the same 
+procedure is followed in the online mode also. The total 
+amount will show in our display itself. By use of Paytm, G -
+Pay or some other money transaction procedures you can pay 
+the amount by online itself. fig 6 in this simulation part, by 
+pressing play button the entire simulation part starts to run. 
+At the stage of starting, it indicates in the display that 
+“SMART SHOPPING CART USING IOT” fig. 7: After 
+pressing play button the virtual terminal box would appear in 
+that we want to type ESP2866 If we typed this code means it 
+will detect as online mode otherwise it will automatically 
+detect offline mode within seconds. fig. 8:  In the virtual 
+terminal we want to type ESP2866 means it will detect that 
+the shopping mode is Online.fig.9: In this we are going to use 
+codes instead of RFID Tags but only in simulation part. 
+fig.10:By using INCREMENT, DECREMENT, MOVE 
+Buttons we can change or fix our budget lim it. And press 
+ENTER Button to start the shopping. fig.11:  in offline mode 
+the bill will sent to the bill counter by IOT by ZEROS and 
+ONES. Like showing in the virtual terminal tab in the above 
+image. fig.12: what are the procedures we did in the offline 
+shopping; the same procedure is followed in the online mode 
+also. fig.13: The total amount will show in our display itself. 
+By use of Paytm, G -Pay or some other money transaction 
+procedures you can pay the amount by online itself. Fig.14 is 
+showing the plac ing the items in online mode. Finally, total 
+items in online is shown in Fig.15. 
+Fig.6. Final results of the proposed system 
+Fig 7 - Connections of entire system 
+Fig 8.  Starting of smart shopping cart 
+2022 Third International Conference on Intelligent Computing, Instrumentation and Control Technologies (ICICICT)
+978-1-6654-1005-2/22/$31.00 ©2022 IEEE
+186
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:26:27 UTC from IEEE Xplore.  Restrictions apply. 
+Fig 9. Detection of Offline mode 
+Fig, 10 . Detection of online mode 
+Fig. 11. Ssetting an amount limit for purchasing 
+Fig .12 Placing an item 
+Fig. 13. Total in offline mode 
+Fig. 14.  Placing the items in online mode 
+Fig.15.  Total in online mode 
+V. PROTYPE MODEL DEVELOPMENT 
+The proposed solution is implemented on a hardware 
+board(fig.16) and put to the test in a real-world scenario. The 
+results are validated and compared to other well -known 
+methodologies, proving that the suggested system is more 
+efficient in terms of low cost and fast performance than other 
+systems. etc. 
+Fig.16 Experimental model 
+A. Experimental reults: 
+The project work is examined using separate trial cases for 
+every 1 -cm, with three distinct things assessed for all 
+practical trials inside a 60 -cm trolley with the reader in the
+center position. The rate of detection is also affected by the 
+product's substance. 
+ 
+Fig. Prototype model 
+2022 Third International Conference on Intelligent Computing, Instrumentation and Control Technologies (ICICICT)
+978-1-6654-1005-2/22/$31.00 ©2022 IEEE
+187
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:26:27 UTC from IEEE Xplore.  Restrictions apply. 
+Fig.17.  Detection rate for products in the trolley 
+Fig.18 Detection rate for removal of products from the trolley 
+Fig.17 depicts how the reader's detection rate changes when 
+flexible plastic products are present in the cart. The x axis 
+represents distance, while the y axis represents time. Because 
+these products have very thin packaging, there is a steady 
+detection rate for virtually the entire distance except for a few 
+locations. Fig.18 demonstrates how the reader's detection rate 
+fluctuates the objects are removed from the cart. The x axis 
+represents distance, while the y axis represents time. The first 
+' removal rates are inconsistent and second tag's removal rate 
+is consistent. 
+VI. CONCLUSION
+This smart shopping cart make a new role in an automated 
+billing system used in supermarkets, malls, etc. The billing 
+data are transferred by ZigBee Module and ESP Module. The 
+total bill amount will send to the main server and to the bill 
+counter through the main service the designed shopping cart 
+will be very useful in time management we can save lots of 
+time by avoiding long queues and crowd. Want to reduce the 
+size of the RFID tags. The device is also water and metal 
+sensitive. The RFID reader capability is of 50tags/sec. This 
+was to develop an app activates the trolley and, it has the 
+capacity to read the tag. 
+REFERENCES 
+[1] Dilyana V. Budakova. Lyudmil G. Dakovski.  Veselka . Petrova -
+Dimitrova “Smart Shopping Cart Learning Agents Development” 
+Department of Computer Systems and Technologies, Technical 
+University of Sofia, Branch Plovdiv, Plovdiv, Bulgaria, IFAC 52 -25 
+(2019) 64–69.  
+[2] Priyanka S. Sahare , Anup Gade , Jayant Rohankar A Review on 
+Automated Billing for Smart Shopping System Using IOT” P.G. 
+Scholar, Department of Information & Technology, RTMNU 
+University, Nagpur, Maharashtra 440033, India, IIETA International 
+Information and Engineering Technology Association, 2021. 
+[3]  Priyanka S. Patil , Yogita P. Gaikwad , Komal D. Mali , Abhishek D. 
+Shingade , Muin R. Shikalgar “Advance Shopping Cart with Smart 
+Billing Using Arduino” Lecturer, Department of Electrical 
+Engineering, Rajarambapu Institute of Technology, Rajaramnagar, 
+India,2581-5792.  
+[4] [Shivika Srivastava ,Shivansh Rai1 , Shashi Kumar1, Shippu Bhuhsan1 
+, Devasis Pradhan. IoT based Human Guided Smart Shopping Cart 
+System for Shopping Center” Final Year UG Students, Department of 
+Electronics & Communication Engineering, Acharya Institute of 
+Technology, Dr. Sarvepalli Radha Krishnan Road, Bengaluru -560107, 
+India, 2415-6272  
+[5] Mobeenshahroz, muhammadfaheemmushtaq, maqsoodahmad, 
+saleemullah, arifmehmood, and gyu sang choi, iot-based smart 
+shopping cart using radio frequency identification ieee access. 
+[6] Ankush Yewatkara, FaizInamdarb, Raj Singhc, Ayushyad , Amol 
+Bandale, Smart Cart with Automatic Billing, Product Information, 
+Product, Recommendation Using RFID & Zigbee with An ti-Theft7th 
+International Conference on Communication, Computing and 
+Virtualization 2016. 
+[7] Zeeshan Ali, Reena Sonkusare, RFID based Smart Shopping: An 
+Overview, 2014 International Conference on Advances in 
+Communication and Computing Technologies, 978 -1-4799-7319-
+2014. 
+[8] Ashutosh Walimbe, Vikrant Pagnis, Akshit Alva, 
+ASidheshBalapure,Madhuri Kar, A Survey Paper on Smart Trolley 
+Using RFID Technology,International Journal of Future Generation  
+0
+0.2
+0.4
+0.6
+0.8
+1
+1.2
+1 2 3 4 5 6 7 8 9 10
+time (s)
+distance (cm)
+2022 Third International Conference on Intelligent Computing, Instrumentation and Control Technologies (ICICICT)
+978-1-6654-1005-2/22/$31.00 ©2022 IEEE
+188
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:26:27 UTC from IEEE Xplore.  Restrictions apply. 

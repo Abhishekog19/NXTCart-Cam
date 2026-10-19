@@ -1,0 +1,18 @@
+# ---------------------------------------------------------------
+# reposition.txt  --  "MOVING IS NOT LEAVING"
+#
+# The old direction-based logic could be fooled into a REMOVE whenever an
+# item moved, or whenever a track was momentarily dropped.  Here an item is
+# slid a long way ACROSS the surface and then back again.  It never crosses
+# the exit boundary, so the cart must not change at all.
+#
+# The last two steps are ordinary removals, so a run of this script still
+# produces a Correct-REMOVEs number rather than only hold-steps.
+# ---------------------------------------------------------------
+
+add jaljira                 | jaljira:1            | jaljira@90,90,140,150
+slide jaljira across        | jaljira:1            | jaljira@400,300,140,150
+slide jaljira back          | jaljira:1            | jaljira@90,90,140,150
+add gel next to it          | gel:1, jaljira:1     | jaljira@90,90,140,150 gel@360,240,150,160
+remove gel                  | jaljira:1            | jaljira@90,90,140,150
+remove jaljira              | -                    |

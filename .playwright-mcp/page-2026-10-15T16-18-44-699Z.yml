@@ -1,0 +1,83 @@
+- application:
+  - iframe [aria-hidden] [ref=f1e1]
+  - generic [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - generic [ref=f1e8]:
+        - generic [ref=f1e18]:
+          - text: Apollo_Global_Management_Interns_JD_Batch_28.pdf
+          - tooltip [aria-hidden] [ref=f1e19]
+        - menubar "Menu bar" [ref=f1e21]:
+          - generic [ref=f1e22]:
+            - generic [ref=f1e23]:
+              - generic [ref=f1e27]:
+                - menuitem "File" [disabled]
+              - generic [ref=f1e31]:
+                - menuitem "View" [disabled]
+              - generic [ref=f1e35]:
+                - menuitem "Insert" [disabled]
+              - generic [ref=f1e39]:
+                - menuitem "Tools" [disabled]
+              - generic [ref=f1e43]:
+                - menuitem "Help" [disabled]
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - tooltip [aria-hidden]: More
+        - link "Sign in" [ref=f1e50] [cursor=pointer]:
+          - /url: https://accounts.google.com/ServiceLogin?service=wise&passive=1209600&osid=1&continue=https://drive.google.com/file/d/1YHTsRYTgr7FLQcq5xunxTKZV4Ah30i9y/view?usp%3Ddrivesdk&followup=https://drive.google.com/file/d/1YHTsRYTgr7FLQcq5xunxTKZV4Ah30i9y/view?usp%3Ddrivesdk&ec=GAZAGQ
+      - generic [ref=f1e52]:
+        - generic [ref=f1e53]:
+          - generic [ref=f1e55]:
+            - generic [ref=f1e56]: Page
+            - group "Page number input container. Press ENTER to begin typing and ESC to exit." [ref=f1e57]:
+              - textbox "Page 1 of 1" [ref=f1e61]: "1"
+            - generic [ref=f1e62]: /
+            - generic [ref=f1e63]: "1"
+          - generic [ref=f1e65]:
+            - generic [ref=f1e67]:
+              - button "Download" [ref=f1e68] [cursor=pointer]
+              - tooltip [aria-hidden] [ref=f1e74]: Download
+            - generic [ref=f1e76]:
+              - button "Print" [ref=f1e77] [cursor=pointer]
+              - tooltip [aria-hidden] [ref=f1e83]: Print
+          - generic [ref=f1e86]:
+            - generic [ref=f1e87]:
+              - button "Zoom out" [ref=f1e88] [cursor=pointer]
+              - tooltip [aria-hidden] [ref=f1e93]: Zoom out
+            - group "Zoom autocomplete container. Press ENTER to begin typing, ESC to exit and arrow keys to navigate the drop-down menu." [ref=f1e94]:
+              - combobox "Page zoom control" [ref=f1e99]: 100%
+            - generic [ref=f1e101]:
+              - button "Zoom in" [ref=f1e102] [cursor=pointer]
+              - tooltip [aria-hidden] [ref=f1e107]: Zoom in
+        - generic [ref=f1e110]:
+          - button "Hide file header" [ref=f1e111] [cursor=pointer]
+          - tooltip [aria-hidden] [ref=f1e121]: Hide file header
+      - generic [ref=f1e122]:
+        - generic [ref=f1e123]:
+          - toolbar "Navigation" [ref=f1e124]:
+            - generic [ref=f1e127]:
+              - button "Hide thumbnails" [pressed] [ref=f1e128] [cursor=pointer]
+              - tooltip [aria-hidden] [ref=f1e140]: Hide thumbnails
+          - generic [ref=f1e143]:
+            - button "Hide navigation pane" [pressed] [ref=f1e144] [cursor=pointer]
+            - tooltip [aria-hidden] [ref=f1e154]: Hide navigation pane
+        - listbox "Page thumbnails" [ref=f1e158]:
+          - option "Page thumbnail" [selected] [ref=f1e159]:
+            - generic [ref=f1e160] [cursor=pointer]
+    - generic "Showing viewer." [ref=f1e163]:
+      - generic "Displaying Apollo_Global_Management_Interns_JD_Batch_28.pdf." [active]
+      - generic [ref=f1e164]:
+        - generic "Previous" [ref=f1e165]
+        - generic "Next" [ref=f1e166]
+        - main [ref=f1e167]:
+          - generic [ref=f1e168]:
+            - textbox [aria-hidden] [ref=f1e169]
+            - document [ref=f1e171]
+            - generic [aria-hidden] [ref=f1e174]:
+              - textbox [ref=f1e177]:
+                - /placeholder: Find in document
+              - button [ref=f1e180] [cursor=pointer]
+              - button [ref=f1e182] [cursor=pointer]
+              - button [ref=f1e184] [cursor=pointer]
+  - region

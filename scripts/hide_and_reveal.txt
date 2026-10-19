@@ -1,0 +1,18 @@
+# ---------------------------------------------------------------
+# hide_and_reveal.txt  --  "HIDDEN IS NOT GONE"
+#
+# An item is completely covered by a non-product object (a hand) and held
+# that way long enough for its track to go OCCLUDED -> LOST.  It must STILL
+# be counted in the cart the whole time, because nothing physically left.
+# When the hand is taken away the item is reacquired by its LOCKED
+# identity embedding — not re-classified from scratch.
+#
+# This script also checks that a non-product blob (the grey hand) never
+# adds anything to the cart: it can never pass verification, so it stays an
+# unconfirmed candidate and is discarded.
+# ---------------------------------------------------------------
+
+add soap                | soap:1  | soap@240,180,150,150
+cover soap with hand    | soap:1  | soap@240,180,150,150 hand@200,140,240,240
+uncover soap            | soap:1  | soap@240,180,150,150
+remove soap             | -       |

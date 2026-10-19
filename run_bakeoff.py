@@ -95,7 +95,7 @@ def _fmt_pct(x: Optional[float]) -> str:
 
 
 def _run_cell(cell: Cell, cases: List[Case], model: str, base_url: str,
-              verbose: bool) -> None:
+              verbose: bool, references: Optional[str] = None) -> None:
     """Score one cell, recording WHY it was skipped if it cannot run."""
     if not cases:
         cell.skipped = "no dataset"
@@ -112,9 +112,12 @@ def _run_cell(cell: Cell, cases: List[Case], model: str, base_url: str,
             cell.skipped = f"reference DB unusable ({type(e).__name__}: {e})"
             return
     else:
+        if references is None:
+            cell.skipped = "supply this camera's reference image root"
+            return
         from ml.ai_backend import VLMBackend
         backend = VLMBackend(model=model, base_url=base_url,
-                             name=f"{cell.camera}-ai")
+                             name=f"{cell.camera}-ai", references_dir=references)
         is_local_host = ("localhost" in base_url or "127.0.0.1" in base_url)
         if not backend.api_key and not is_local_host:
             cell.skipped = "no API key (set OPENROUTER_API_KEY)"
@@ -334,6 +337,8 @@ def main():
                     help="dataset captured through the USB webcam")
     ap.add_argument("--webcam-db", default=None,
                     help="reference .pkl built from webcam photos")
+    ap.add_argument("--webcam-references", help="webcam reference image root for AI")
+    ap.add_argument("--esp32-references", help="ESP32 reference image root for AI")
     ap.add_argument("--model", default=AI_BACKEND_MODEL,
                     help="vision model id for the AI tests")
     ap.add_argument("--base-url", default=AI_BACKEND_BASE_URL,
@@ -386,7 +391,8 @@ def main():
             cell.skipped = "not requested (--tests)"
             continue
         _run_cell(cell, loaded[cell.camera], args.model, args.base_url,
-                  args.verbose)
+                  args.verbose, args.webcam_references if cell.camera == "webcam"
+                  else args.esp32_references)
 
     print_bakeoff(cells, args.price_per_m)
 

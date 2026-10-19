@@ -136,6 +136,8 @@ class ItemFollower:
         self._baseline_area: Optional[float] = None   # target's established size
         self._misses = 0
         self.reached_cart = False
+        self.observed_seq = None
+        self.current_crop = None
 
         # Kept crops, keyed by seq so one physical frame contributes once.
         self._kept: List[KeptCrop] = []
@@ -154,6 +156,10 @@ class ItemFollower:
     def usable_crop_count(self) -> int:
         return len(self._kept)
 
+    def crops_before(self, seq: int, limit: int = 6) -> List[np.ndarray]:
+        """Distinct chronological evidence preceding the explicit rest window."""
+        return _sample_even([k.crop for k in self._kept if k.seq < seq], limit)
+
     def update(self, detections: List[Detection], frame: np.ndarray,
                meta) -> str:
         """
@@ -167,6 +173,8 @@ class ItemFollower:
             return self.status
         if meta is not None:
             self._seen_seq.add(meta.seq)
+        self.observed_seq = None
+        self.current_crop = None
 
         if self.status in FollowStatus.BROKEN:
             return self.status
@@ -200,6 +208,7 @@ class ItemFollower:
         self._baseline_area = float(max(target.area, 1))
         self._misses = 0
         self.status = FollowStatus.TRACKING
+        self.observed_seq = meta.seq if meta is not None else None
         self._record_crop(target, frame, meta)
         self._record_trail(target)
         return self.status
@@ -239,6 +248,7 @@ class ItemFollower:
         # Good, unambiguous match — advance the target.
         self._misses = 0
         self.target_bbox = best.bbox
+        self.observed_seq = meta.seq if meta is not None else None
         # Let the baseline grow slowly toward the item's true size but never
         # jump (a jump would be the very merge we just guarded against).
         self._baseline_area = max(self._baseline_area or best.area,
@@ -282,6 +292,7 @@ class ItemFollower:
         seq = meta.seq if meta is not None else len(self._kept)
         ts = meta.ts if meta is not None else 0.0
         self._kept.append(KeptCrop(seq=seq, ts=ts, crop=small))
+        self.current_crop = self._kept[-1]
         # Keep the buffer bounded; if it overflows, thin it evenly rather than
         # dropping the oldest, so we retain coverage of the whole path.
         if len(self._kept) > VERIFY_BURST_FRAMES * 3:

@@ -387,6 +387,14 @@ def main():
                          "reference photos (default: config DATABASE_PATH)")
     ap.add_argument("--verbose", action="store_true",
                     help="print every case as it is scored")
+    ap.add_argument("--ai-frames", type=int, choices=range(1, 6), default=3,
+                    help="maximum chronological AI views per request (default 3)")
+    ap.add_argument("--references", default=None,
+                    help="AI reference image root (default config REFERENCES_DIR)")
+    ap.add_argument("--ai-references", type=int, choices=range(1, 4), default=2,
+                    help="maximum reference photos per SKU (default 2)")
+    ap.add_argument("--ai-name-only", action="store_true",
+                    help="explicit ablation: omit reference photos")
     args = ap.parse_args()
 
     root = args.dataset
@@ -415,7 +423,13 @@ def main():
         print(f"\n[compare] Running AI backend ({args.model})...")
         print(f"[compare] Endpoint: {args.base_url}")
         from ml.ai_backend import VLMBackend
-        backend = VLMBackend(model=args.model, base_url=args.base_url)
+        from ml.config import REFERENCES_DIR
+        backend = VLMBackend(model=args.model, base_url=args.base_url,
+                             max_frames=args.ai_frames,
+                             references_dir=None if args.ai_name_only else (args.references or REFERENCES_DIR),
+                             max_references=args.ai_references)
+        print(f"[compare] AI reference root: {backend.references_dir}")
+        print(f"[compare] AI image limit: {args.ai_frames} per request")
         is_local = ("localhost" in args.base_url or "127.0.0.1" in args.base_url)
         if not backend.api_key and not is_local:
             print("[compare] ERROR: no API key. Set OPENROUTER_API_KEY, or "

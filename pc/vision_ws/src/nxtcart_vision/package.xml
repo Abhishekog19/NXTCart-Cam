@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>nxtcart_vision</name><version>2.0.0</version>
+  <description>PC-only product verification</description>
+  <maintainer email="maintainer@example.com">NXTCart</maintainer><license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <depend>rclpy</depend><depend>std_msgs</depend><depend>smart_cart_interfaces</depend>
+  <exec_depend>python3-opencv</exec_depend><exec_depend>python3-numpy</exec_depend>
+  <exec_depend>python3-requests</exec_depend><exec_depend>launch_ros</exec_depend>
+  <export><build_type>ament_python</build_type></export>
+</package>

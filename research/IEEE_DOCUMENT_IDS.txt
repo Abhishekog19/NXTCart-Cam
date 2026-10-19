@@ -1,0 +1,94 @@
+IEEE Xplore IDs checked 2026-10-12
+P1=new first-priority downloads; P2=supporting; P3=optional
+
+P1 - NOT ALREADY SUPPLIED
+11527873
+11059075
+8697995
+10799859
+7932080
+11344991
+9912319
+9120574
+9060814
+11619726
+9857462
+8578572
+
+P2 - NOT ALREADY SUPPLIED
+9998221
+10212323
+10984823
+10503373
+7873753
+7033996
+7732405
+11709931
+10208503
+9257112
+7528213
+7533003
+8296962
+554205
+8953496
+8658240
+4270484
+
+P3 - NOT ALREADY SUPPLIED
+5991855
+7501897
+10937485
+11263715
+10189849
+9008835
+7780459
+7780460
+9878412
+
+ALREADY SUPPLIED (RP1, RP2, RP3)
+11406732
+9917860
+9761346
+
+TITLE KEY
+11406732 | R01 | 2025 | Intelligent Shopping Cart Product Recognition System Based on Computer Vision and Multi-Sensor Fusion
+11527873 | R02 | 2026 | A Weight-Reconciliation Algorithm for Fraud Detection in Smart Shopping Carts
+11059075 | R03 | 2024 | TAV-Cart: Transaction Assistance and Validation Cart System for Effortless Shopping and Checkout
+8697995 | R04 | 2019 | Deep Learning based Automated Billing Cart
+10799859 | R05 | 2024 | Smart Shopping Cart With Machine Learning, Navigation, and Weighing Technologies
+7932080 | R06 | 2017 | IoT Applications on Secure Smart Shopping System
+11344991 | R07 | 2025 | A Few-Shot Learning Pipeline for Retail Product Recognition Using Object Detection and Metric Embeddings
+9912319 | R08 | 2022 | A Retail Object Classification Method Using Multiple Cameras for Vision-Based Unmanned Kiosks
+9120574 | R09 | 2020 | Smart Shopping Carts Based on Mobile Computing and Deep Learning Cloud Services
+9060814 | R10 | 2020 | IoT-Based Smart Shopping Cart Using Radio Frequency Identification
+9917860 | R11 | 2022 | Design and Development of a Smart Shopping Cart System
+9761346 | R12 | 2022 | AIoT-based Smart Cart System
+9998221 | R13 | 2022 | Fast and Low-Cost, Wireless Controlled Smart Shopping Cart with Raspberry Pi and RFID Technology
+10212323 | R14 | 2023 | Advanced Smart Shopping Cart with Integration of AI and IoT
+10984823 | R15 | 2025 | RFID based Smart Trolley Billing System using IoT
+10503373 | R16 | 2024 | RFID-Powered Intelligent Shopping Cart: Streamlined Checkout and Automated Billing
+7873753 | R17 | 2016 | Development of e-shopping cart with theft control mechanism: No queue
+7033996 | R18 | 2014 | Smart shopping cart with automatic billing system through RFID and ZigBee
+5991855 | R19 | 2011 | Auto-checkout system for retails using Radio Frequency Identification (RFID) technology
+7501897 | R20 | 2016 | 3S-cart: A Lightweight, Interactive Sensor-Based Cart for Smart Shopping in Supermarkets
+10937485 | R21 | 2025 | AI-Driven Smart Shopping Carts With Real-Time Tracking and Inventory Forecasting for Enhanced Retail Efficiency
+11263715 | R22 | 2025 | Next Buy Navigator: Smart Shopping Cart with Item Prediction
+10189849 | R23 | 2023 | Radar Self-Following Shopping Cart Based on Multi-Sensor Fusion
+7732405 | R24 | 2016 | RFID-Cloud smart cart system
+11709931 | R25 | 2026 | The Smart Cart with Automatic Billing and Anti-Theft
+11619726 | R26 | 2026 | Multi-Modal Product Recognition and In-Store Navigation using an Intelligent Shopping Cart
+9857462 | R27 | 2022 | DeepACO: A Robust Deep Learning-based Automatic Checkout System
+10208503 | R28 | 2023 | Improving Deep Learning-based Automatic Checkout System Using Image Enhancement Techniques
+9257112 | R29 | 2021 | Iterative Knowledge Distillation for Automatic Check-Out
+7528213 | R30 | 2016 | Context-aware hybrid classification system for fine-grained retail product recognition
+8578572 | R31 | 2018 | MobileNetV2: Inverted Residuals and Linear Bottlenecks
+9008835 | R32 | 2019 | Searching for MobileNetV3
+7780459 | R33 | 2016 | Deep Residual Learning for Image Recognition
+7780460 | R34 | 2016 | You Only Look Once: Unified, Real-Time Object Detection
+7533003 | R35 | 2016 | Simple online and realtime tracking
+8296962 | R36 | 2017 | Simple online and realtime tracking with a deep association metric
+554205 | R37 | 1997 | An introduction to multisensor data fusion
+8953496 | R38 | 2019 | Precise Detection in Densely Packed Scenes
+8658240 | R39 | 2019 | A Hierarchical Grocery Store Image Dataset With Visual and Semantic Labels
+4270484 | R40 | 2007 | Recognizing Groceries in situ Using in vitro Training Data
+9878412 | R41 | 2022 | M5Product: Self-harmonized Contrastive Learning for E-commercial Multi-modal Pretraining

@@ -1,0 +1,5 @@
+# Ubuntu 24.04 / ROS Jazzy uses system Python 3.12. Prefer apt OpenCV/numpy.
+# The existing embedding extractor supports OpenCV DNN ONNX on the PC.
+opencv-python>=4.10,<5
+numpy>=1.26,<3
+requests>=2.32,<3

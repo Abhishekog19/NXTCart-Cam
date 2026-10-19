@@ -115,6 +115,33 @@ class VerdictResult:
         return self.verdict in Verdict.ACCEPTING
 
 
+@dataclass
+class ClassifyResult:
+    """
+    The outcome of a CLOSED-SET pick: 'of the few SKUs currently in the cart,
+    which one do these crops most look like?'  Used ONLY by the weight-driven
+    removal path (ml/lane.py) to decide which of several SAME-WEIGHT cart lines
+    just left — never for open-set identification, which this module avoids on
+    purpose.  `confident` is the only thing a caller should act on; when it is
+    False the caller must FLAG the removal, not guess a line to de-bill.
+    """
+    best_sku: Optional[str]
+    best_score: float
+    runner_up: Optional[str]
+    runner_up_score: float
+    margin: float
+    confident: bool
+    usable_crops: int
+    reason: str
+    ranked: List[tuple] = field(default_factory=list)   # [(sku, score), ...] desc
+
+
+# A sensible default appearance margin for the closed-set pick, kept here so
+# verifier.py does not import removal-specific config; ml/lane.py passes the
+# tunable REMOVAL_CLASSIFY_MARGIN explicitly.
+_CLASSIFY_DEFAULT_MARGIN = 0.05
+
+
 class ColourReference:
     """
     A SKU's colour fingerprint: one histogram per reference photo (multiple
@@ -266,6 +293,76 @@ class ProductVerifier:
             expected_sku=expected_sku,
             joint_pass_frac=round(joint_pass_frac, 3),
         )
+
+    def classify(self, crops: List[np.ndarray], candidate_skus: List[str],
+                 appearance_threshold: Optional[float] = None,
+                 margin: float = _CLASSIFY_DEFAULT_MARGIN) -> ClassifyResult:
+        """
+        Among a SMALL candidate set (the SKUs currently in the cart), decide
+        which one `crops` most look like.  This is a CLOSED-SET pick for the
+        weight-driven removal path, NOT open-set identification: the candidate
+        list is only ever the handful of items already in the cart, and the
+        pick is used to disambiguate same-weight lines on removal.
+
+        Appearance is the discriminator here (colour is a coarse anti-swap
+        channel, not an identity signal).  Each candidate's score is its
+        BEST-angle appearance similarity across the usable crops (max over
+        crops of max-over-refs), mirroring verify()'s best_app.  The result is
+        `confident` only when the top score clears the absolute appearance
+        threshold AND beats the runner-up by `margin`.  When not confident the
+        caller must FLAG the removal rather than de-bill a guess.
+        """
+        thr = (VERIFY_APPEARANCE_THRESHOLD if appearance_threshold is None
+               else appearance_threshold)
+        usable = [c for c in (crops or []) if assess(c).usable]
+
+        # Score only candidates that actually have appearance references.
+        scored: List[tuple] = []
+        if usable:
+            embs = [self.recognizer.embed(c) for c in usable]
+            for sku in dict.fromkeys(candidate_skus):   # de-dup, keep order
+                refs = self.appearance_db.get(sku)
+                if not refs:
+                    continue
+                best = 0.0
+                for emb in embs:
+                    s = max((self.recognizer.similarity(emb, r) for r in refs),
+                            default=0.0)
+                    if s > best:
+                        best = s
+                scored.append((sku, float(best)))
+
+        scored.sort(key=lambda sk: sk[1], reverse=True)
+
+        if not scored:
+            return ClassifyResult(
+                best_sku=None, best_score=0.0, runner_up=None,
+                runner_up_score=0.0, margin=0.0, confident=False,
+                usable_crops=len(usable),
+                reason="No usable crops or no candidate had references.",
+                ranked=[])
+
+        best_sku, best_score = scored[0]
+        runner_up, runner_up_score = (scored[1] if len(scored) >= 2
+                                      else (None, 0.0))
+        gap = best_score - runner_up_score
+        confident = best_score >= thr and (runner_up is None or gap >= margin)
+        if confident:
+            reason = (f"Leaving item looks like '{best_sku}' "
+                      f"({best_score:.2f}).")
+        elif best_score < thr:
+            reason = (f"Best candidate '{best_sku}' only scored "
+                      f"{best_score:.2f} (< {thr:.2f}); cannot tell what left.")
+        else:
+            reason = (f"'{best_sku}' ({best_score:.2f}) and '{runner_up}' "
+                      f"({runner_up_score:.2f}) too close to call "
+                      f"(margin {gap:.2f} < {margin:.2f}).")
+        return ClassifyResult(
+            best_sku=best_sku, best_score=round(best_score, 4),
+            runner_up=runner_up, runner_up_score=round(runner_up_score, 4),
+            margin=round(gap, 4), confident=confident,
+            usable_crops=len(usable), reason=reason,
+            ranked=[(s, round(v, 4)) for s, v in scored])
 
 
 # ── default colour histogram (colour fingerprint format v2) ──────────

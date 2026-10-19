@@ -1,0 +1,648 @@
+AIoT-based Smart Cart System 
+ 
+ 
+Sakthivel S 
+UG Student 
+Department of Electronics 
+Communication and Engineering, 
+Amrita Vishwa Vidyapeetham, Chennai-
+601103, India. 
+sakthijaya10022@gmail.com 
+Akash Ram R.K 
+UG Student 
+Department of Electronics 
+Communication and Engineering, 
+Amrita Vishwa Vidyapeetham, Chennai-
+601103, India. 
+ 
+Sidarth Sai B 
+UG Student 
+Department of Electronics 
+Communication and Engineering, 
+Amrita Vishwa Vidyapeetham, Chennai-
+601103, India 
+ 
+ 
+Vijaya Kesavan K.M 
+UG Student 
+Department of Electronics Communication and Engineering, 
+Amrita Vishwa Vidyapeetham, 
+Chennai-601103, India. 
+ 
+Ganesh Kumar C 
+Assistant Professor (Senior Grade) 
+Amrita Vishwa Vidyapeetham, 
+Chennai-601103, India. 
+c_ganeshkumar@ch.amrita.edu
+ 
+ 
+Abstract—- A supermarket is a place where customers go to 
+purchase and pay for their daily necessities. As a result, 
+calculating the number of things sold and generating a bill for 
+the consumer is required. Generally shopping in a mall is very 
+tedious where the right items needed are difficult to find. After 
+that, standing in line to bill all of the things are exhausting. For 
+this, the developed model here would be a solution which is a 
+smart shopping cart system that would keep track of purchased 
+products, as well as bill payment, is done using RFID (Radio 
+Frequency Identification). In this paper, the automation of 
+invoicing and payment is done using image processing, RFID 
+scanners, and tags for consumers' convenience. In this case, 
+RFID cards are being used, which are similar to the smart wallet 
+systems that are popular in malls these days. Since assigning 
+RFID tags to every item is a tiresome process, instead, they will 
+only be assigned to a group of the same products, and the 
+number of items chosen from each group will be determined by 
+object detection and identification using the YOLO (You only 
+look once) neural network technique. The proposed technique 
+can be easily developed and tested on a commercial scale in a 
+real-world situation in the future. As a result, the proposed 
+model outperforms the alternatives.   
+Keywords— Super market; RFID; Smart Shopping Cart; 
+YOLO neural network; Object detection 
+I.  INTRODUCTION  
+A supermarket's customers are largely local households 
+and small businesses that need to replenish their basic products 
+stock on a regular basis. A supermarket's suppliers are usually 
+domestic products makers who are positioned far distant from 
+their final clients. The drastic growth and development in the 
+field of IoT have paved the way for many cost-effective and 
+highly reliable models that can be easily implemented an d 
+managed to address our day- to-day problems. Nowadays, 
+customers face a big problem in every supermarket or 
+convenience store when it comes to queues in the billing 
+counters which is both time-consuming and exhausting. Apart 
+from that, it reduces the enthusiasm of people to go shopping 
+and also forces the store’s management to get equipped with 
+laborers more than they need. Thereby highly increasing the 
+margins of the working capital. This paper, portrayals the 
+incorporation of some applications of IoT, Image processing, 
+and RFID technology to come up with a solution for this 
+particular problem and also to enhance the customer’s 
+shopping experience. The main motive of the discussed model 
+is to provide a superior shopping environment that could allow 
+the customer to access high-end technology to reduce 
+manpower and time [2]. One of the most significant challenges 
+in implementing AIoT (Artificial Intelligence of Things) for 
+these types of practical applications is the level of security it 
+provides especially here we need to prevent shoplifting, which 
+is addressed by combining image processing to track and keep 
+note of the products to prevent this type of activity. The motive 
+of this paper is to build and create an Intelligent Smart 
+Shopping Cart with the aim of reducing shopping time and 
+enhancing the supermarket shopping experience. 
+In this framework, we have decided to implement RFID for 
+the sake of replacing the traditional payment method after 
+billing to create a customer-centered environment, where the 
+customer can prepay the money to the digital wallet like the 
+existing model present in many malls, with the help of RFID 
+cards and RFID scanners [5]. This is more safe and encrypted 
+mode of payment which also could help the customers with the 
+budget. Since the customer will only add money to their wallet 
+based on their planned expenditure thereby helping to facilitate 
+an indirect mode of keeping up with their budget. The RFID 
+scanners are fixed in different places all over the supermarkets 
+where the LCDs and scanners are connected to a 
+microcontroller to display the indication of payment being 
+done. Also, this displays the bill and total price so the customer 
+could be aware of the price they are going to pay. This is being 
+done instead of having this system in every cart which could 
+turn into a very expensive model. Since this is only used to do 
+payments after billing is done and a sufficient number of units 
+will be installed so there won’t be any kind of delay happening 
+because of this choice of implementation. A different method 
+is initiated for generating invoices and ensuring anti-thievery 
+without a need for billing counters compared to other newly 
+proposed methods which are done through RFID tags and 
+scanners. It also contradicts the sole aim of the proposed 
+framework which is to save time and money. So instead, here 
+image processing is used to do multiple object detection at the 
+same time in that way it is easy to identify and classify items 
+in the shopping cart. Using this method helps in adding and 
+2022 International Conference on Smart Technologies and Systems for Next Generation Computing (ICSTSN) | 978-1-6654-2111-9/22/$31.00 ©2022 IEEE | DOI: 10.1109/ICSTSN53084.2022.9761346
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:27:57 UTC from IEEE Xplore.  Restrictions apply. 
+removing items in between with ease. There is a small delay 
+between taking the image input and starting to process them, 
+which helps to ensure all products are immobile for proper 
+detection as all of this is done in real-time [4]. This is done to 
+make a list of the products, count each product picked by the 
+customers, then mention the price as per the data fed into the 
+system, and also for summing the prices to get a total price of 
+all the items purchased. The bill will be stored in an CSV sheet 
+as a result of image processing. For object detection, to count 
+the products under the same set and to find the total number of 
+products, here YOLO version 3 neural network architecture is 
+being used. This algorithm is preferred over the others for its 
+faster an d precise results  [11]. To take the input for image 
+processing it is necessary to place a camera rite above the cart 
+to provide the full view of things present in the cart. After the 
+billing these details are needed to be sent to the 
+microcontroller, this transmission is done through Bluetooth or 
+Wi-Fi to RFID scanners [12] so that the payment process can 
+be seamless. The contribution of this paper is the development 
+of a model that improves the shopping experience of the 
+customers and also helps the shop o r supermarket to manage 
+and monitor the customers easily and effectively. This 
+technology could be the starting point for fully automated 
+supermarkets in the future also helps to reduce human-human 
+contact thereby avoiding contagiousness. 
+II. LITERATURE SURVEY 
+In order to make shopping easier  for the customers [1] 
+incorporates smart shopping  carts which are equipped with 
+certain features. Firstly, a barcode scanner is used to avoid 
+separate billing counters using this , the  customer could 
+directly scan the items  as soon as they take it, the camera in 
+the cart to monitor the customers if something looks 
+suspicious, a weight sensor which could calculate the total 
+weight of all items so it could be later compared with the ideal 
+weight of all that items and finally, there is a small computer 
+is used for computing purpose. To save the cost of displaying 
+all the items data in a monitor, it is done through smartphones 
+of the customers who are connected to the cart via Wi-Fi. The 
+Wi-Fi is also used for connecting differen t carts to share the 
+bills and do parallel shopping which could save a lot of time. 
+There is an app built for this purpose that asks customers to 
+log-in, so every item suggestion will be customized for 
+everyone based on their purchase history. This could h elp to 
+clear the congestion in the billing counters in no time since 
+only the payment is done there which can be comparatively 
+far efficient compared to the traditional methods of shopping. 
+The automation in supermarkets is aimed to provide an in-
+person experience to buy items with a comfort level that is 
+equal to shopping from home to the customers and the model 
+suggested in this paper made  it more attainable by 
+implementing the RFID tags and scanners for scanning and 
+billing which is controlled by Arduino UNO microcontroller. 
+Also, the controller’s peripheral buses help to add Bluetooth 
+module to this system, enabling the connection of the product 
+identification system to the mobile app lication that was 
+created. This delivers features which help customers by 
+guiding them to different sections of the products in the 
+supermarket, if they are facing any problem with it . It also 
+remembers and manages the shopping list, by showing the bill 
+thereby letting the customers know about any special 
+discounts available. Then the data from the app is transferred 
+to the server which is interfaced with the cashier management 
+system to send items data once the purchase is done and 
+receives an appropriate response from the cashier 
+management system. This system also helps in providing a 
+personalized experience to the customers by giving product 
+preferences based on their activity [2].  
+The authors use ATMEGA 328 microcontroller as a 
+Center of data processing also acts as a connection to connect 
+all peripherals into one system [3]. Every cart has a dedicated 
+barcode reader on its own to reduce the time by 
+simultaneously scanning while picking and dropping the 
+products. There is a DC motor that controls the flap cover 
+opening and closing in the cart which is automated with some 
+delay or can be manually opened and closed just to make sure 
+only scanned items go inside the cart. As soon as one item is 
+scanned the LCD shows the product name and total price 
+which is just the sum of prices of all items in the cart at that 
+time. The tota l varies if one or more items are added or 
+removed from the cart. In this way, customers can be kept 
+posted about the status of the cart, their purchases, and their 
+budget. Even the products can be removed by scanning it 
+again while taking it out , by doing  this the  amount will be 
+subtracted from the bill. Then Wi -Fi module is used to send 
+the billing data to the webserver which was done with the help 
+of HTML. This can be accessed through the exit counters for 
+quick payment when the customers are leaving the stores. 
+The authors in [4] proposed a model which is almost alike 
+to [3 ] in terms of performance when it comes to using 
+ATMEGA controller while using servo motor instead of DC 
+motor but almost used very similarly for closing the flap 
+covers to ensure anti -thievery, avoid mistakes and  to have 
+LCD to display real -time billing. Here the scanning is done 
+with RFID scanners so multiple items can be scanned and 
+billed at the same time also customers can directly pay from 
+anywhere in the supermarket just by pressing the payment 
+button present in the cart. Here the RFID is used so the data 
+can be interfaced with both the server and customized mobile 
+applications for the management and the customers. To 
+facilitate this, RFID tags are added to each product and t he 
+tags are removed while going out. Also, here the customers 
+can access the whole bill in real -time to ensure, helps to 
+modify, and can be used as a cashless online payment 
+platform after checking out the cart. This is a safer method 
+since all the custome rs are having a login id and password 
+applied with discounts while checking out in the app and it is 
+seamlessly updating the data in -app and server at the same 
+time. 
+Discussed framework i n [5] consists of a Product 
+Identification Device  (PID) is used that contains a 
+microcontroller placed on every cart. Has an LCD to show 
+live updates in the billing process, RFID reader for scanning 
+and feeding the data as a bill. This is possible with having all 
+items in the supermarket hooked with RFID tags. EEPROM 
+and ZigBee module is used for data transmission wirelessly to 
+the centralized database server which is used for bill payment 
+and management. The bills are updated in real -time that 
+affecting both displayed values in LCD and the data in the 
+server, this can also be modified if any of the items are needed 
+to be removed. This model also shows product info, expiry 
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:27:57 UTC from IEEE Xplore.  Restrictions apply. 
+date, better alternative, and customized discount based on 
+customer’s purchase history other than a bill with the ZigBee. 
+At last, while leaving the shop t here are RFID readers placed 
+in the exits to identify unpaid items from the information from 
+those RFID tags to ensure anti-thievery.  
+This [6] shows an implementation of a method that starts 
+with manually pressing a start button by the customers in the 
+cart before they start shopping. Then has an interface that lets 
+the customers set a budget limit so the proposed system can 
+alarm the customer when they reach the limit with red light 
+and buzzer. Even when the customer is within their set budget 
+limit, they get an indication with green light this is the novelty 
+of [6]. As the products are dropped inside the cart every RFID 
+tag placed over the items is scanned and added to the bill 
+which is also displayed using an LCD screen above the cart. 
+Then this invoicing information is fed to the system near the 
+cashier via Wi -Fi once the end button is pressed by the 
+customer. Since the billing is already done and only payment 
+is yet to be done at the cashier counter the time consumed here 
+will be comparatively very less  and the total price would be 
+always less than or equal to the budget limit set by the 
+customer so, there won’t be any delay happening while doing 
+the payment as well. 
+III. EXISTING SYSTEM 
+The current system, which uses hardware barcode readers 
+on billing count ers, creates a long line. With the increase in 
+the number of individuals purchasing at these locations, the 
+length of time it takes to get a bill has increased significantly. 
+It is evident how inconvenient the current paradigm is for both 
+customers and sto re owners. A supermarket business mainly 
+takes care of two things to be successful 1) Local Customers 
+who visit often 2) Supply -Demand chain management in 
+order to maintain these two aspects, they must efficiently 
+serve the customer's needs and ensure that  no stock goes 
+unsold. In order to maintain this relationship, they must have 
+a clear data on what has been sold. This is a key flaw in the 
+existing system. 
+IV. AIOT SMART CART SYSTEM 
+This Supermarket Model was created using a collaborative 
+modification of an earlier technique known as the "Integrated 
+Modeling Method”.  
+Figure 1 shows the block diagram of the implemented 
+model in this paper. This new supermarket model contains 
+basic parts of the system, but with significant improvements 
+and a better grasp of ho w a supermarket operates in today's 
+global market environment. Firstly, Image processing is 
+employed to generate the bill for the customer which consists 
+of the price and quantity of every single item present in the 
+cart, and then this bill is transmitted via Bluetooth to the 
+Arduino Uno microcontroller where RFID technology is 
+being used to enable the card -based payment feature. The 
+overall sales and number of goods sold every day are also 
+tracked in a database. The discussed model also allows 
+supermarket owners to maintain the supply -demand chain 
+seamlessly. 
+ 
+Fig. 1. Block diagram of AIoT smart cart    
+ 
+A. OBJECT DETECTION 
+Object detection is typically thought of as a collection of 
+computer vision techniques for recognizing items in digital 
+forms. Computer v ision, algorithms for object recognition 
+play a crucial role in the analysis of the given image that are 
+fed as input. A camera, a computer, a frame capture and a 
+software for image processing, analysis, and recognition  are 
+required for successful object d etection. These computer 
+vision tasks can be separated into Image classification, Object 
+localization, and Object detection. Image classification can be 
+done by sending an image as an input and guessing the nature 
+of an object. Object localization locates all the objects in the 
+input image by creating a bounding box around it. Then it 
+locates the object with a bounding box and finds the 
+respective classes of the identified objects in the input image. 
+The YOLO model consists of only one neural network trained 
+end to end that takes an input as a picture and predicts classes 
+for each bounding boxes and sophistication labels it for every 
+bounding box. Th is method provides lesser prophetic 
+accuracy (example, a lot of localization errors), though works 
+at forty -five frames per second and it can go uptill  to a 
+hundred and fifty -five frames per second . It will work by  
+dividing the input image into a grid of cells, every grid cell 
+identifies a bounding box that involves the different 
+coordinates and also th e length, height, and confidence. A 
+category prediction is additionally supported in every cell. For 
+instance, a picture is split into an M*N (rows and columns of 
+the grid) grid and every cell within the grid might predict a 
+pair of bounding boxes, leading  to no planned bounding box 
+predictions.  
+ 
+The category chances map and also the bounding boxes 
+with confidence area unit then merged as an resultant set of 
+bounding boxes and sophisticated labels. There are three 
+major variations of YOLO, are version 1, 2 , and 3 , whereas 
+the YOLO v1 involves the overall architecture, the bounding 
+box theorem was boosted by YOLO v2  which refined the 
+planning and created the use of predefined bounding box, and 
+version 3 clarified the model design and training method. 
+Here the steps involved in object detection using YOLOv3 are 
+discussed. Taking input images with various resolutions, 
+YOLO v3 passes them into a convolutional neural network 
+where each cell of the M*N ) grid processes the image as an 
+array and establishes a neural  pattern among them. As a 
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:27:57 UTC from IEEE Xplore.  Restrictions apply. 
+consequence, a succession of bounding boxes with the 
+recognized categories appears.  Every bounding box is 
+depicted by classes and coordinates (X Center, Y Center, 
+Width, Height). This architecture uses darknet which has a 53-
+layer network trained on image net. For the task of detection, 
+double the layers area unit stacked onto it, giving us a layer 
+convolutional underlying design for YOLO v3. Parameters 
+used were the threshold for predicted object and the non-max 
+suppression threshold which helps to undertake the problem 
+of detecting multiple times of single object in an image and 
+input size and shape. Darknet is used as a feature extractor 
+which consists of filters with connections like the residual 
+network present in ResNet [9]. YOLOv3 architecture mainly 
+includes two steps, they are bounding boxes and non -max 
+suppression. Object detection is done by YOLOv3 that 
+predicts and forms bounding boxes around the detected object 
+in an image. This bounding box is also known as the anchor 
+that predicts 3 boxes per cell. When there are several 
+bounding boxes, the objects might be recognized multiple 
+times, resulting in a positive type detection.  Non-maximum 
+suppression helps to ignore this circumstance and only detects 
+the object if it hasn't already been detected.  
+ 
+With the help of threshold value and confidence threshold 
+value, non -max suppression is instrumented to prevent 
+multiple detections. It is an indispensable part of using 
+YOLOv3 effectively [9]. Each anchor (bounding box) 
+contains X axis center, Y axis center, width, height, and box 
+confidence scores. The confidence score is just the value of 
+how probably a class or type is to be contained within the 
+bounding box, as well as the precision of the anchor.  The 
+anchor with its width and height is 1st set to the width and 
+height of the input image. F our anchor  values are between 
+zero and one. Then, every cell has twenty conditional category 
+changes enforced by the YOLOv3 algorithmic program.  The 
+object detection algorithm is evaluated using I OU. IOU or 
+Intersection Over Union analyses how close the predicted box 
+is to the actual truth by calculating the crossover between the 
+actual truth and the predicted bounding box. 
+ 
+ P(Class j|Object)*P(Object)*IOU = P(Class j)*IOU     (1) 
+ 
+Confidence is defined as in RHS of (1). Ultimately, the 
+IOU between the projected box and any of the actual truth box 
+is represented by the confidence prediction. Each grid cell 
+additionally forecasts P  (Class j|Object), which are C 
+conditional class probabilities. The grid cell in which a n 
+object is present determines the probability.  We only expect 
+one group of related probabilities for each grid cell, 
+irrespective of the number of boxes B.  The box confidence 
+score can be improved by the conditional class probability if 
+the category confi dence score for each final boundary box 
+used as a positive prediction is increased.  
+ 
+In this class, the conditional class probability is the 
+likelihood that the identified object belongs to a given type . 
+The h, w, and depth numbers in YOLOv3's prediction include 
+mathematics, as well as the spatial dimensions of the images 
+and the tensors that are used to generate anchor predictions . 
+Finally, the anchors with high confidence scores are made as 
+final detection. An input layer, convolutional layer, pooling 
+layer, and output layer make up a convolutional neural 
+network. A 2D image is taken as an input for this network, the 
+convolution layer identifies and maps the image's 
+characteristics, while the pooling laye r down samples the 
+input data of the image, decreasing machine complexity and 
+extracting the most important attributes [8]. 
+B. MICROCONTROLLER AND RFID   
+             IMPLEMENTATION 
+The system is designed to be cost-effective with in-expensive 
+Hardware such as: 
+ Arduino UNO. 
+ EM-18 RF-ID module. 
+ 16*2 LCD display. 
+ I2C interface module.  
+ 
+To carry out the data processing and to make the circuit 
+fully functional a microcontroller namely Arduino UNO 
+board is used. Arduino UNO is chosen because of the compact 
+nature of the board so that installation becomes simple on 
+every smart cart in the shopping mall. The board is also open 
+source and modular so the hardware parts can be upgraded 
+easily and also replaced/repaired making it sustainable. The 
+programmability offered by the board is almost limitless and 
+can be done with ease giving it maximum debugging 
+capability and troubleshooting.  
+ 
+In modern times cashless payment is becoming the 
+standard. So, the foundation behind the billing process for the 
+smart cart system is R FID technology (Radio frequency 
+identification). RFID is Automatic Identification technology 
+that uses electromagnetic waves to automatically identify the 
+object installed with tags that are connected to the database. 
+Two components of RFID are the integrator and transponder, 
+when the transponder comes to the proximity of the reader the 
+tag will get scanned and tracked [7]. This scanning process 
+will work even when there is a barrier between tag and reader. 
+In this proposed system the reader module chosen to be 
+implemented is the EM-18 RFID reader module. 
+ 
+This is a passive RFID system as the cards obtain 
+operating power from the reader by receiving electromagnetic 
+waves and get induced with the current. And the 12 digits 
+hexadecimal code is transmitted by reflecting the RF signal 
+and modulating the signal f or a certain frequency. RFID 
+works in several frequencies varying with the distance of 
+operation as shown in table 1. 
+Table. 1. Range of Operation for RFID’s 
+Frequency range Distance of 
+operation 
+120-140 KHZ (low frequency range) 10-20 cm 
+13.56 MHZ (High frequency range) 10-20 cm 
+868-928 MHZ (Ultra High frequency range) 3 meters 
+2.45 &5.8 GHZ (Microwave) 3 meters 
+ 
+Since this is a passive RFID system the principle of 
+operation is inductive coupling which takes place HF and LF 
+frequency range [13], the operating frequency of the EM -18 
+module is given to be 125 kHz from this it can be said the 
+circuit is operated at low -frequency range making it efficient 
+short-range with no loss in power.    
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:27:57 UTC from IEEE Xplore.  Restrictions apply. 
+C. WORKING OF BILL PAYMENT SYSTEM 
+ 
+Once the bill gets generated using image processing it can 
+be sent via Bluetooth to payment stations situated in the 
+supermarket. The payment stations are the areas with 
+standalone electronic machinery powered by Arduino UNO 
+where people can make their contactless payment. T he 
+received bill is processed by Arduino UNO then displayed on 
+the 16*2 LCD screen for the customers as shown in Figure 2. 
+From that customer can cross-check and finalize the products 
+then proceed to the payment process.  
+As mentioned above the proposed mo del implements 
+contactless payment with a wallet concept as in the flowchart 
+Fig.3. A wallet is a card exclusive for supermarkets in which 
+customers can deposit the desired amount, this contains a 
+unique 12 -digit hex-decimal code. The wallet in this model 
+acts as the transponder to the RFID reader.  
+Authentication of payment is done with the unique 12 -
+digit code as the code is different from each card there will be 
+no interference in payment between one and another whilst 
+providing security.  Payment is don e if the card comes close 
+to the EM-18 RFID reader module.  
+This fantastic add -on integrates a wallet system into the 
+store, which has a Wallet for the Customer/User. Wallet Cash 
+can be used by customers/users during checkout, and money 
+will be removed fro m their Wallet’s Cash. If needed the 
+Customers/Users can quickly replenish their wallets with 
+cash. 
+ 
+Fig. 2. Arduino Circuit Diagram 
+ 
+D. PRINCIPLE OF OPERATION 
+The micro -controller is connected with host computer 
+with memory to store the data base for multiple 12- digit codes 
+registered in the supermarket and it’s programmed to make 
+the EM-18 RFID reader to detect all the codes by reading card 
+and comparing it with the data base [10 ]. If any of the code 
+gets matched th e authentication of payment for the specific 
+customer is done. The reading process of the code from the 
+card done by EM-18 module is done with the help of inductive 
+coupling. 
+As the reader generates strong electromagnetic wave this 
+penetrates the antenna coil of the transponder. This induces  
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Fig. 3. Flowchart of implemented model 
+ 
+current in the antenna of transponder’s coil thereby 
+powering the microchip present in the card [7 ]. By  this 
+process the 12-digit code is sent from the microchip of the 
+transponder to the reader. Also, an analogy can be drawn to 
+the working of transformer with primary coil as the reader and 
+secondary coil as transponder. 
+ 
+ 
+V. RESULT 
+ 
+A functional prototype of the AIoT-Based Smart Cart 
+System has been built and worked successfully.  The object 
+detection is done for some of the daily -products like 
+notebook, spoon, fork...etc. (Fig.4).  
+The results obtained were really good as it was able to 
+detect the objects irrelev ant of the angle and in one of the 
+images, only a half of the keyboard is visible but this model 
+was able to detect that. After object detection detected objects 
+are stored in excel sheet with their time at which they got sold 
+and their price as shown in Fig.5.  
+The bill information is sent to the microcontroller and total 
+price is displayed as shown in Fig. 6.Once the card gets 
+scanned the 12 -digit code is sent from the serial port of the 
+EM-18 module to the digital serial port of Arduino and the 
+software will process the code to draw a comparison with the 
+codes present in the database and will try to match the code.  
+Once the match is found authentication of payment will be 
+done and the amount will be deduced as show in Fig.7. A 
+confirmation notification wi ll be displayed on 16*2 LCD by 
+sending the message ‘payment successful’ via serial data pin 
+of Arduino to the display as shown in Fig.7. 
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:27:57 UTC from IEEE Xplore.  Restrictions apply. 
+ 
+ 
+ 
+Fig. 4. Object detection using our YOLO model 
+ 
+ 
+Fig. 5. Products sold presented in Excel sheet 
+ 
+ 
+Fig. 6. Total bill is displayed to the customer 
+ 
+ 
+ 
+Fig. 7. Payment Status 
+VI. CONCLUSION 
+A superior shopping experience is developed and delivered 
+through this contribution as intended. The developed model 
+can be implemented in any convenience store or supermarket 
+to improve the standard of shopping for the sake of customers. 
+Currently, the implemented project can only be used to 
+classify and assign items' prices without considering their 
+brands as it may lead to varied prices for the items under the 
+same class of products.  This could be achieved by  
+incorporating the Artificial Intelligence of things which will 
+connect various components and control them based on our 
+requirements. The introduced framework in this paper 
+automates scanning items, generating bills, displaying b ills 
+and total price, and also making quick RFID payments that 
+use image processing and IoT. The interesting feature of this 
+project is the security and management are done without using 
+any actuators other than cameras for the input of image 
+processing th ereby serving as one of the minimalistic 
+approaches to provide a smart shopping system. 
+ 
+ACKNOWLEDGMENT 
+We would like to thank our chairperson Dr. A. Manikandan 
+for his guidance throughout this project. Also, we are obliged 
+to acknowledge Amrita Vishwa Vidhyapeetham, Chennai 
+campus for their constant support. 
+REFERENCES 
+ 
+[1] Srinidhi Karjol, Anusha K. Holla, C. B. Abhilash, “An IOT Based Smart 
+Shopping Cart for Smart Shopping” Springer, 2018. 
+[2] Mobeen Shahroz, Muhammad Faheem Mushtaq, Maqsood Ahmad, Saleem 
+Ullah, Arif Mehmood, Gyu Sang Choi , “IoT-Based Smart Shopping Cart 
+Using Radio Frequency Identification” IEEE Access, 2020. 
+[3] Sujay Ekal, Sonal Suryawanshi, Siddhant Warke, Mrs. P.P. Gundewar, 
+“Smart Billing Cart” IRJET Vol.05 Issue 03, 2018. 
+[4] Manan Rao, “RFID Based Smart Trolley Using IOT” IJSR Vol.8 Issue 11, 
+2019. 
+[5] Ankush Yewatkar, Faiz Inamdar, Raj Singh, Ayushya, Amol Bandal, 
+“Smart Cart with Automatic Billing, Product Information, Product 
+Recommendation Using RFID & Zigbee with Anti -Theft” Procedia 
+Computer Science, 2016. 
+[6] Akindele E. Ayoola, Member, IAENG Awodeyi I. Afolabi, Victoria W. 
+Oguntosin, Olaitan A. Alashiri, Victor O. Matthews, Member, IAENG and 
+Odunayo O. Akande, “Development of an Intelligent Smart Shopping Cart 
+System” Proceedings of the World Congress on Engineering and Computer 
+Science, 2019. 
+[7] Davinder Parkash, Twinkle Kundu, Preet Kaur, “The Rfid Technology and 
+Its Applications” IJECIERD Vol.2 Issue 3, 2012. 
+[8] Pan Weijun, Duan Yingjie, Zhang Qiang, Tang Jiahao, Zhou Jun, “Deep 
+Learning for Aircraft Wake Vortex Identification” IOP ATCES, 2019. 
+[9] Dr. S.V. Viraktamath, Madhuri Yavagal, Rachita Byahatti, “Object 
+Detection and Classification using YOLOv3” IJERT, 2021. 
+[10] Leo Louis, “Working Principle of Arduino and Using it as a Tool for Study 
+and Research” IJCACS, 2018. 
+[11] Shubham Shinde, Ashwin Kothari, Vikram Gupta, “YOLO based Human 
+Action Recognition and Localization” Procedia Computer Science, 2018. 
+[12] Jayaram Kizhekke Pakkathillam and M. Kanagasabai, "A Novel UHF 
+Near-Field RFID Reader Antenna Deploying C SRR Elements," in IEEE 
+Transactions on Antennas and Propagation, vol. 65, no. 4, pp. 2047-2050, 
+April 2017. doi: 10.1109/TAP.2017.2669722. 
+[13] Jayaram Kizhekke Pakkathillam, M. Kanagasabai and M. G. N. Alsath, 
+"Compact Multiservice UHF RFID Reader Antenna for Near-Field and 
+Far-Field Operations," in IEEE Antennas and Wireless Propagation   
+Letters, vol. 16, pp. 149-152, 2017. doi: 10.1109/LAWP.2016.2561960 
+  
+Authorized licensed use limited to: Mukesh Patel School of Technology & Engineering. Downloaded on October 12,2026 at 09:27:57 UTC from IEEE Xplore.  Restrictions apply. 

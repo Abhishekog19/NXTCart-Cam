@@ -1,0 +1,1213 @@
+[
+  {
+    "query": "An IOT Based Smart Shopping Cart for Smart Shopping",
+    "kind": "title",
+    "candidates": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              7,
+              18
+            ]
+          ],
+          "date-time": "2026-07-18T16:23:55Z",
+          "timestamp": 1784391835627,
+          "version": "3.55.0"
+        },
+        "publisher-location": "Singapore",
+        "reference-count": 7,
+        "publisher": "Springer Singapore",
+        "isbn-type": [
+          {
+            "value": "9789811090585",
+            "type": "print"
+          },
+          {
+            "value": "9789811090592",
+            "type": "electronic"
+          }
+        ],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  1,
+                  1
+                ]
+              ],
+              "date-time": "2018-01-01T00:00:00Z",
+              "timestamp": 1514764800000
+            },
+            "content-version": "unspecified",
+            "delay-in-days": 0,
+            "URL": "http://www.springer.com/tdm"
+          }
+        ],
+        "content-domain": {
+          "domain": [
+            "link.springer.com"
+          ],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "DOI": "10.1007/978-981-10-9059-2_33",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2018,
+              4,
+              6
+            ]
+          ],
+          "date-time": "2018-04-06T21:38:34Z",
+          "timestamp": 1523050714000
+        },
+        "page": "373-385",
+        "update-policy": "https://doi.org/10.1007/springer_crossmark_policy",
+        "source": "Crossref",
+        "is-referenced-by-count": 37,
+        "title": [
+          "An IOT Based Smart Shopping Cart for Smart Shopping"
+        ],
+        "prefix": "10.1007",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0000-0001-6168-028X",
+            "authenticated-orcid": false,
+            "given": "Srinidhi",
+            "family": "Karjol",
+            "sequence": "first",
+            "affiliation": [],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          },
+          {
+            "ORCID": "https://orcid.org/0000-0001-9314-6217",
+            "authenticated-orcid": false,
+            "given": "Anusha K.",
+            "family": "Holla",
+            "sequence": "additional",
+            "affiliation": [],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          },
+          {
+            "ORCID": "https://orcid.org/0000-0001-9596-6630",
+            "authenticated-orcid": false,
+            "given": "C. B.",
+            "family": "Abhilash",
+            "sequence": "additional",
+            "affiliation": [],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          },
+          {
+            "given": "P. V.",
+            "family": "Amrutha",
+            "sequence": "additional",
+            "affiliation": [],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          },
+          {
+            "given": "Y. V.",
+            "family": "Manohar",
+            "sequence": "additional",
+            "affiliation": [],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          }
+        ],
+        "member": "297",
+        "published-online": {
+          "date-parts": [
+            [
+              2018,
+              4,
+              7
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "33_CR1",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gubbi, J., Buyya, R., Marusic, S., Palaniswami, S.: Internet of Things (IoT): a vision, architectural elements, and future directions. IEEE (2011). https://doi.org/10.1109/i-smac.2017.8058399",
+            "DOI": "10.1109/i-smac.2017.8058399"
+          },
+          {
+            "key": "33_CR2",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gangwal, U., Roy, S., Bapat, J.: Smart shopping cart for automated billing purpose using wireless sensor networks. IEEE (2013). https://doi.org/10.1109/icices.2014.703399",
+            "DOI": "10.1109/icices.2014.703399"
+          },
+          {
+            "key": "33_CR3",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Yathisha, L., Abhishek, A., Harshith, R., Darshan Koundinya, S.R., Srinidhi, K.: Automation of shopping cart to ease queue in malls by using RFID (2015). https://doi.org/10.1109/icices.2014.7033996",
+            "DOI": "10.1109/icices.2014.7033996"
+          },
+          {
+            "key": "33_CR4",
+            "unstructured": "Kaur, A., Garg, A., Verma, A., Bansal, A., Singh, A.: Arduino based smart cart. Int. J. Adv. Res. Comput. Eng. Technol. (IJARCET) 2(12) (2013)"
+          },
+          {
+            "key": "33_CR5",
+            "unstructured": "Dash Robotic Shopping Cart. https://www.fastcompany.com/3061405/walmart-is-testing-a-robot-shopping-cart-so-you-can-do-the-job-of-low-wage-workers"
+          },
+          {
+            "key": "33_CR6",
+            "unstructured": "Sanghi, K., Singh, R., Raman, N.: The Smart Cart – An Enhanced Shopping Experience. TA: Justine Fortier Team 41 (2012)"
+          },
+          {
+            "key": "33_CR7",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dubey, V., Sangeeth Sagar, V.R., Sumalya, S., Abhilash, C.B.: An Android approach for wireless power harvesting from radio waves. In: Contemporary Computing and Informatics (IC3I), pp. 1235–1239. IEEE (2014). https://doi.org/10.1109/ic3i.2014.7019670",
+            "DOI": "10.1109/ic3i.2014.7019670"
+          }
+        ],
+        "updated-by": [
+          {
+            "DOI": "10.1007/978-981-10-9059-2_44",
+            "type": "correction",
+            "label": "Correction",
+            "source": "publisher",
+            "updated": {
+              "date-parts": [
+                [
+                  2021,
+                  12,
+                  25
+                ]
+              ],
+              "date-time": "2021-12-25T00:00:00Z",
+              "timestamp": 1640390400000
+            }
+          }
+        ],
+        "container-title": [
+          "Communications in Computer and Information Science",
+          "Cognitive Computing and Information Processing"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://link.springer.com/content/pdf/10.1007/978-981-10-9059-2_33",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2021,
+              12,
+              24
+            ]
+          ],
+          "date-time": "2021-12-24T16:08:22Z",
+          "timestamp": 1640362102000
+        },
+        "score": 66.419876,
+        "resource": {
+          "primary": {
+            "URL": "https://link.springer.com/10.1007/978-981-10-9059-2_33"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "ISBN": [
+          "9789811090585",
+          "9789811090592"
+        ],
+        "references-count": 7,
+        "URL": "https://doi.org/10.1007/978-981-10-9059-2_33",
+        "relation": {
+          "correction": [
+            {
+              "id-type": "doi",
+              "id": "10.1007/978-981-10-9059-2_44",
+              "asserted-by": "object"
+            }
+          ]
+        },
+        "ISSN": [
+          "1865-0929",
+          "1865-0937"
+        ],
+        "issn-type": [
+          {
+            "value": "1865-0929",
+            "type": "print"
+          },
+          {
+            "value": "1865-0937",
+            "type": "electronic"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "assertion": [
+          {
+            "value": "7 April 2018",
+            "order": 1,
+            "name": "first_online",
+            "label": "First Online",
+            "group": {
+              "name": "ChapterHistory",
+              "label": "Chapter History"
+            }
+          },
+          {
+            "value": "25 December 2021",
+            "order": 2,
+            "name": "change_date",
+            "label": "Change Date",
+            "group": {
+              "name": "ChapterHistory",
+              "label": "Chapter History"
+            }
+          },
+          {
+            "value": "Correction",
+            "order": 3,
+            "name": "change_type",
+            "label": "Change Type",
+            "group": {
+              "name": "ChapterHistory",
+              "label": "Chapter History"
+            }
+          },
+          {
+            "value": "In the originally published chapter 33 the names of two authors who contributed to the work were not included. Amrutha P.V. and Manohar Y.V. have been added as co-authors of the paper.",
+            "order": 4,
+            "name": "change_details",
+            "label": "Change Details",
+            "group": {
+              "name": "ChapterHistory",
+              "label": "Chapter History"
+            }
+          },
+          {
+            "value": "CCIP",
+            "order": 1,
+            "name": "conference_acronym",
+            "label": "Conference Acronym",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "International Conference on Cognitive Computing and Information Processing",
+            "order": 2,
+            "name": "conference_name",
+            "label": "Conference Name",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "Bengaluru",
+            "order": 3,
+            "name": "conference_city",
+            "label": "Conference City",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "India",
+            "order": 4,
+            "name": "conference_country",
+            "label": "Conference Country",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "2017",
+            "order": 5,
+            "name": "conference_year",
+            "label": "Conference Year",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "15 December 2017",
+            "order": 7,
+            "name": "conference_start_date",
+            "label": "Conference Start Date",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "16 December 2017",
+            "order": 8,
+            "name": "conference_end_date",
+            "label": "Conference End Date",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "3",
+            "order": 9,
+            "name": "conference_number",
+            "label": "Conference Number",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "ccoip2017",
+            "order": 10,
+            "name": "conference_id",
+            "label": "Conference ID",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          },
+          {
+            "value": "http://ccip2017.jssateb.ac.in/",
+            "order": 11,
+            "name": "conference_url",
+            "label": "Conference URL",
+            "group": {
+              "name": "ConferenceInfo",
+              "label": "Conference Information"
+            }
+          }
+        ]
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              9,
+              7
+            ]
+          ],
+          "date-time": "2024-09-07T20:50:51Z",
+          "timestamp": 1725742251831
+        },
+        "reference-count": 9,
+        "publisher": "IEEE",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2023,
+                  12,
+                  14
+                ]
+              ],
+              "date-time": "2023-12-14T00:00:00Z",
+              "timestamp": 1702512000000
+            },
+            "content-version": "stm-asf",
+            "delay-in-days": 0,
+            "URL": "https://doi.org/10.15223/policy-029"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2023,
+                  12,
+                  14
+                ]
+              ],
+              "date-time": "2023-12-14T00:00:00Z",
+              "timestamp": 1702512000000
+            },
+            "content-version": "stm-asf",
+            "delay-in-days": 0,
+            "URL": "https://doi.org/10.15223/policy-037"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2023,
+              12,
+              14
+            ]
+          ]
+        },
+        "DOI": "10.1109/iccebs58601.2023.10448761",
+        "type": "proceedings-article",
+        "created": {
+          "date-parts": [
+            [
+              2024,
+              3,
+              19
+            ]
+          ],
+          "date-time": "2024-03-19T18:04:04Z",
+          "timestamp": 1710871444000
+        },
+        "page": "1-4",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "IoT Based Smart Shopping Cart"
+        ],
+        "prefix": "10.1109",
+        "author": [
+          {
+            "given": "Sangeetha",
+            "family": "K",
+            "sequence": "first",
+            "affiliation": [
+              {
+                "name": "Sri Sai Ram Institute of Technology,Department of ECE,Chennai,India"
+              }
+            ],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          },
+          {
+            "given": "Laksmidevi",
+            "family": "R",
+            "sequence": "additional",
+            "affiliation": [
+              {
+                "name": "Sri Sai Ram Institute of Technology,Department of ECE,Chennai,India"
+              }
+            ],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          },
+          {
+            "given": "Kaviya",
+            "family": "M",
+            "sequence": "additional",
+            "affiliation": [
+              {
+                "name": "Sri Sai Ram Institute of Technology,Department of ECE,Chennai,India"
+              }
+            ],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          },
+          {
+            "given": "Hamrithaa Shree",
+            "family": "A",
+            "sequence": "additional",
+            "affiliation": [
+              {
+                "name": "Sri Sai Ram Institute of Technology,Department of ECE,Chennai,India"
+              }
+            ],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          },
+          {
+            "given": "Harini",
+            "family": "T",
+            "sequence": "additional",
+            "affiliation": [
+              {
+                "name": "Sri Sai Ram Institute of Technology,Department of ECE,Chennai,India"
+              }
+            ],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          },
+          {
+            "given": "SweetlineShamini",
+            "family": "S",
+            "sequence": "additional",
+            "affiliation": [
+              {
+                "name": "Sri Sai Ram Institute of Technology,Department of ECE,Chennai,India"
+              }
+            ],
+            "role": [
+              {
+                "role": "author",
+                "vocabulary": "crossref"
+              }
+            ]
+          }
+        ],
+        "member": "263",
+        "reference": [
+          {
+            "year": "2020",
+            "author": "Meghana",
+            "journal-title": "Smart shopping cart with automated billing system",
+            "key": "ref1"
+          },
+          {
+            "doi-asserted-by": "publisher",
+            "key": "ref2",
+            "DOI": "10.1109/ICMDCS.2017.8211723"
+          },
+          {
+            "year": "2019",
+            "author": "Abraham",
+            "journal-title": "Smart shopping cart",
+            "key": "ref3"
+          },
+          {
+            "year": "2018",
+            "author": "Minu",
+            "journal-title": "Smart Shopping System With Automatic Bill Generation And Customer Relationship Management",
+            "key": "ref4"
+          },
+          {
+            "year": "2020",
+            "author": "Roopa",
+            "journal-title": "Research on Smart Shopping Cart",
+            "key": "ref5"
+          },
+          {
+            "doi-asserted-by": "publisher",
+            "key": "ref6",
+            "DOI": "10.1007/978-981-10-9059-2_33"
+          },
+          {
+            "doi-asserted-by": "publisher",
+            "key": "ref7",
+            "DOI": "10.1109/icices.2014.7033996"
+          },
+          {
+            "year": "2017",
+            "author": "Machhirke",
+            "journal-title": "A new technology of smart shopping cart using RFID and ZigBee",
+            "key": "ref8"
+          },
+          {
+            "year": "2018",
+            "author": "Viswanadha",
+            "journal-title": "Smart Shopping Cart",
+            "key": "ref9"
+          }
+        ],
+        "event": {
+          "name": "2023 Intelligent Computing and Control for Engineering and Business Systems (ICCEBS)",
+          "start": {
+            "date-parts": [
+              [
+                2023,
+                12,
+                14
+              ]
+            ]
+          },
+          "location": "Chennai, India",
+          "end": {
+            "date-parts": [
+              [
+                2023,
+                12,
+                15
+              ]
+            ]
+          }
+        },
+        "container-title": [
+          "2023 Intelligent Computing and Control for Engineering and Business Systems (ICCEBS)"
+        ],
+        "link": [
+          {
+            "URL": "http://xplorestaging.ieee.org/ielx7/10447018/10448515/10448761.pdf?arnumber=10448761",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2024,
+              3,
+              26
+            ]
+          ],
+          "date-time": "2024-03-26T18:49:41Z",
+          "timestamp": 1711478981000
+        },
+        "score": 65.7578,
+        "resource": {
+          "primary": {
+            "URL": "https://ieeexplore.ieee.org/document/10448761/"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2023,
+              12,
+              14
+            ]
+          ]
+        },
+        "references-count": 9,
+        "URL": "https://doi.org/10.1109/iccebs58601.2023.10448761",
+        "published": {
+          "date-parts": [
+            [
+              2023,
+              12,
+              14
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              9,
+              10
+            ]
+          ],
+          "date-time": "2026-09-10T13:00:07Z",
+          "timestamp": 1789045207176,
+          "version": "build-2803163510"
+        },
+        "reference-count": 0,
+        "publisher": "International Journal for Research in Applied Science and Engineering Technology",
+        "issue": "9",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "IJRASET"
+        ],
+        "abstract": "<jats:p>Abstract: Physically challenged and senior citizens find it difficult to push heavily loaded carts around the supermarket. To combat this, we have implemented an autonomous shopping cart that supersedes the existing shopping trolley. This autonomous cart can manoeuvre around without the need of pushing it by using multiple ultrasonic sensors. To avoid long queues at the billing counters and also to reduce the workload of the employees at the supermarket, we have implemented a billing system. Scanning is incorporated in the cart itself, thus reducing the time wasted by customers at the billing counter. This billing system uses RFID (Radio Frequency Identification) to scan products. Products scanned in the cart are sent to the computers installed in the supermarket using a Wi-Fi module. The Automated Shopping Cart thereby eases the shopping experience of customers and reduces the manpower employed in supermarkets. The significant benefit of using an automated cart is that customers can move swiftly through the cash counter and check out independently. Keywords: Smart Cart, RFID, Arduino, Billing System, Autonomous Drive System</jats:p>",
+        "DOI": "10.22214/ijraset.2021.38159",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2021,
+              9,
+              22
+            ]
+          ],
+          "date-time": "2021-09-22T05:38:45Z",
+          "timestamp": 1632289125000
+        },
+        "page": "1172-1178",
+        "source": "Crossref",
+        "is-referenced-by-count": 6,
+        "title": [
+          "IoT Based Smart Shopping Cart"
+        ],
+        "prefix": "10.22214",
+        "volume": "9",
+        "author": [
+          {
+            "given": "Adhithya.",
+            "family": "A",
+            "sequence": "first",
+            "affiliation": [],
+            "role": [
+              {
+                "vocabulary": "crossref",
+                "role": "author"
+              }
+            ]
+          }
+        ],
+        "member": "9476",
+        "published-online": {
+          "date-parts": [
+            [
+              2021,
+              9,
+              30
+            ]
+          ]
+        },
+        "container-title": [
+          "International Journal for Research in Applied Science and Engineering Technology"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2021,
+              9,
+              22
+            ]
+          ],
+          "date-time": "2021-09-22T05:38:51Z",
+          "timestamp": 1632289131000
+        },
+        "score": 65.72612,
+        "resource": {
+          "primary": {
+            "URL": "https://www.ijraset.com/fileserve.php?FID=38159"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2021,
+              9,
+              30
+            ]
+          ]
+        },
+        "references-count": 0,
+        "journal-issue": {
+          "issue": "9",
+          "published-online": {
+            "date-parts": [
+              [
+                2021,
+                9,
+                30
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.22214/ijraset.2021.38159",
+        "ISSN": [
+          "2321-9653"
+        ],
+        "issn-type": [
+          {
+            "value": "2321-9653",
+            "type": "electronic"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2021,
+              9,
+              30
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  {
+    "query": "10.1007/978-981-10-8575-8_6",
+    "kind": "doi",
+    "record": {
+      "indexed": {
+        "date-parts": [
+          [
+            2026,
+            6,
+            10
+          ]
+        ],
+        "date-time": "2026-06-10T16:30:17Z",
+        "timestamp": 1781109017570,
+        "version": "3.54.1"
+      },
+      "publisher-location": "Singapore",
+      "reference-count": 28,
+      "publisher": "Springer Singapore",
+      "isbn-type": [
+        {
+          "value": "9789811085741",
+          "type": "print"
+        },
+        {
+          "value": "9789811085758",
+          "type": "electronic"
+        }
+      ],
+      "license": [
+        {
+          "start": {
+            "date-parts": [
+              [
+                2018,
+                1,
+                1
+              ]
+            ],
+            "date-time": "2018-01-01T00:00:00Z",
+            "timestamp": 1514764800000
+          },
+          "content-version": "unspecified",
+          "delay-in-days": 0,
+          "URL": "http://www.springer.com/tdm"
+        }
+      ],
+      "content-domain": {
+        "domain": [
+          "link.springer.com"
+        ],
+        "crossmark-restriction": false
+      },
+      "short-container-title": [],
+      "published-print": {
+        "date-parts": [
+          [
+            2018
+          ]
+        ]
+      },
+      "DOI": "10.1007/978-981-10-8575-8_6",
+      "type": "book-chapter",
+      "created": {
+        "date-parts": [
+          [
+            2018,
+            2,
+            16
+          ]
+        ],
+        "date-time": "2018-02-16T09:22:10Z",
+        "timestamp": 1518772930000
+      },
+      "page": "45-58",
+      "update-policy": "https://doi.org/10.1007/springer_crossmark_policy",
+      "source": "Crossref",
+      "is-referenced-by-count": 5,
+      "title": [
+        "An IoT-Based Smart Shopping Cart Using the Contemporary Barcode Scanner"
+      ],
+      "prefix": "10.1007",
+      "author": [
+        {
+          "given": "V. N.",
+          "family": "Prithvish",
+          "sequence": "first",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "Shraddha",
+          "family": "Agrawal",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        },
+        {
+          "given": "John Sahaya Rani",
+          "family": "Alex",
+          "sequence": "additional",
+          "affiliation": [],
+          "role": [
+            {
+              "vocabulary": "crossref",
+              "role": "author"
+            }
+          ]
+        }
+      ],
+      "member": "297",
+      "published-online": {
+        "date-parts": [
+          [
+            2018,
+            2,
+            17
+          ]
+        ]
+      },
+      "reference": [
+        {
+          "key": "6_CR1",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Chandrasekar P, Sangeetha T (2014) Smart shopping cart with automatic billing system through RFID and ZigBee. IEEE. ISBN: 978-1-4799-3834-6/14",
+          "DOI": "10.1109/ICICES.2014.7033996"
+        },
+        {
+          "key": "6_CR2",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Ali Z, Sonkusare R (2014) RFID based smart shopping: an overview. In: 2014 international conference on advances in communication and computing technologies. IEEE. ISBN: 978-1-4799-7319-4/14",
+          "DOI": "10.1109/EIC.2015.7230698"
+        },
+        {
+          "key": "6_CR3",
+          "unstructured": "Roussos G. Enabling RFID in Retail. Brubeck College—University of London"
+        },
+        {
+          "key": "6_CR4",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Wenxing O, Lei W, Zhipeng J, Changhong Y (2015) Implementation of smart shopping system based on NFC Technology. In: Seventh international conference on measuring technology and mechatronics automation. IEEE. ISBN: 978-1-4673-7143-8/15",
+          "DOI": "10.1109/ICMTMA.2015.140"
+        },
+        {
+          "key": "6_CR5",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Gao JZ, Prakash L, Jagatesan R (2007) Understanding 2D-barcode technology and applications in m-commerce—design and implementation of a 2D barcode processing solution. 31st annual international of computer software and applications conference, 2007. COMPSAC 2007. IEEE. ISBN: 978-0-7695-2870-8, ISSN: 0730-3157",
+          "DOI": "10.1109/COMPSAC.2007.229"
+        },
+        {
+          "key": "6_CR6",
+          "unstructured": "IoT Agenda (Online) (2015). \n                  http://internetofthingsagenda.techtarget.com/definition/Internet-of-Things-IoT\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR7",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Sinha N, Alex JSR (2015) IoT based iPower saver meter. Indian J Sci Technol 8(19) (IPL0142)",
+          "DOI": "10.17485/ijst/2015/v8i19/77011"
+        },
+        {
+          "key": "6_CR8",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Sinha N, Pujitha KE, Alex JSR (2015) Xively based sensing and monitoring system for IoT. Accepted in 2015 international conference on computer communication and informatics (ICCCI-2015), Coimbatore, India, 08–10 Jan 2015",
+          "DOI": "10.1109/ICCCI.2015.7218144"
+        },
+        {
+          "key": "6_CR9",
+          "unstructured": "Blau J. Supermarket’s futuristic outlet"
+        },
+        {
+          "key": "6_CR10",
+          "unstructured": "TI Processor onboard on Beagle Bone Black (Online). \n                  http://www.ti.com/product/AM3359\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR11",
+          "unstructured": "Beagle Bone Black (Online). \n                  https://beagleboard.org/black\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR12",
+          "unstructured": "Beagle Bone Bloack JPEG image (Online). \n                  https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcSD5-qb_dxg1vJuk4apuEKMOUirgjIhY_W7h4gPp3uDEYstg_StUw\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR13",
+          "unstructured": "TVS BS-C101 Barcode scanner (Online). \n                  http://www.tvs-e.in/product-detail-db.aspx?id=45&typ=btn_bt&pro=tb_4\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR14",
+          "unstructured": "TVS BS-C101 Barcode scanner JPEG image (Online). \n                  http://bwindia.net/bwfiles/images/Barcode%20Scanner%20TVS%20CCD%20Based%20USB%20101%20Star%20Handheld.jpg\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR15",
+          "unstructured": "USB Wi-Fi Adapter—TL-WN725N (Online). \n                  http://www.tp-link.com/il/products/details/cat-11_TL-WN725N.html\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR16",
+          "unstructured": "USB WiFi Adaptor TL-WN725N image (Online). \n                  https://encrypted-tbn3.gstatic.com/images?q=tbn:ANd9GcSSNjRMJXw4uhjEp-pVBC5b_fcsCll9iTeAAB0abhA4Pm2-bbqhwczHkF0\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR17",
+          "unstructured": "MI Power bank image (Online). \n                  https://encrypted-tbn2.gstatic.com/images?q=tbn:ANd9GcRxIVJsN2jejtFYYdO1k7cJX7JEr26kg05SfW7EordEh6UG0qDDvdeb7w\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR18",
+          "unstructured": "Parse Cloud (Online Document). \n                  http://www.parse.com/\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR19",
+          "unstructured": "Load cell image (Online). \n                  https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwy3Bhb94hKnAeIKJvKMrz0Bo2QqvoYEvE7NjqJi_QdoqpePOUc6j174k\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR20",
+          "unstructured": "Load cell specification sheet (Online Document). \n                  www.kadcontrols.com/KadWebsite/LoadCell_Tech/CZL601.pdf\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR21",
+          "unstructured": "Hernandez W (2006) Improving the response of a load cell by using optimal filtering. ISSN 1424-8220© 2006 by MDPI"
+        },
+        {
+          "key": "6_CR22",
+          "unstructured": "Dahikar PB, Gaikwad KD (2013) Design and development of novel weighing scale system. Int J Eng Res Technol (IJERT) 2(5). ISSN: 2278-0181"
+        },
+        {
+          "key": "6_CR23",
+          "unstructured": "Gangwal U, Roy S, Bapat J. Smart shopping cart for automated billing purpose using wireless sensor networks. ISBN: 978-1-61208-296-7"
+        },
+        {
+          "key": "6_CR24",
+          "doi-asserted-by": "crossref",
+          "unstructured": "Lowe DG (2004) Distinctive image features from scale-invariant key-points. Int J Comput Vis",
+          "DOI": "10.1023/B:VISI.0000029664.99615.94"
+        },
+        {
+          "key": "6_CR25",
+          "unstructured": "Beagle Bone Black Debian OS eMMC images (Online Document). \n                  https://beagleboard.org/latest-images\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR26",
+          "unstructured": "Realteak Drivers (Online Document). \n                  http://www.realtek.com.tw/products/productsView.aspx?Langid=1&PNid=21&PFid=48&Level=5&Conn=4\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR27",
+          "unstructured": "PyUSB (Online Document). \n                  https://github.com/walac/pyusb\n                  \n                . Accessed on 14 June 2015"
+        },
+        {
+          "key": "6_CR28",
+          "unstructured": "PyUSB (Online Document). \n                  http://walac.github.io/pyusb/\n                  \n                . Accessed on 14 June 2015"
+        }
+      ],
+      "container-title": [
+        "Lecture Notes in Electrical Engineering",
+        "Intelligent Embedded Systems"
+      ],
+      "original-title": [],
+      "language": "en",
+      "link": [
+        {
+          "URL": "http://link.springer.com/content/pdf/10.1007/978-981-10-8575-8_6",
+          "content-type": "unspecified",
+          "content-version": "vor",
+          "intended-application": "similarity-checking"
+        }
+      ],
+      "deposited": {
+        "date-parts": [
+          [
+            2019,
+            5,
+            17
+          ]
+        ],
+        "date-time": "2019-05-17T22:09:28Z",
+        "timestamp": 1558130968000
+      },
+      "score": 1,
+      "resource": {
+        "primary": {
+          "URL": "http://link.springer.com/10.1007/978-981-10-8575-8_6"
+        }
+      },
+      "subtitle": [],
+      "short-title": [],
+      "issued": {
+        "date-parts": [
+          [
+            2018
+          ]
+        ]
+      },
+      "ISBN": [
+        "9789811085741",
+        "9789811085758"
+      ],
+      "references-count": 28,
+      "URL": "https://doi.org/10.1007/978-981-10-8575-8_6",
+      "relation": {},
+      "ISSN": [
+        "1876-1100",
+        "1876-1119"
+      ],
+      "issn-type": [
+        {
+          "value": "1876-1100",
+          "type": "print"
+        },
+        {
+          "value": "1876-1119",
+          "type": "electronic"
+        }
+      ],
+      "subject": [],
+      "published": {
+        "date-parts": [
+          [
+            2018
+          ]
+        ]
+      },
+      "assertion": [
+        {
+          "value": "17 February 2018",
+          "order": 1,
+          "name": "first_online",
+          "label": "First Online",
+          "group": {
+            "name": "ChapterHistory",
+            "label": "Chapter History"
+          }
+        }
+      ]
+    }
+  }
+]

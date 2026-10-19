@@ -733,7 +733,7 @@ def _ai_verdict(reply=None, status=200, raise_exc=None, body=None,
     saved = _sys.modules.get("requests")
     _sys.modules["requests"] = fake
     try:
-        backend = VLMBackend(api_key="test-key")
+        backend = VLMBackend(api_key="test-key", references_dir=None)
         n = n_crops if n_crops is not None else VERIFY_MIN_USABLE_FRAMES + 1
         crops = [_usable_crop() for _ in range(n)]
         return backend.verify("sku_a", crops), fake
@@ -775,12 +775,44 @@ def test_ai_verdict_mapping():
     check("endpoint is /chat/completions",
           fake.calls[0]["url"].endswith("/chat/completions"),
           fake.calls[0]["url"])
-    check("exactly one image is sent",
-          sum(1 for p in content if p.get("type") == "image_url") == 1)
+    check("three images are sent in one request",
+          sum(1 for p in content if p.get("type") == "image_url") == 3
+          and len(fake.calls) == 1)
     check("image is a base64 data URI",
-          content[0]["image_url"]["url"].startswith("data:image/jpeg;base64,"))
+          next(p for p in content if p.get("type") == "image_url")
+          ["image_url"]["url"].startswith("data:image/jpeg;base64,"))
     check("temperature is 0 (repeatable)", payload["temperature"] == 0)
     check("timeout is passed to requests", fake.calls[0]["timeout"] > 0)
+
+    from ml.ai_backend import VLMBackend, _select_crops
+    from unittest.mock import patch
+    from types import SimpleNamespace
+    crops = [np.full((64, 64, 3), i, dtype=np.uint8) for i in range(9)]
+    with patch("ml.ai_backend.assess", side_effect=lambda c:
+               SimpleNamespace(usable=True, edges=float(c[0, 0, 0]))):
+        picked = _select_crops(crops, 3)
+        check("sharp views span early middle late in order",
+              [int(c[0, 0, 0]) for c in picked] == [2, 5, 8])
+        check("exact repeated images are not resent",
+              len(_select_crops([crops[0]] * 9, 3)) == 1)
+        check("single-image baseline picks sharpest",
+              int(_select_crops(crops, 1)[0][0, 0, 0]) == 8)
+    for limit in (1, 3, 5):
+        fake = FakeHTTP(reply='{"matches":true,"confident":true,"reason":"ok"}')
+        with patch.dict(sys.modules, {"requests": fake}):
+            backend = VLMBackend(api_key="test", max_frames=limit, references_dir=None)
+            backend.verify("sku_a", [_usable_crop() for _ in range(12)])
+        parts = fake.calls[0]["json"]["messages"][1]["content"]
+        check(f"configured {limit} images share one HTTP call",
+              len(fake.calls) == 1 and sum(p["type"] == "image_url" for p in parts) == limit)
+        check(f"stats record {limit} sent images", backend.stats[0].images_sent == limit)
+    for invalid in (0, 6, -1, True, 2.5):
+        try:
+            VLMBackend(max_frames=invalid)
+            rejected = False
+        except ValueError:
+            rejected = True
+        check(f"invalid image limit {invalid!r} rejected", rejected)
 
 
 # ═════════════════════════════════════════════════════════════════
@@ -817,7 +849,7 @@ def test_ai_fails_closed():
     saved = (_os.environ.pop("OPENROUTER_API_KEY", None),
              _os.environ.pop("OPENAI_API_KEY", None))
     try:
-        backend = VLMBackend(api_key="")
+        backend = VLMBackend(api_key="", references_dir=None)
         crops = [_usable_crop() for _ in range(VERIFY_MIN_USABLE_FRAMES + 1)]
         r = backend.verify("sku_a", crops)
         check("no API key -> RETRY", r.verdict == Verdict.RETRY, r.verdict)
@@ -1013,6 +1045,321 @@ def test_bakeoff_ranking():
     check("four-way ranking is 3,4,2,1", order == [3, 4, 2, 1], str(order))
 
 
+# ═════════════════════════════════════════════════════════════════
+# CART LEDGER + LANE: the running bill, and weight-driven removal
+# ═════════════════════════════════════════════════════════════════
+
+def test_cart_ledger():
+    print("\n[cart] ledger keeps quantities, per-unit weights and a bill")
+    from ml.cart import CartFlag, CartLedger
+
+    seen = []
+    led = CartLedger(prices={"soap": 35.0, "gel": 120.0},
+                     on_event=lambda e: seen.append(e))
+    led.add_unit("soap", 150.0, "T1")
+    led.add_unit("soap", 152.0, "T2")
+    led.add_unit("gel", 150.0, "T3")
+    check("quantities count units per SKU",
+          led.quantities() == {"soap": 2, "gel": 1}, str(led.quantities()))
+    check("subtotal is price x qty", led.subtotal() == 190.0,
+          str(led.subtotal()))
+    check("every mutation emitted an event", len(seen) == 3, str(len(seen)))
+
+    # Removing by weight takes the unit whose recorded weight is closest, so
+    # the line that physically left is the one de-billed.
+    ev = led.remove_unit("soap", weight_g=152.0)
+    check("remove_unit returns a remove event",
+          ev is not None and ev.kind == "remove" and ev.qty_delta == -1,
+          str(ev))
+    check("removal lowers quantity and bill",
+          led.quantities() == {"soap": 1, "gel": 1} and led.subtotal() == 155.0,
+          f"{led.quantities()} {led.subtotal()}")
+
+    # A SKU that is not in the cart cannot be removed -> None, so the caller
+    # flags rather than silently doing nothing.
+    check("removing an absent SKU returns None",
+          led.remove_unit("not_in_cart") is None, "expected None")
+
+    # An unpriced SKU still counts as a quantity; it just can't be billed.
+    led.add_unit("mystery", 90.0)
+    check("unpriced SKU counted but not billed",
+          led.quantities().get("mystery") == 1 and led.subtotal() == 155.0,
+          f"{led.quantities()} {led.subtotal()}")
+    check("unpriced lines are reported", led.has_unpriced(), "expected True")
+
+    f = led.flag(CartFlag.SWAP_SUSPECT, "swap!", sku="soap")
+    check("a flag changes no quantity",
+          f.qty_delta == 0 and led.quantities().get("soap") == 1, str(f))
+
+
+class _PerSkuRecognizer:
+    """
+    Scores by REAL cosine against distinct per-SKU unit vectors, so exactly one
+    candidate wins.  `seen` names which SKU the crops actually show.
+    """
+
+    def __init__(self, vec) -> None:
+        self.vec = vec
+
+    def embed(self, crop):
+        return self.vec
+
+    def similarity(self, a, b):
+        return float(np.dot(a, b))
+
+
+_SKU_VECS = {
+    "soap": np.array([1.0, 0.0, 0.0, 0.0], dtype=np.float32),
+    "gel":  np.array([0.0, 1.0, 0.0, 0.0], dtype=np.float32),
+    "rice": np.array([0.0, 0.0, 1.0, 0.0], dtype=np.float32),
+}
+
+
+def _verifier_seeing(sku: str):
+    """A real ProductVerifier whose crops look like `sku` and nothing else."""
+    appearance_db = {k: [v] for k, v in _SKU_VECS.items()}
+    colour_db = {k: ColourReference([np.array([1.0], dtype=np.float32)])
+                 for k in _SKU_VECS}
+    return ProductVerifier(
+        _PerSkuRecognizer(_SKU_VECS[sku]), appearance_db=appearance_db,
+        colour_db=colour_db,
+        colour_hist_fn=lambda c: np.array([1.0], dtype=np.float32))
+
+
+def test_classify_closed_set():
+    print("\n[verifier] classify() picks among cart SKUs, or refuses")
+    crops = [_usable_crop() for _ in range(4)]
+
+    # The crops show 'gel'; among gel/soap it must pick gel, confidently.
+    r = _verifier_seeing("gel").classify(crops, ["soap", "gel"])
+    check("picks the SKU the crops actually show",
+          r.best_sku == "gel", str(r.best_sku))
+    check("confident when the winner is clear and above threshold",
+          r.confident, f"{r.best_score} margin={r.margin}")
+    check("runner-up is reported for auditability",
+          r.runner_up == "soap", str(r.runner_up))
+
+    # A candidate list that excludes the true item must NOT be confident: the
+    # best remaining score is far below the appearance threshold.
+    r = _verifier_seeing("gel").classify(crops, ["soap", "rice"])
+    check("not confident when no candidate matches", not r.confident,
+          f"{r.best_sku} {r.best_score}")
+
+    # No usable crops -> cannot judge, never a confident guess.
+    r = _verifier_seeing("gel").classify([], ["soap", "gel"])
+    check("no crops -> not confident and no pick",
+          not r.confident and r.best_sku is None, str(r))
+
+    # A candidate with no references is skipped rather than scored as 0.
+    r = _verifier_seeing("gel").classify(crops, ["gel", "no_such_sku"])
+    check("candidates without references are skipped",
+          [s for s, _ in r.ranked] == ["gel"], str(r.ranked))
+
+    # The margin rule: an impossibly large margin requirement must defeat
+    # confidence even though the top score is high.
+    r = _verifier_seeing("gel").classify(crops, ["soap", "gel"], margin=99.0)
+    check("an unmet margin blocks confidence", not r.confident,
+          f"margin={r.margin}")
+
+
+def _lane(verifier, prices=None, barcode=None, weight=None, detector=None):
+    from ml.lane import LaneController
+    return LaneController(verifier=verifier, barcode=barcode, weight=weight,
+                          detector=detector, prices=prices or {},
+                          frame_size=(FRAME_W, FRAME_H))
+
+
+def test_lane_add_path():
+    print("\n[lane] a MATCH adds to the cart; a flagged verdict does not")
+    from ml.cart import CartFlag
+    from ml.detector import OracleDetector
+    from ml.events import MockBarcodeSource, MockWeightSource
+
+    frame = _frame()
+    xs = _transit_xs()
+
+    def run(verifier, sku, grams=150.0):
+        det = OracleDetector()
+        bc = MockBarcodeSource()
+        wt = MockWeightSource()
+        lane = _lane(verifier, prices={"soap": 35.0, "gel": 120.0},
+                     barcode=bc, weight=wt, detector=det)
+        bc.scan(sku, txn_id="T-1")
+        evs, seq = [], 0
+        for x in xs:
+            det.set([_det(x)]); evs += lane.process(frame, _meta(seq)); seq += 1
+        wt.begin_change()
+        det.set([_det(xs[-1])]); evs += lane.process(frame, _meta(seq)); seq += 1
+        wt.settle(grams, txn_id="T-1")
+        det.set([_det(xs[-1])]); evs += lane.process(frame, _meta(seq)); seq += 1
+        return lane, evs
+
+    # Genuine: the crops show the scanned SKU -> MATCH -> cart +1, bill up.
+    lane, evs = run(_verifier_seeing("soap"), "soap")
+    adds = [e for e in evs if e.kind == "add"]
+    check("MATCH produces exactly one add event", len(adds) == 1, str(evs))
+    check("add carries the SKU and the settled weight",
+          adds and adds[0].sku == "soap" and adds[0].weight_g == 150.0,
+          str(adds))
+    check("cart and bill reflect the add",
+          lane.ledger.quantities() == {"soap": 1}
+          and lane.ledger.subtotal() == 35.0,
+          f"{lane.ledger.quantities()} {lane.ledger.subtotal()}")
+
+    # THE ATTACK: scan 'soap' but present 'gel' (same 150 g).  Weight is happy;
+    # the camera must refuse, and the cart must NOT grow.
+    lane, evs = run(_verifier_seeing("gel"), "soap")
+    flags = [e for e in evs if e.kind == "flag"]
+    check("same-weight swap is flagged, not added",
+          len(flags) == 1 and not [e for e in evs if e.kind == "add"],
+          str(evs))
+    check("swap flag is a mismatch/suspect kind",
+          flags and flags[0].flag in (CartFlag.MISMATCH, CartFlag.SWAP_SUSPECT),
+          str(flags))
+    check("cart stays empty after a swap attempt",
+          lane.ledger.quantities() == {} and lane.ledger.subtotal() == 0.0,
+          str(lane.ledger.quantities()))
+
+    # A SKU with no references cannot be judged -> UNAVAILABLE flag, no add.
+    lane, evs = run(_verifier_seeing("soap"), "no_such_sku")
+    flags = [e for e in evs if e.kind == "flag"]
+    check("unknown SKU -> UNAVAILABLE flag, never an add",
+          flags and flags[0].flag == CartFlag.UNAVAILABLE
+          and lane.ledger.is_empty(), str(evs))
+
+
+def test_lane_removal_paths():
+    print("\n[lane] a weight DROP removes; ambiguity is flagged, never guessed")
+    from ml.cart import CartFlag
+    from ml.detector import OracleDetector
+    from ml.events import MockWeightSource
+
+    frame = _frame()
+
+    def build(seeing, units, seq0=0):
+        det = OracleDetector()
+        wt = MockWeightSource()
+        lane = _lane(_verifier_seeing(seeing), prices={"soap": 35.0,
+                                                       "gel": 120.0},
+                     weight=wt, detector=det)
+        for sku, g in units:
+            lane.ledger.add_unit(sku, g)
+        # Let the leaving-item buffer fill with crops of the moving item.
+        seq = seq0
+        for _ in range(6):
+            det.set([_det(300)]); lane.process(frame, _meta(seq)); seq += 1
+        return lane, det, wt, seq
+
+    # ONE cart line matches the drop -> straight removal, bill down.
+    lane, det, wt, seq = build("soap", [("soap", 150.0)])
+    wt.settle(-150.0)
+    det.set([_det(300)]); evs = lane.process(frame, _meta(seq))
+    check("a matching weight drop removes the item",
+          len(evs) == 1 and evs[0].kind == "remove" and evs[0].sku == "soap",
+          str(evs))
+    check("removal empties the cart and the bill",
+          lane.ledger.is_empty() and lane.ledger.subtotal() == 0.0,
+          f"{lane.ledger.quantities()} {lane.ledger.subtotal()}")
+
+    # A drop matching NOTHING in the cart -> flagged for review, no change.
+    lane, det, wt, seq = build("soap", [("soap", 150.0)], seq0=100)
+    wt.settle(-900.0)
+    det.set([_det(300)]); evs = lane.process(frame, _meta(seq))
+    check("an unexplained drop is flagged",
+          evs and evs[0].flag == CartFlag.UNEXPECTED_REMOVAL, str(evs))
+    check("an unexplained drop changes nothing",
+          lane.ledger.quantities() == {"soap": 1},
+          str(lane.ledger.quantities()))
+
+    # TWO cart lines share the drop weight and the camera CAN tell which left.
+    lane, det, wt, seq = build("gel", [("soap", 150.0), ("gel", 150.0)],
+                               seq0=200)
+    wt.settle(-150.0)
+    det.set([_det(300)]); evs = lane.process(frame, _meta(seq))
+    check("camera disambiguates same-weight lines",
+          evs and evs[0].kind == "remove" and evs[0].sku == "gel", str(evs))
+    check("the OTHER same-weight line is untouched",
+          lane.ledger.quantities() == {"soap": 1},
+          str(lane.ledger.quantities()))
+
+    # Same setup but the camera has NO crops to judge -> must flag, not guess.
+    det2 = OracleDetector()
+    wt2 = MockWeightSource()
+    lane2 = _lane(_verifier_seeing("gel"), prices={}, weight=wt2,
+                  detector=det2)
+    lane2.ledger.add_unit("soap", 150.0)
+    lane2.ledger.add_unit("gel", 150.0)
+    wt2.settle(-150.0)
+    det2.set([])
+    evs = lane2.process(frame, _meta(300))
+    check("no view of the leaving item -> AMBIGUOUS_REMOVAL",
+          evs and evs[0].flag == CartFlag.AMBIGUOUS_REMOVAL, str(evs))
+    check("ambiguous removal de-bills nothing",
+          lane2.ledger.quantities() == {"soap": 1, "gel": 1},
+          str(lane2.ledger.quantities()))
+
+    # Weight uniquely implies 'soap', but the camera confidently saw 'gel'
+    # leaving: a contradiction must be held for review, not resolved by weight.
+    lane3, det3, wt3, seq3 = build("gel", [("soap", 150.0), ("gel", 900.0)],
+                                   seq0=400)
+    wt3.settle(-150.0)
+    det3.set([_det(300)]); evs = lane3.process(frame, _meta(seq3))
+    check("weight/camera contradiction is flagged",
+          evs and evs[0].flag == CartFlag.REMOVAL_MISMATCH, str(evs))
+    check("contradiction de-bills nothing",
+          lane3.ledger.quantities() == {"soap": 1, "gel": 1},
+          str(lane3.ledger.quantities()))
+
+    # Scale noise below the floor must not look like a removal at all.
+    lane4, det4, wt4, seq4 = build("soap", [("soap", 150.0)], seq0=500)
+    wt4.settle(-1.0)
+    det4.set([_det(300)]); evs = lane4.process(frame, _meta(seq4))
+    check("tiny negative noise is not a removal",
+          not [e for e in evs if e.kind == "remove"], str(evs))
+
+
+class _CountingDetector:
+    """Wraps OracleDetector and counts detect() calls per frame."""
+
+    def __init__(self, inner) -> None:
+        self.inner = inner
+        self.calls = 0
+
+    def set(self, dets):
+        self.inner.set(dets)
+
+    def detect(self, frame):
+        self.calls += 1
+        return self.inner.detect(frame)
+
+    def reset(self):
+        self.inner.reset()
+
+    def background_image(self):
+        return None
+
+
+def test_lane_single_detect_per_frame():
+    print("\n[lane] the detector runs ONCE per frame (Pi budget)")
+    from ml.detector import OracleDetector
+    from ml.events import MockBarcodeSource, MockWeightSource
+
+    inner = OracleDetector()
+    det = _CountingDetector(inner)
+    bc = MockBarcodeSource()
+    wt = MockWeightSource()
+    lane = _lane(_verifier_seeing("soap"), barcode=bc, weight=wt, detector=det)
+    bc.scan("soap", txn_id="T-1")
+
+    frame = _frame()
+    frames = 7
+    for seq in range(frames):
+        det.set([_det(40 + seq * 50)])
+        lane.process(frame, _meta(seq))
+    check("one detect() per process() call despite two consumers",
+          det.calls == frames, f"{det.calls} calls for {frames} frames")
+
+
 def main():
     print("=" * 60)
     print("  NXTCart-Cam — headless verification branch coverage")
@@ -1038,6 +1385,11 @@ def main():
     test_ai_reply_parsing()
     test_comparison_metrics()
     test_bakeoff_ranking()
+    test_cart_ledger()
+    test_classify_closed_set()
+    test_lane_add_path()
+    test_lane_removal_paths()
+    test_lane_single_detect_per_frame()
 
     print("\n" + "=" * 60)
     if _failures:
